@@ -6,5 +6,24 @@
         <item name="fontFamily">@font/vazir</item>
     </style>
 
+    <style name="Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:elevation">0dp</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="titleTextAppearance">@style/Toolbar.Title</item>
+
+    </style>
+
+
+    <style name="Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+
+    </style>
+
     <style name="Theme.MotmaenBash" parent="Base.Theme.MotmaenBash" />
+
+
 </resources>
