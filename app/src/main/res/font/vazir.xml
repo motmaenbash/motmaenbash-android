@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font
+        android:font="@font/vazir_matn_thin"
+        android:fontStyle="normal"
+        android:fontWeight="100" />
+
+
+    <font
+        android:font="@font/vazir_matn_extra_light"
+        android:fontStyle="normal"
+        android:fontWeight="200" />
+
+
+    <font
+        android:font="@font/vazir_matn_light"
+        android:fontStyle="normal"
+        android:fontWeight="300" />
+
+
+    <font
+        android:font="@font/vazir_matn_regular"
+        android:fontStyle="normal"
+        android:fontWeight="400" />
+
+
+    <font
+        android:font="@font/vazir_matn_medium"
+        android:fontStyle="normal"
+        android:fontWeight="500" />
+
+
+    <font
+        android:font="@font/vazir_matn_semi_bold"
+        android:fontStyle="normal"
+        android:fontWeight="600" />
+
+
+    <font
+        android:font="@font/vazir_matn_bold"
+        android:fontStyle="normal"
+        android:fontWeight="700" />
+
+
+    <font
+        android:font="@font/vazir_matn_extra_bold"
+        android:fontStyle="normal"
+        android:fontWeight="800" />
+
+
+    <font
+        android:font="@font/vazir_matn_black"
+        android:fontStyle="normal"
+        android:fontWeight="900" />
+
+</font-family>
