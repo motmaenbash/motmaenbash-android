@@ -3,6 +3,7 @@
     <style name="Base.Theme.MotmaenBash" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="fontFamily">@font/vazir</item>
     </style>
 
     <style name="Theme.MotmaenBash" parent="Base.Theme.MotmaenBash" />
