@@ -1,0 +1,24 @@
+{
+  "phishing_links": [
+  ],
+  "phishing_sms_senders": [
+  ],
+  "phishing_sms_messages": [
+  ],
+  "suspicious_words": [
+  ],
+  "user_stats": [
+    {
+      "stat_key": "suspicious_link_detected",
+      "stat_count": 0
+    },
+    {
+      "stat_key": "suspicious_sms_detected",
+      "stat_count": 0
+    },
+    {
+      "stat_key": "suspicious_app_detected",
+      "stat_count": 0
+    }
+  ]
+}
