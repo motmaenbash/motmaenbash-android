@@ -4,17 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:background="#f5f5f5"
-    android:fitsSystemWindows="true"
     android:layoutDirection="rtl"
-    tools:context=".MainActivity">
+    android:padding="16dp">
 
     <LinearLayout
-        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#f5f5f5"
         android:orientation="vertical"
-        android:padding="32dp">
+        android:padding="16dp">
+
 
         <!-- App Name -->
         <TextView
@@ -22,8 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:text="مطمئن باش"
+            android:layout_marginTop="48dp"
+            android:text="اسکن URL"
             android:textColor="@color/colorPrimary"
             android:textSize="32sp"
             android:textStyle="bold" />
@@ -39,61 +41,51 @@
             android:textStyle="bold" />
 
 
-        <!-- Tip of the Day -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp"
-            android:text="نکته روز"
-            android:textColor="@color/colorPrimary"
-            android:textSize="18sp"
-
-            android:textStyle="bold" />
-
-        <androidx.cardview.widget.CardView
+        <EditText
+            android:id="@+id/url_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="لطفاً URL را وارد کنید"
+            android:inputType="textUri"
+            android:padding="16dp" />
+
+        <Button
+            android:id="@+id/scan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:backgroundTint="@color/colorPrimary"
             android:padding="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
+            android:text="شروع اسکن"
+            android:textColor="@color/white" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/scan_result_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            tools:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="8dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/tip_of_the_day"
-                    android:layout_width="0dp"
+                    android:id="@+id/scan_result"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="نکته نمونه"
-                    android:textSize="14sp" />
-
-                <ImageButton
-                    android:id="@+id/refresh_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:contentDescription="Refresh Tip"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_rotate" />
+                    android:gravity="center"
+                    android:text="نتیجه اسکن در اینجا نمایش داده خواهد شد."
+                    android:textSize="16sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-
-        <!-- App Version -->
-        <TextView
-            android:id="@+id/app_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:paddingTop="16dp"
-            android:text="@string/app_version"
-            android:textSize="14sp" />
-
     </LinearLayout>
 </ScrollView>

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,9 +14,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MotmaenBash"
         tools:targetApi="31">
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
+        <activity
+            android:name=".ui.FaqActivity"
+            android:exported="false"
+            android:label="@string/faq_activity_label" />
+        <activity
+            android:name=".ui.UrlScanActivity"
+            android:exported="true"
+            android:label="@string/url_scan_activity_label">
+        </activity>
+        <activity
+            android:name=".ui.AboutActivity"
+            android:exported="false"
+            android:label="@string/about_activity_label" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
