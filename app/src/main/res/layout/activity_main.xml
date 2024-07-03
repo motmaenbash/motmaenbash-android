@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:paddingTop="16dp"
-            android:text="@string/app_version"
+            android:text="1.0.0"
             android:textSize="14sp" />
 
     </LinearLayout>

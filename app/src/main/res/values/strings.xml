@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Motmaen Bash</string>
     <string name="app_name_fa">مطمئن باش</string>
+    <string name="accessibility_service_description">توضیح دسترسی‌پذیری</string>
 </resources>
