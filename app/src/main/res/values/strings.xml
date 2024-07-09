@@ -2,4 +2,12 @@
     <string name="app_name">Motmaen Bash</string>
     <string name="app_name_fa">مطمئن باش</string>
     <string name="accessibility_service_description">توضیح دسترسی‌پذیری</string>
+
+    <string name="alert_dialog_activity_label">دیالوگ هشدار</string>
+    <string name="user_report_activity_label">گزارش کاربر</string>
+    <string name="permissions_explanation_activity_label">دسترسی‌های برنامه</string>
+    <string name="faq_activity_label">سوالات متداول</string>
+    <string name="url_scan_activity_label">🕵️ بررسی صفحه پرداخت</string>
+    <string name="about_activity_label">درباره ما</string>
+
 </resources>

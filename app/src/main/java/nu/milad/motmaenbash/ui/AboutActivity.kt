@@ -1,21 +1,25 @@
-package tech.tookan.motmaenbash.ui
+package nu.milad.motmaenbash.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import tech.tookan.motmaenbash.BuildConfig
+import nu.milad.motmaenbash.BuildConfig
 
-import tech.tookan.motmaenbash.databinding.ActivityAboutBinding
+import nu.milad.motmaenbash.databinding.ActivityAboutBinding
 
-class AboutActivity : AppCompatActivity() {
+class AboutActivity : BaseActivity() {
     private lateinit var binding: ActivityAboutBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Initialize ViewBinding
         binding = ActivityAboutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.appVersion.text = "نسخه: ${BuildConfig.VERSION_NAME}"
+
 
 
     }

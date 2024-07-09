@@ -1,11 +1,21 @@
 {
-  "phishing_links": [
+  "suspicious_links": [
+    
   ],
-  "phishing_sms_senders": [
+  "suspicious_senders": [
+
   ],
-  "phishing_sms_messages": [
+  "suspicious_messages": [
+
   ],
-  "suspicious_words": [
+  "suspicious_apps": [
+
+  ],
+  "suspicious_keywords": [
+
+  ],
+  "tips": [
+
   ],
   "user_stats": [
     {

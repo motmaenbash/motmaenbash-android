@@ -1,13 +1,12 @@
-package tech.tookan.motmaenbash.utils
+package nu.milad.motmaenbash.utils
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import org.json.JSONObject
-import tech.tookan.motmaenbash.R
+import nu.milad.motmaenbash.R
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -15,7 +14,7 @@ class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
-        private const val DATABASE_NAME = "phishing_detection.db"
+        private const val DATABASE_NAME = "motmaenbash.db"
         private const val DATABASE_VERSION = 2
 
 
@@ -26,6 +25,7 @@ class DatabaseHelper(context: Context) :
         const val TABLE_SUSPICIOUS_KEYWORDS = "suspicious_keywords"
         const val TABLE_SUSPICIOUS_APPS = "suspicious_apps"
 
+        private const val TABLE_TIPS = "tips"
         private const val TABLE_USER_STATS = "user_stats"
     }
 
@@ -106,6 +106,16 @@ class DatabaseHelper(context: Context) :
         """
         )
 
+        // Creating tips table if not exists
+        db?.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS $TABLE_TIPS (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tip TEXT NOT NULL
+            );
+        """
+        )
+
         // Creating user_stats table if not exists
         db?.execSQL(
             """
@@ -126,6 +136,7 @@ class DatabaseHelper(context: Context) :
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_SUSPICIOUS_MESSAGES")
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_SUSPICIOUS_KEYWORDS")
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_SUSPICIOUS_APPS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_TIPS")
     }
 
     private fun prepopulateData(db: SQLiteDatabase?) {
@@ -139,12 +150,13 @@ class DatabaseHelper(context: Context) :
 
 
 
-            insertData(db, TABLE_SUSPICIOUS_LINKS, "phishing_links", jsonData)
-            insertData(db, TABLE_SUSPICIOUS_SENDERS, "phishing_sms_senders", jsonData)
-            insertData(db, TABLE_SUSPICIOUS_MESSAGES, "phishing_sms_messages", jsonData)
-            insertData(db, TABLE_SUSPICIOUS_KEYWORDS, "suspicious_words", jsonData)
-            insertData(db, TABLE_SUSPICIOUS_APPS, "suspicious_apps", jsonData)
-            insertData(db, TABLE_USER_STATS, "user_stats", jsonData)
+            insertData(db, TABLE_SUSPICIOUS_LINKS, jsonData)
+            insertData(db, TABLE_SUSPICIOUS_SENDERS, jsonData)
+            insertData(db, TABLE_SUSPICIOUS_MESSAGES, jsonData)
+            insertData(db, TABLE_SUSPICIOUS_KEYWORDS, jsonData)
+            insertData(db, TABLE_SUSPICIOUS_APPS, jsonData)
+            insertData(db, TABLE_TIPS, jsonData)
+            insertData(db, TABLE_USER_STATS, jsonData)
 
 
 
@@ -159,10 +171,9 @@ class DatabaseHelper(context: Context) :
     private fun insertData(
         db: SQLiteDatabase?,
         tableName: String,
-        jsonKey: String,
         jsonData: JSONObject
     ) {
-        val jsonArray = jsonData.optJSONArray(jsonKey) ?: return
+        val jsonArray = jsonData.optJSONArray(tableName) ?: return
         db?.beginTransaction()
         try {
             for (i in 0 until jsonArray.length()) {
@@ -200,6 +211,13 @@ class DatabaseHelper(context: Context) :
                         val word = jsonArray.getString(i)
                         contentValues.apply {
                             put("word", word)
+                        }
+                    }
+
+                    TABLE_TIPS -> {
+                        val word = jsonArray.getString(i)
+                        contentValues.apply {
+                            put("tip", word)
                         }
                     }
 
@@ -256,4 +274,29 @@ class DatabaseHelper(context: Context) :
         }
         return count
     }
+
+    fun getRandomTip(): String {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT tip FROM tips ORDER BY RANDOM() LIMIT 1", null)
+        var randomTip = ""
+        if (cursor.moveToFirst()) {
+            randomTip = cursor.getString(cursor.getColumnIndexOrThrow("tip"))
+        }
+        cursor.close()
+        return randomTip
+    }
+
+    fun getUserStats(): Map<String, Int> {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT stat_key, stat_count FROM user_stats", null)
+        val statsMap = mutableMapOf<String, Int>()
+        while (cursor.moveToNext()) {
+            val statKey = cursor.getString(cursor.getColumnIndexOrThrow("stat_key"))
+            val statValue = cursor.getInt(cursor.getColumnIndexOrThrow("stat_count"))
+            statsMap[statKey] = statValue
+        }
+        cursor.close()
+        return statsMap
+    }
+
 }

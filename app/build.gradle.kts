@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "tech.tookan.motmaenbash"
+    namespace = "nu.milad.motmaenbash"
     compileSdk = 34
 
     defaultConfig {

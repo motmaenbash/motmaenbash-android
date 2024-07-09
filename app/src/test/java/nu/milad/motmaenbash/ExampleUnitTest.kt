@@ -1,4 +1,4 @@
-package tech.tookan.motmaenbash
+package nu.milad.motmaenbash
 
 import org.junit.Test
 

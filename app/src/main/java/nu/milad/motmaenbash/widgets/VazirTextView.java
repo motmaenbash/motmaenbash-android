@@ -1,4 +1,4 @@
-package tech.tookan.motmaenbash.widgets;
+package nu.milad.motmaenbash.widgets;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatTextView;
 
-import tech.tookan.motmaenbash.utils.UiUtils;
+import nu.milad.motmaenbash.utils.UiUtils;
 
 
 public class VazirTextView extends AppCompatTextView {

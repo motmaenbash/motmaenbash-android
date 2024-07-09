@@ -1,4 +1,4 @@
-package tech.tookan.motmaenbash.utils;
+package nu.milad.motmaenbash.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -7,7 +7,7 @@ import android.graphics.Typeface;
 import androidx.collection.LruCache;
 import androidx.core.content.res.ResourcesCompat;
 
-import tech.tookan.motmaenbash.R;
+import nu.milad.motmaenbash.R;
 
 public class UiUtils {
 

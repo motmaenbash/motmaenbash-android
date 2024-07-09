@@ -1,10 +1,10 @@
-package tech.tookan.motmaenbash.ui
+package nu.milad.motmaenbash.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import tech.tookan.motmaenbash.databinding.ActivityFaqBinding
+import nu.milad.motmaenbash.databinding.ActivityFaqBinding
 
-class FaqActivity : AppCompatActivity() {
+class FaqActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFaqBinding
 

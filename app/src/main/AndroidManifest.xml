@@ -17,8 +17,27 @@
 
 
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name_fa">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name=".ui.UserReportActivity"
+            android:exported="false"
+
+            android:label="@string/user_report_activity_label" />
+        <activity
+            android:name=".ui.PermissionsExplanationActivity"
+            android:exported="false"
+            android:label="@string/permissions_explanation_activity_label"
+            android:parentActivityName=".ui.MainActivity"
+            />
         <activity
             android:name=".ui.FaqActivity"
             android:exported="false"
@@ -32,6 +51,14 @@
             android:name=".ui.AboutActivity"
             android:exported="false"
             android:label="@string/about_activity_label" />
+        <activity
+            android:name=".ui.AlertDialogActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:taskAffinity=".ui.AlertDialogActivity"
+            android:theme="@style/Theme.Material3.DayNight.Dialog" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
