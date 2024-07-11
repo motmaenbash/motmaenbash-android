@@ -61,8 +61,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
+                android:gravity="top"
                 android:orientation="horizontal"
+
                 android:padding="8dp">
 
                 <TextView
@@ -70,7 +71,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="14sp"
+                    android:minHeight="100dp"
                     tools:text="در صورت دریافت پیام حاوی لینک و درخواست برای واریز وجه به حساب‌های بانکی، به هیچ عنوان از این لینک‌ها استفاده نکنید" />
 
                 <ImageButton
@@ -78,7 +79,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:contentDescription="Refresh Tip"
                     android:padding="8dp"
                     android:src="@android:drawable/ic_menu_rotate" />
             </LinearLayout>
@@ -129,7 +129,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/colorPrimary"
-                        android:text="فعال‌سازی" />
+                        android:text="فعال‌سازی"
+                        android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -385,6 +386,14 @@
                     android:textColor="@color/black"
                     android:textSize="14sp" />
 
+                <ImageButton
+                    android:id="@+id/update_database_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:contentDescription="Update Database"
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_popup_sync" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

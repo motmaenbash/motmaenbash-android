@@ -23,7 +23,7 @@ class DatabaseHelper(context: Context) :
         const val TABLE_SUSPICIOUS_SENDERS = "suspicious_senders"
         private const val TABLE_SUSPICIOUS_MESSAGES = "suspicious_messages"
         const val TABLE_SUSPICIOUS_KEYWORDS = "suspicious_keywords"
-        const val TABLE_SUSPICIOUS_APPS = "suspicious_apps"
+        private const val TABLE_SUSPICIOUS_APPS = "suspicious_apps"
 
         private const val TABLE_TIPS = "tips"
         private const val TABLE_USER_STATS = "user_stats"
@@ -32,18 +32,18 @@ class DatabaseHelper(context: Context) :
 
     private val context = context
 
-    override fun onCreate(db: SQLiteDatabase?) {
+    override fun onCreate(db: SQLiteDatabase) {
         createTables(db)
         prepopulateData(db)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         dropTables(db)
         createTables(db)
         prepopulateData(db)
     }
 
-    private fun createTables(db: SQLiteDatabase?) {
+    private fun createTables(db: SQLiteDatabase) {
         // Creating phishing_links table
         db?.execSQL(
             """
@@ -143,20 +143,16 @@ class DatabaseHelper(context: Context) :
         db?.beginTransaction()
         try {
             val inputStream = context.resources.openRawResource(R.raw.data)
-            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
-            val stringBuilder = StringBuilder()
-            bufferedReader.forEachLine { line -> stringBuilder.append(line) }
-            val jsonData = JSONObject(stringBuilder.toString())
+            val jsonData = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(jsonData)
 
-
-
-            insertData(db, TABLE_SUSPICIOUS_LINKS, jsonData)
-            insertData(db, TABLE_SUSPICIOUS_SENDERS, jsonData)
-            insertData(db, TABLE_SUSPICIOUS_MESSAGES, jsonData)
-            insertData(db, TABLE_SUSPICIOUS_KEYWORDS, jsonData)
-            insertData(db, TABLE_SUSPICIOUS_APPS, jsonData)
-            insertData(db, TABLE_TIPS, jsonData)
-            insertData(db, TABLE_USER_STATS, jsonData)
+            insertData(db, TABLE_SUSPICIOUS_LINKS, jsonObject)
+            insertData(db, TABLE_SUSPICIOUS_SENDERS, jsonObject)
+            insertData(db, TABLE_SUSPICIOUS_MESSAGES, jsonObject)
+            insertData(db, TABLE_SUSPICIOUS_KEYWORDS, jsonObject)
+            insertData(db, TABLE_SUSPICIOUS_APPS, jsonObject)
+            insertData(db, TABLE_TIPS, jsonObject)
+            insertData(db, TABLE_USER_STATS, jsonObject)
 
 
 
@@ -225,6 +221,7 @@ class DatabaseHelper(context: Context) :
                         val jsonObject = jsonArray.getJSONObject(i)
                         contentValues.apply {
                             put("package_name", jsonObject.optString("package_name"))
+                            put("sha1", jsonObject.optString("sha1"))
                         }
                     }
 
