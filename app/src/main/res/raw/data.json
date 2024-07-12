@@ -1,18 +1,29 @@
 {
   "suspicious_links": [
-    
+    {
+      "url": "",
+      "type": "",
+      "description": "",
+      "is_phishing": ""
+    }
   ],
   "suspicious_senders": [
-
+    {
+      "sender_number": ""
+    }
   ],
   "suspicious_messages": [
-
   ],
   "suspicious_apps": [
-
+    {
+      "package_name": "",
+      "sha1": "",
+      "apk_sha1": ""
+    }
   ],
   "suspicious_keywords": [
-
+    "",
+    ""
   ],
   "tips": [
 

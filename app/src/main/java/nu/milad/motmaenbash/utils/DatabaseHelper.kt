@@ -100,8 +100,8 @@ class DatabaseHelper(context: Context) :
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 package_name TEXT NOT NULL UNIQUE,
                 sha1 TEXT UNIQUE,
-                detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(package_name)
+                apk_sha1 TEXT UNIQUE,
+                detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """
         )
@@ -121,9 +121,8 @@ class DatabaseHelper(context: Context) :
             """
             CREATE TABLE IF NOT EXISTS $TABLE_USER_STATS (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                stat_key TEXT NOT NULL,
-                stat_count INTEGER NOT NULL,
-                UNIQUE(stat_key)
+                stat_key TEXT NOT NULL UNIQUE,
+                stat_count INTEGER NOT NULL
             );
         """
         )
@@ -222,6 +221,7 @@ class DatabaseHelper(context: Context) :
                         contentValues.apply {
                             put("package_name", jsonObject.optString("package_name"))
                             put("sha1", jsonObject.optString("sha1"))
+                            put("apk_sha1", jsonObject.optString("apk_sha1"))
                         }
                     }
 
@@ -247,10 +247,9 @@ class DatabaseHelper(context: Context) :
         }
     }
 
-
-    fun isAppSuspicious(packageName: String, sha1: String): Boolean {
-        val selection = "package_name = ? OR sha1 = ?"
-        val selectionArgs = arrayOf(packageName, sha1)
+    fun isAppSuspicious(packageName: String, sha1: String, apkSha1: String): Boolean {
+        val selection = "package_name = ? AND (sha1 = ? OR apk_sha1 = ?)"
+        val selectionArgs = arrayOf(packageName, sha1, apkSha1)
         return countData(TABLE_SUSPICIOUS_APPS, selection, selectionArgs) > 0
     }
 

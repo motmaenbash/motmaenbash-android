@@ -21,6 +21,7 @@ class AboutActivity : BaseActivity() {
         binding.appVersion.text = "نسخه: ${BuildConfig.VERSION_NAME}"
 
 
+        // Set up donate button
         binding.donateButton.setOnClickListener()
         {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://milad.nu/onate"))

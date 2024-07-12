@@ -9,6 +9,9 @@ object UrlUtils {
      * @return True if the URL is valid, false otherwise.
      */
     fun validateUrl(url: String): Boolean {
+        if (url.isEmpty()) {
+            return false
+        }
         val regex = Regex(
             "^(https?:\\/\\/)?(www\\.)?([a-zA-Z0-9\\-]+\\.)+[a-zA-Z]{2,}(\\/[^\\s]*)?$"
         )

@@ -3,9 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Permission to draw overlays on top of other apps, used for displaying system alerts -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -71,12 +80,30 @@
             android:noHistory="true"
             android:taskAffinity=".ui.AlertDialogActivity"
             android:theme="@style/Theme.Material3.DayNight.Dialog" />
+        <service
+            android:name=".services.UrlDetectionService"
+            class=".UrlInterceptorService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action
+                    android:name=".UrlInterceptorService"
+                    android:value=".UrlInterceptorService" />
             </intent-filter>
-        </activity>
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service" />
+        </service>
+        <service
+            android:name=".services.FloatingViewService"
+            android:enabled="true"
+            android:exported="false" />
+
 
 
         <receiver
@@ -88,7 +115,11 @@
             </intent-filter>
         </receiver>
 
-
+        <service
+            android:name=".services.AppInstallService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

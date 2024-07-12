@@ -3,6 +3,15 @@
     <string name="app_name_fa">مطمئن باش</string>
     <string name="accessibility_service_description">توضیح دسترسی‌پذیری</string>
 
+    <!--  Faq  -->
+    <string-array name="faq_questions">
+        <item>این اپلیکیشن چه کار می‌کند؟</item>
+    </string-array>
+
+    <string-array name="faq_answers">
+        <item>این اپلیکیشن به شما کمک می‌کند تا لینک‌ها و پیامک‌های مشکوک به فیشینگ را شناسایی کنید و از افتادن در دام‌های کلاهبرداری جلوگیری کنید.</item>
+    </string-array>
+
     <string name="alert_dialog_activity_label">دیالوگ هشدار</string>
     <string name="user_report_activity_label">گزارش کاربر</string>
     <string name="permissions_explanation_activity_label">دسترسی‌های برنامه</string>

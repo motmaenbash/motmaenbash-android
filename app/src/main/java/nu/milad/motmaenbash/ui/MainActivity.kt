@@ -18,14 +18,24 @@ import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.databinding.ActivityMainBinding
 import nu.milad.motmaenbash.services.AppInstallService
-import nu.milad.motmaenbash.services.UrlMonitorService
+import nu.milad.motmaenbash.services.FloatingViewService
+import nu.milad.motmaenbash.services.UrlDetectionService
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.NumberUtils.formatNumber
 
 class MainActivity : BaseActivity() {
 
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var dbHelper: DatabaseHelper
+
+    companion object {
+        private const val PERMISSIONS_REQUEST_RECIEVE_SMS = 100
+        private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
+        private const val ACCESSIBILITY_SETTINGS_REQUEST_CODE = 5678
+
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +55,10 @@ class MainActivity : BaseActivity() {
         setupClickListeners()
 
 
+
+        updatePermissionsStatus()
+
+
         binding.appVersion.text = "نسخه: ${BuildConfig.VERSION_NAME}"
 
 
@@ -54,6 +68,8 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        updatePermissionsStatus()
+
     }
 
 
@@ -134,8 +150,11 @@ class MainActivity : BaseActivity() {
 
     }
 
-    private fun formatNumber(number: Int): String {
-        return String.format("%,d", number)
+
+    private fun updatePermissionsStatus() {
+
+        //
+        
     }
 
-}
+    }
