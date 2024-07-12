@@ -79,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:padding="8dp"
+                    android:padding="4dp"
                     android:src="@android:drawable/ic_menu_rotate" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -217,7 +217,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:text="تشخیص لینک مشکوک"
                         android:textSize="14sp" />
 
@@ -244,7 +243,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:text="تشخیص پیامک مشکوک"
                         android:textSize="14sp" />
 
@@ -271,7 +269,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:text="تشخیص اپلیکیشن مشکوک"
                         android:textSize="14sp" />
 
@@ -298,7 +295,6 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:text="تعداد کل اسکن‌ها"
                         android:textSize="14sp" />
 

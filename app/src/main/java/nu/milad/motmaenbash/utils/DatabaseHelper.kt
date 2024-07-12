@@ -248,7 +248,7 @@ class DatabaseHelper(context: Context) :
     }
 
     fun isAppSuspicious(packageName: String, sha1: String, apkSha1: String): Boolean {
-        val selection = "package_name = ? AND (sha1 = ? OR apk_sha1 = ?)"
+        val selection = "package_name = ? OR sha1 = ? OR apk_sha1 = ?"
         val selectionArgs = arrayOf(packageName, sha1, apkSha1)
         return countData(TABLE_SUSPICIOUS_APPS, selection, selectionArgs) > 0
     }
