@@ -331,6 +331,40 @@
             android:orientation="horizontal"
             android:weightSum="3">
 
+            <!-- App Scan -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="16dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="8dp"
+                        android:src="@android:drawable/ic_menu_report_image" />
+
+                    <Button
+                        android:id="@+id/app_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:padding="12dp"
+                        android:text="اسکن برنامه‌ها" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
@@ -356,7 +390,7 @@
                         android:src="@android:drawable/ic_menu_search" />
 
                     <Button
-                        android:id="@+id/tool2"
+                        android:id="@+id/url_scan"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/colorPrimary"

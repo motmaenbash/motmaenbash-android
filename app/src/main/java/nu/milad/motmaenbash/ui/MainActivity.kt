@@ -68,6 +68,7 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        displayStats()
         updatePermissionsStatus()
 
     }
@@ -107,8 +108,18 @@ class MainActivity : BaseActivity() {
             )
         }
 
-        // Scan button
-        binding.tool2.setOnClickListener {
+        // App Scan button
+        binding.appScan.setOnClickListener {
+            startActivity(
+                Intent(
+                    this,
+                    ScanActivity::class.java
+                )
+            )
+        }
+
+        // URL Scan button
+        binding.urlScan.setOnClickListener {
             startActivity(
                 Intent(
                     this,

@@ -25,8 +25,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MotmaenBash"
         tools:targetApi="31">
-
-
+        <activity
+            android:name=".ui.ScanActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -37,11 +38,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name=".ui.UserReportActivity"
             android:exported="false"
-
             android:label="@string/user_report_activity_label" />
         <activity
             android:name=".ui.PermissionsExplanationActivity"
