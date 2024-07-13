@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "987525328112",
+    "project_id": "motmaenbash-app",
+    "storage_bucket": "motmaenbash-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987525328112:android:345007c74e1b12244e2635",
+        "android_client_info": {
+          "package_name": "nu.milad.motmaenbash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKwIYnCg8gAYQSltuxrHFzEVzxd1Xj3kA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
