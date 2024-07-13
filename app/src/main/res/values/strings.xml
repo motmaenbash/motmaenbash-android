@@ -19,4 +19,7 @@
     <string name="url_scan_activity_label">🕵️ بررسی صفحه پرداخت</string>
     <string name="about_activity_label">درباره ما</string>
 
+    <string name="version">نسخه: %1$s</string>
+    <string name="last_update">آخرین به‌روزرسانی: %1$s</string>
+
 </resources>

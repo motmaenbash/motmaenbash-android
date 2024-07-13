@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="24dp"
-                android:text="مطمئن باش"
+                android:text="@string/app_name_fa"
                 android:textColor="@color/colorPrimary"
                 android:textSize="32sp"
                 android:textStyle="bold" />
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 android:text="اپلیکیشن تشخیص فیشینگ"
                 android:textColor="@color/black"
                 android:textSize="16sp"
@@ -59,11 +59,50 @@
                 android:id="@+id/app_version"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="نسخه 1.0"
+                android:layout_marginBottom="12dp"
+                android:textSize="12sp"
+                tools:text="نسخه 1.0" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="برنامه‌نویس: میلاد نوری"
                 android:textSize="16sp" />
 
+        
+            <!-- Social Media Links -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:autoLink="web"
+                android:text="کانال تلگرام: t.me/MiladNouriChannel"
+                android:textSize="16sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:autoLink="web"
+                android:text="توییتر: twitter.com/MilaDnu"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:autoLink="web"
+                android:text="کانال یوتوب: youtube.com/MilaDnu"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:autoLink="web"
+                android:text="اینستاگرام: instagram.com/milad_nouri"
+                android:textSize="16sp" />
 
             <!-- Donate Button -->
             <Button
