@@ -69,8 +69,6 @@
             android:name=".ui.AboutActivity"
             android:exported="false"
             android:label="@string/about_activity_label" />
-
-
         <activity
             android:name=".ui.AlertDialogActivity"
             android:excludeFromRecents="true"

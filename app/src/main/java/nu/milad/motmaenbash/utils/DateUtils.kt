@@ -23,6 +23,36 @@ object DateUtils {
     }
 
 
+    /**
+     * Get the current time in milliseconds since epoch.
+     *
+     * @return Current time in milliseconds.
+     */
+    fun getCurrentTimeInMillis(): Long {
+        return System.currentTimeMillis()
+    }
+
+
+    /**
+     * Get a human-readable string representing the time elapsed from the given timestamp to now, in Persian.
+     *
+     * @param timeInMillis The timestamp to calculate the time elapsed from, in milliseconds.
+     * @return A string representing the time elapsed in Persian.
+     */
+    fun timeAgo(timeInMillis: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timeInMillis
+
+        return when {
+            diff < TimeUnit.MINUTES.toMillis(1) -> "لحظاتی قبل"
+            diff < TimeUnit.HOURS.toMillis(1) -> "${toPersianNumbers((diff / TimeUnit.MINUTES.toMillis(1)).toString())} دقیقه قبل"
+            diff < TimeUnit.DAYS.toMillis(1) -> "${toPersianNumbers((diff / TimeUnit.HOURS.toMillis(1)).toString())} ساعت قبل"
+            diff < TimeUnit.DAYS.toMillis(7) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(1)).toString())} روز قبل"
+            diff < TimeUnit.DAYS.toMillis(30) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(1) / 7).toString())} هفته قبل"
+            diff < TimeUnit.DAYS.toMillis(365) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(30)).toString())} ماه قبل"
+            else -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(365)).toString())} سال قبل"
+        }
+    }
 
 
     /**
