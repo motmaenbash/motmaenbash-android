@@ -74,11 +74,10 @@
                     android:minHeight="100dp"
                     tools:text="در صورت دریافت پیام حاوی لینک و درخواست برای واریز وجه به حساب‌های بانکی، به هیچ عنوان از این لینک‌ها استفاده نکنید" />
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/refresh_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
                     android:padding="4dp"
                     android:src="@android:drawable/ic_menu_rotate" />
             </LinearLayout>
@@ -133,6 +132,7 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
+              
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

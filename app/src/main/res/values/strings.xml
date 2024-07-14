@@ -20,6 +20,8 @@
     <string name="about_activity_label">درباره ما</string>
 
     <string name="version">نسخه: %1$s</string>
-    <string name="last_update">آخرین به‌روزرسانی: %1$s</string>
+    <string name="last_update_time">آخرین به‌روزرسانی: %1$s</string>
+    <string name="last_scan_time">آخرین اسکن: %1$s</string>
+
 
 </resources>

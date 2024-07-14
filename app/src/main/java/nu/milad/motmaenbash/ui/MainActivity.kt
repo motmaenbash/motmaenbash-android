@@ -8,6 +8,8 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
@@ -21,7 +23,10 @@ import nu.milad.motmaenbash.services.AppInstallService
 import nu.milad.motmaenbash.services.FloatingViewService
 import nu.milad.motmaenbash.services.UrlDetectionService
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.NetworkUtils
+import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.NumberUtils.formatNumber
+
 
 class MainActivity : BaseActivity() {
 
@@ -35,6 +40,9 @@ class MainActivity : BaseActivity() {
         private const val ACCESSIBILITY_SETTINGS_REQUEST_CODE = 5678
 
     }
+
+    // Animation objects
+    private lateinit var rotateAnimation: Animation
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +60,10 @@ class MainActivity : BaseActivity() {
         setupWindowInsets()
         displayRandomTip()
         displayStats()
+
+        // Initialize animations
+        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate)
+
         setupClickListeners()
 
 
@@ -86,14 +98,22 @@ class MainActivity : BaseActivity() {
     private fun setupClickListeners() {
 
 
-        binding.refreshButton.setOnClickListener { displayRandomTip() }
+        binding.refreshButton.setOnClickListener {
+            binding.refreshButton.startAnimation(rotateAnimation)
+            GlobalScope.launch(Dispatchers.Main) {
+                delay(400) // Simulate loading time
+                displayRandomTip()
+
+                binding.refreshButton.clearAnimation()
+            }
+        }
+
 
         // FAQ button
         binding.faqButton.setOnClickListener {
             startActivity(
                 Intent(
-                    this,
-                    FaqActivity::class.java
+                    this, FaqActivity::class.java
                 )
             )
         }
@@ -102,8 +122,7 @@ class MainActivity : BaseActivity() {
         binding.aboutButton.setOnClickListener {
             startActivity(
                 Intent(
-                    this,
-                    AboutActivity::class.java
+                    this, AboutActivity::class.java
                 )
             )
         }
@@ -112,8 +131,7 @@ class MainActivity : BaseActivity() {
         binding.appScan.setOnClickListener {
             startActivity(
                 Intent(
-                    this,
-                    ScanActivity::class.java
+                    this, ScanActivity::class.java
                 )
             )
         }
@@ -122,8 +140,7 @@ class MainActivity : BaseActivity() {
         binding.urlScan.setOnClickListener {
             startActivity(
                 Intent(
-                    this,
-                    UrlScanActivity::class.java
+                    this, UrlScanActivity::class.java
                 )
             )
         }
