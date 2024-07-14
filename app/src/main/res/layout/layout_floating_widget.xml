@@ -4,7 +4,7 @@
     android:id="@+id/root_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:alpha="0.8"
+    android:alpha="0.85"
     android:background="@drawable/floating_widget_bg"
     android:fitsSystemWindows="false"
     android:padding="4dp"

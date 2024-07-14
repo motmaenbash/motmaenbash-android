@@ -1,11 +1,10 @@
 package nu.milad.motmaenbash.ui
 
-import android.content.Intent
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Bundle
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.databinding.ActivityAlertDialogBinding
+import nu.milad.motmaenbash.utils.AppUtils
 
 class AlertDialogActivity : BaseActivity() {
 
@@ -43,13 +42,13 @@ class AlertDialogActivity : BaseActivity() {
 
 
 
+        binding.uninstallButton.setOnClickListener {
+            AppUtils.uninstallApp(this, packageName, packageName) //todo: pass app name
+        }
+
 
         binding.okButton.setOnClickListener {
             finish()
-        }
-
-        binding.uninstallButton.setOnClickListener {
-            uninstallApp()
         }
 
         // Set dialog to be not cancelable
@@ -63,17 +62,6 @@ class AlertDialogActivity : BaseActivity() {
             mp.release()
         }
         mediaPlayer.start()
-    }
-
-    private fun uninstallApp() {
-
-
-        val intent = Intent(Intent.ACTION_DELETE)
-        intent.setData(Uri.parse("package:$packageName"))
-        intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-        startActivity(intent)
-
-
     }
 
 
