@@ -7,8 +7,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import org.json.JSONObject
 import nu.milad.motmaenbash.R
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -27,6 +25,11 @@ class DatabaseHelper(context: Context) :
 
         private const val TABLE_TIPS = "tips"
         private const val TABLE_USER_STATS = "user_stats"
+
+        // Stats keys
+        const val STAT_SUSPICIOUS_LINK_DETECTED = "suspicious_link_detected"
+        const val STAT_SUSPICIOUS_SMS_DETECTED = "suspicious_sms_detected"
+        const val STAT_SUSPICIOUS_APP_DETECTED = "suspicious_app_detected"
     }
 
 
@@ -250,13 +253,24 @@ class DatabaseHelper(context: Context) :
     fun isAppSuspicious(packageName: String, sha1: String, apkSha1: String): Boolean {
         val selection = "package_name = ? OR sha1 = ? OR apk_sha1 = ?"
         val selectionArgs = arrayOf(packageName, sha1, apkSha1)
-        return countData(TABLE_SUSPICIOUS_APPS, selection, selectionArgs) > 0
+        val isSuspicious = countData(TABLE_SUSPICIOUS_APPS, selection, selectionArgs) > 0
+
+        if (isSuspicious) {
+            incrementUserStat(STAT_SUSPICIOUS_APP_DETECTED)
+        }
+        return isSuspicious
     }
 
     fun isUrlSuspicious(url: String): Boolean {
         val selection = "url = ?"
         val selectionArgs = arrayOf(url)
-        return countData(TABLE_SUSPICIOUS_LINKS, selection, selectionArgs) > 0
+        val isSuspicious = countData(TABLE_SUSPICIOUS_LINKS, selection, selectionArgs) > 0
+
+        if (isSuspicious) {
+            incrementUserStat(STAT_SUSPICIOUS_APP_DETECTED)
+        }
+
+        return isSuspicious
     }
 
     private fun countData(tableName: String, selection: String, selectionArgs: Array<String>): Int {
@@ -294,5 +308,36 @@ class DatabaseHelper(context: Context) :
         cursor.close()
         return statsMap
     }
+
+
+    fun incrementUserStat(statKey: String) {
+        val db = writableDatabase
+        val updateQuery =
+            "UPDATE $TABLE_USER_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
+        db.execSQL(updateQuery, arrayOf(statKey))
+    }
+
+    fun clearDatabase() {
+        val db = writableDatabase
+        try {
+            val tables = arrayOf(
+                TABLE_SUSPICIOUS_LINKS,
+                TABLE_SUSPICIOUS_SENDERS,
+                TABLE_SUSPICIOUS_MESSAGES,
+                TABLE_SUSPICIOUS_KEYWORDS,
+                TABLE_SUSPICIOUS_APPS,
+                TABLE_TIPS
+            )
+
+            tables.forEach { tableName ->
+                db.execSQL("DELETE FROM $tableName")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            db.close()
+        }
+    }
+
 
 }
