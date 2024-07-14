@@ -66,11 +66,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="32dp"
                 android:text="برنامه‌نویس: میلاد نوری"
                 android:textSize="16sp" />
 
-        
+
             <!-- Social Media Links -->
             <TextView
                 android:layout_width="wrap_content"

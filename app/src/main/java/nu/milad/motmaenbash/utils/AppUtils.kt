@@ -1,12 +1,15 @@
 package nu.milad.motmaenbash.utils
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import nu.milad.motmaenbash.model.App
 import nu.milad.motmaenbash.receivers.AppInstallReceiver.Companion.TAG
 import java.io.File
@@ -21,7 +24,7 @@ object AppUtils {
      * @param signature The byte array to hash.
      * @return The SHA-1 hash as a Base64 encoded string.
      */
-    private fun calculateSHA1(signature: ByteArray): String {
+    fun calculateSHA1(signature: ByteArray): String {
         val md = MessageDigest.getInstance("SHA-1")
         val digest = md.digest(signature)
         return Base64.encodeToString(digest, Base64.DEFAULT)
@@ -116,4 +119,25 @@ object AppUtils {
             )
         }
     }
+
+    /**
+     * Uninstalls the specified app package.
+     *
+     * @param context The application context.
+     * @param packageName The package name of the app to uninstall.
+     */
+    fun uninstallApp(context: Context, packageName: String, appName: String) {
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = Uri.parse("package:$packageName")
+        intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
+        context.startActivity(intent)
+
+        Toast.makeText(
+            context,
+            "برنامه ${appName} حذف شد",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+
 }

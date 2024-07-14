@@ -8,7 +8,7 @@ object NumberUtils {
 
 
     fun formatNumber(number: Int): String {
-        return String.format(Locale.getDefault(), "%,d", number)
+        return toPersianNumbers(String.format(Locale.getDefault(), "%,d", number))
     }
 
 
