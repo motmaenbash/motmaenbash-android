@@ -2,11 +2,13 @@ package nu.milad.motmaenbash.ui
 
 import android.Manifest
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -16,9 +18,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
+import nu.milad.motmaenbash.utils.UpdateManager
 import nu.milad.motmaenbash.databinding.ActivityMainBinding
+import nu.milad.motmaenbash.receivers.SmsReceiver
 import nu.milad.motmaenbash.services.AppInstallService
 import nu.milad.motmaenbash.services.FloatingViewService
 import nu.milad.motmaenbash.services.UrlDetectionService
@@ -33,9 +42,10 @@ class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var updateManager: UpdateManager
 
     companion object {
-        private const val PERMISSIONS_REQUEST_RECIEVE_SMS = 100
+        private const val PERMISSIONS_REQUEST_RECEIVE_SMS = 100
         private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
         private const val ACCESSIBILITY_SETTINGS_REQUEST_CODE = 5678
 
@@ -56,10 +66,10 @@ class MainActivity : BaseActivity() {
 
 
         dbHelper = DatabaseHelper(this)
+        updateManager = UpdateManager(this)
 
         setupWindowInsets()
         displayRandomTip()
-        displayStats()
 
         // Initialize animations
         rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate)
@@ -68,7 +78,10 @@ class MainActivity : BaseActivity() {
 
 
 
-        updatePermissionsStatus()
+
+
+        binding.appVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
+
 
 
         binding.appVersion.text = "نسخه: ${BuildConfig.VERSION_NAME}"
@@ -81,8 +94,16 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         displayStats()
+        displayDatabaseUpdateTime()
         updatePermissionsStatus()
 
+    }
+
+    private fun displayDatabaseUpdateTime() {
+        binding.databaseUpdateTime.text = getString(
+            R.string.last_update_time,
+            NumberUtils.toPersianNumbers(updateManager.getLastUpdateTimeAgo())
+        )
     }
 
 
@@ -95,6 +116,38 @@ class MainActivity : BaseActivity() {
 
     }
 
+    private fun updateDatabase() {
+
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            Toast.makeText(
+                this,
+                "اتصال به اینترنت برقرار نیست. لطفا اتصال به اینترنت را بررسی کرده و دوباره تلاش کنید.",
+
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
+
+        binding.updateDatabaseButton.startAnimation(rotateAnimation)
+
+        lifecycleScope.launch {
+            val success = updateManager.updateDatabase()
+            if (success) {
+
+
+                binding.databaseUpdateTime.text = getString(
+                    R.string.last_update_time,
+                    NumberUtils.toPersianNumbers(updateManager.getLastUpdateTimeAgo())
+                )
+
+            }
+
+            binding.updateDatabaseButton.clearAnimation() // Clear animation after update
+
+        }
+
+    }
     private fun setupClickListeners() {
 
 
@@ -153,6 +206,9 @@ class MainActivity : BaseActivity() {
         binding.reportByUser.setOnClickListener {
             startActivity(Intent(this, UserReportActivity::class.java))
         }
+
+        binding.updateDatabaseButton.setOnClickListener({ updateDatabase() })
+
     // Function to display a random tip
     fun displayRandomTip() {
         val tip = dbHelper.getRandomTip()

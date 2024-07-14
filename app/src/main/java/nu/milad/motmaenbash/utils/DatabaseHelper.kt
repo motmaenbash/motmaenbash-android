@@ -167,9 +167,7 @@ class DatabaseHelper(context: Context) :
     }
 
     private fun insertData(
-        db: SQLiteDatabase?,
-        tableName: String,
-        jsonData: JSONObject
+        db: SQLiteDatabase?, tableName: String, jsonData: JSONObject
     ) {
         val jsonArray = jsonData.optJSONArray(tableName) ?: return
         db?.beginTransaction()
@@ -238,10 +236,7 @@ class DatabaseHelper(context: Context) :
                 }
 
                 db?.insertWithOnConflict(
-                    tableName,
-                    null,
-                    contentValues,
-                    SQLiteDatabase.CONFLICT_IGNORE
+                    tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
                 )
             }
             db?.setTransactionSuccessful()
@@ -272,6 +267,8 @@ class DatabaseHelper(context: Context) :
 
         return isSuspicious
     }
+
+
 
     private fun countData(tableName: String, selection: String, selectionArgs: Array<String>): Int {
         val db = readableDatabase
@@ -331,6 +328,9 @@ class DatabaseHelper(context: Context) :
 
             tables.forEach { tableName ->
                 db.execSQL("DELETE FROM $tableName")
+                // Reset auto-increment ID
+                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '$tableName'")
+
             }
         } catch (e: Exception) {
             e.printStackTrace()

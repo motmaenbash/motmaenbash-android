@@ -3,7 +3,12 @@ package nu.milad.motmaenbash.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 
@@ -33,7 +38,7 @@ class UpdateManager(private val context: Context) {
                 return false
             }
         }
-        val success = true //todo: update database
+        val success = performDatabaseUpdate()
         if (success) {
             setLastUpdateTime(DateUtils.getCurrentTimeInMillis())
             Toast.makeText(
@@ -49,6 +54,33 @@ class UpdateManager(private val context: Context) {
         return success
     }
 
+
+    private suspend fun performDatabaseUpdate(): Boolean {
+        return withContext(Dispatchers.IO) {
+            var success = false
+
+            val url = "https://..." //todo: fix url
+
+
+            try {
+                val response = URL(url).readText()
+                val jsonObject = JSONObject(response)
+
+                val dbHelper = DatabaseHelper(context)
+                dbHelper.clearDatabase()
+                dbHelper.populateDatabaseWithFetchedData(jsonObject)
+
+                success = true
+
+
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during database update: ${e.message}", e)
+            }
+
+            success
+        }
+    }
 
     private fun setLastUpdateTime(lastUpdateTime: Long) {
         with(sharedPreferences.edit()) {

@@ -217,7 +217,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="تشخیص لینک مشکوک"
+                        android:text="هشدار لینک مشکوک"
                         android:textSize="14sp" />
 
                     <TextView
@@ -243,7 +243,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="تشخیص پیامک مشکوک"
+                        android:text="هشدار پیامک مشکوک"
                         android:textSize="14sp" />
 
                     <TextView
@@ -269,7 +269,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="تشخیص اپلیکیشن مشکوک"
+                        android:text="هشدار اپلیکیشن مشکوک"
                         android:textSize="14sp" />
 
                     <TextView
@@ -295,7 +295,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="تعداد کل اسکن‌ها"
+                        android:text="تعداد کل هشدارها"
                         android:textSize="14sp" />
 
                     <TextView
@@ -460,11 +460,10 @@
                     android:textColor="@color/black"
                     android:textSize="14sp" />
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/update_database_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
                     android:contentDescription="Update Database"
                     android:padding="8dp"
                     android:src="@android:drawable/ic_popup_sync" />

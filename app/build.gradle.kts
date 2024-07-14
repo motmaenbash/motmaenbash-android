@@ -15,7 +15,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "Alpha 1.0.0"
-
+        resourceConfigurations += listOf("en", "fa")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

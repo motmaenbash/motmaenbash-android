@@ -1,7 +1,6 @@
 package nu.milad.motmaenbash.ui
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import nu.milad.motmaenbash.databinding.ActivityFaqBinding
 
 class FaqActivity : BaseActivity() {
