@@ -166,6 +166,25 @@ class DatabaseHelper(context: Context) :
         }
     }
 
+
+    fun populateDatabaseWithFetchedData(jsonObject: JSONObject) {
+        val tables = arrayOf(
+            TABLE_SUSPICIOUS_LINKS,
+            TABLE_SUSPICIOUS_SENDERS,
+            TABLE_SUSPICIOUS_MESSAGES,
+            TABLE_SUSPICIOUS_KEYWORDS,
+            TABLE_SUSPICIOUS_APPS,
+            TABLE_TIPS
+        )
+
+        tables.forEach { tableName ->
+            val jsonArray = jsonObject.optJSONArray(tableName)
+            if (jsonArray != null && jsonArray.length() > 0) {
+                insertData(writableDatabase, tableName, jsonObject)
+            }
+        }
+    }
+
     private fun insertData(
         db: SQLiteDatabase?, tableName: String, jsonData: JSONObject
     ) {

@@ -7,48 +7,16 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import nu.milad.motmaenbash.model.App
 import nu.milad.motmaenbash.receivers.AppInstallReceiver.Companion.TAG
+import nu.milad.motmaenbash.utils.HashUtils.calculateSHA1FromBytes
+import nu.milad.motmaenbash.utils.HashUtils.calculateSHA1FromFile
 import java.io.File
-import java.io.FileInputStream
-import java.security.MessageDigest
 
-object AppUtils {
+object PackageUtils {
 
-    /**
-     * Calculates the SHA-1 hash of the provided byte array.
-     *
-     * @param signature The byte array to hash.
-     * @return The SHA-1 hash as a Base64 encoded string.
-     */
-    fun calculateSHA1(signature: ByteArray): String {
-        val md = MessageDigest.getInstance("SHA-1")
-        val digest = md.digest(signature)
-        return Base64.encodeToString(digest, Base64.DEFAULT)
-    }
-
-    /**
-     * Calculates the SHA-1 hash of the provided file.
-     *
-     * @param file The APK file to hash.
-     * @return The SHA-1 hash as a Base64 encoded string.
-     */
-    private fun calculateSHA1FromFile(file: File): String {
-        val md = MessageDigest.getInstance("SHA-1")
-        val fis = FileInputStream(file)
-        val buffer = ByteArray(8192)
-        var len = fis.read(buffer)
-        while (len != -1) {
-            md.update(buffer, 0, len)
-            len = fis.read(buffer)
-        }
-        fis.close()
-        val digest = md.digest()
-        return Base64.encodeToString(digest, Base64.DEFAULT)
-    }
 
     /**
      * Retrieves information about the specified app package.
@@ -60,17 +28,15 @@ object AppUtils {
     fun getAppInfo(context: Context, packageName: String): App {
         val pm: PackageManager = context.packageManager
         return try {
-            val packageInfo: PackageInfo =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    pm.getPackageInfo(
-                        packageName,
-                        PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_PERMISSIONS
-                    )
+            val packageInfo: PackageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                pm.getPackageInfo(
+                    packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_PERMISSIONS
+                )
             } else {
-                    pm.getPackageInfo(
-                        packageName,
-                        PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS
-                    )
+                pm.getPackageInfo(
+                    packageName, PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS
+                )
             }
 
 
@@ -84,9 +50,31 @@ object AppUtils {
             }
             val firstInstallTime = packageInfo.firstInstallTime
             val lastUpdateTime = packageInfo.lastUpdateTime
+            val permissions = packageInfo.requestedPermissions ?: arrayOf()
 
             // Retrieve ApplicationInfo for additional details
             val applicationInfo: ApplicationInfo = pm.getApplicationInfo(packageName, 0)
+
+            Log.d(TAG, "Packagei info: ${packageInfo.applicationInfo}")
+            Log.d(TAG, "Packagei info: ${packageInfo.packageName}")
+            Log.d(TAG, "Packagei info: ${packageInfo.firstInstallTime}")
+            Log.d(TAG, "Packagei info: ${packageInfo.lastUpdateTime}")
+            Log.d(TAG, "Packagei info: ${packageInfo.permissions}")
+            Log.d(TAG, "Packagei info: ${permissions.toString()}")
+            Log.d(TAG, "Packagei info: ${versionCode}")
+
+            Log.d(TAG, "Packagei Application Name: ${pm.getApplicationLabel(applicationInfo)}")
+            Log.d(TAG, "Packagei Application Package Name: ${applicationInfo.packageName}")
+            Log.d(TAG, "Packagei Application Data Directory: ${applicationInfo.dataDir}")
+            Log.d(TAG, "Packagei Application Source Directory: ${applicationInfo.sourceDir}")
+            Log.d(
+                TAG,
+                "Packagei Application Public Source Directory: ${applicationInfo.publicSourceDir}"
+            )
+            Log.d(
+                TAG, "Packagei Application Target SDK Version: ${applicationInfo.targetSdkVersion}"
+            )
+
 
             // Calculate SHA-1 hash of the app's signatures
             val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -94,12 +82,24 @@ object AppUtils {
             } else {
                 packageInfo.signatures
             }
-            val sha1 = calculateSHA1(signatures[0].toByteArray())
+            val sha1 = calculateSHA1FromBytes(signatures[0].toByteArray())
 
             // Calculate SHA-1 hash of the APK file
             val sourceApk = File(applicationInfo.sourceDir)
             val apksha1 = calculateSHA1FromFile(sourceApk)
 
+
+            Log.d(TAG, "Package info: $packageName, SHA-1: $sha1, APK SHA-1: $apksha1")
+
+            // Load XML MetaData
+//            val xmlMetaData = applicationInfo.metaData
+//            if (xmlMetaData != null) {
+//                for (key in xmlMetaData.keySet()) {
+//                    Log.d(TAG, "MetaData Key: $key, Value: ${xmlMetaData[key]}")
+//                }
+//            } else {
+//                Log.d(TAG, "No XML MetaData found.")
+//            }
 
 
             App(
@@ -108,14 +108,14 @@ object AppUtils {
                 versionCode,
                 sha1,
                 apksha1,
+                versionName,
+                firstInstallTime,
+                lastUpdateTime,
+                permissions?.toList() ?: emptyList()
             )
         } catch (e: Exception) {
             App(
-                "Unknown",
-                packageName,
-                -1,
-                "",
-                "",
+                "Unknown", packageName, -1, "", "", "Unknown", -1, -1, emptyList()
             )
         }
     }
@@ -133,10 +133,10 @@ object AppUtils {
         context.startActivity(intent)
 
         Toast.makeText(
-            context,
-            "برنامه ${appName} حذف شد",
-            Toast.LENGTH_SHORT
+            context, "برنامه ${appName} حذف شد", Toast.LENGTH_SHORT
         ).show()
+
+
     }
 
 

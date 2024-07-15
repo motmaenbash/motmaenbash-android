@@ -12,6 +12,8 @@
         <item>این اپلیکیشن به شما کمک می‌کند تا لینک‌ها و پیامک‌های مشکوک به فیشینگ را شناسایی کنید و از افتادن در دام‌های کلاهبرداری جلوگیری کنید.</item>
     </string-array>
 
+
+    <!--  Activity Labels  -->
     <string name="alert_dialog_activity_label">دیالوگ هشدار</string>
     <string name="user_report_activity_label">گزارش کاربر</string>
     <string name="permissions_explanation_activity_label">دسترسی‌های برنامه</string>
@@ -23,5 +25,10 @@
     <string name="last_update_time">آخرین به‌روزرسانی: %1$s</string>
     <string name="last_scan_time">آخرین اسکن: %1$s</string>
 
-
+    <!-- User Report -->
+    <string-array name="report_types">
+        <item>پیامک (SMS)</item>
+        <item>برنامه (App)</item>
+        <item>سایت (Site)</item>
+    </string-array>
 </resources>

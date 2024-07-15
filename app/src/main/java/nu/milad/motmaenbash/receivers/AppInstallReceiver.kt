@@ -4,18 +4,23 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import nu.milad.motmaenbash.utils.AppUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import android.util.Log
+import nu.milad.motmaenbash.utils.PackageUtils
 
 
 class AppInstallReceiver : BroadcastReceiver() {
 
+    companion object {
+        const val TAG = "AppInstallReceiver"
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
 
         val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
 
-        if (intent.action == Intent.ACTION_PACKAGE_ADDED || intent.action == Intent.ACTION_PACKAGE_REPLACED
+        if (intent.action == Intent.ACTION_PACKAGE_ADDED ||
+            intent.action == Intent.ACTION_PACKAGE_REPLACED
 
         ) {
 
@@ -29,8 +34,7 @@ class AppInstallReceiver : BroadcastReceiver() {
 
 
             packageName?.let {
-                val appInfo = AppUtils.getAppInfo(context, packageName)
-
+                val appInfo = PackageUtils.getAppInfo(context, packageName)
 
                 checkAppAgainstDatabase(context, it)
             }
@@ -50,7 +54,7 @@ class AppInstallReceiver : BroadcastReceiver() {
 
 
         val dbHelper = DatabaseHelper(context)
-        val appInfo = AppUtils.getAppInfo(context, packageName)
+        val appInfo = PackageUtils.getAppInfo(context, packageName)
 
 
 
