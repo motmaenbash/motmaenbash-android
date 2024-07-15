@@ -13,12 +13,11 @@ object SmsUtils {
      * @param bundle The bundle containing the SMS data.
      * @return The SmsMessage object.
      */
-    fun getSmsMessageFromPdu(pdu: Any, bundle: Bundle): SmsMessage {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val format = bundle.getString("format")
-            SmsMessage.createFromPdu(pdu as ByteArray, format)
+    fun getSmsMessageFromPdu(pdu: ByteArray, bundle: Bundle? = null): SmsMessage =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val format = bundle?.getString("format") ?: "3gpp"
+            SmsMessage.createFromPdu(pdu, format)
         } else {
-            SmsMessage.createFromPdu(pdu as ByteArray)
-        }
+            SmsMessage.createFromPdu(pdu)
     }
 }
