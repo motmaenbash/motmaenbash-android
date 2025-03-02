@@ -1,244 +1,121 @@
 package nu.milad.motmaenbash.ui
 
-import android.Manifest
+import AboutScreen
+import AppScanScreen
+import MainScreen
+import UserReportScreen
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
-import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import nu.milad.motmaenbash.BuildConfig
-import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.utils.UpdateManager
-import nu.milad.motmaenbash.databinding.ActivityMainBinding
-import nu.milad.motmaenbash.receivers.SmsReceiver
-import nu.milad.motmaenbash.services.AppInstallService
-import nu.milad.motmaenbash.services.FloatingViewService
-import nu.milad.motmaenbash.services.UrlDetectionService
-import nu.milad.motmaenbash.utils.DatabaseHelper
-import nu.milad.motmaenbash.utils.NetworkUtils
-import nu.milad.motmaenbash.utils.NumberUtils
-import nu.milad.motmaenbash.utils.NumberUtils.formatNumber
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import nu.milad.motmaenbash.consts.NavRoutes
+import nu.milad.motmaenbash.consts.Pages
+import nu.milad.motmaenbash.services.MonitoringService
+import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.utils.SettingsManager
+import nu.milad.motmaenbash.utils.dataStore
 
 
-class MainActivity : BaseActivity() {
-
-
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var dbHelper: DatabaseHelper
-    private lateinit var updateManager: UpdateManager
-
-    companion object {
-        private const val PERMISSIONS_REQUEST_RECEIVE_SMS = 100
-        private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
-        private const val ACCESSIBILITY_SETTINGS_REQUEST_CODE = 5678
-
-    }
-
-    // Animation objects
-    private lateinit var rotateAnimation: Animation
+class MainActivity : ComponentActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
-        // Initialize ViewBinding
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+//        val dbHelper = DatabaseHelper(this)
 
-
-        dbHelper = DatabaseHelper(this)
-        updateManager = UpdateManager(this)
-
-        setupWindowInsets()
-        displayRandomTip()
-
-        // Initialize animations
-        rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate)
-
-        setupClickListeners()
-
-
-
-
-
-        binding.appVersion.text = getString(R.string.version, BuildConfig.VERSION_NAME)
-
-
-
-        binding.appVersion.text = "نسخه: ${BuildConfig.VERSION_NAME}"
-
-
-
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-        displayStats()
-        displayDatabaseUpdateTime()
-        updatePermissionsStatus()
-
-    }
-
-    private fun displayDatabaseUpdateTime() {
-        binding.databaseUpdateTime.text = getString(
-            R.string.last_update_time,
-            NumberUtils.toPersianNumbers(updateManager.getLastUpdateTimeAgo())
-        )
-    }
-
-
-    private fun setupWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        // Start the monitoring service
+        val serviceIntent = Intent(this, MonitoringService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
         }
 
-    }
-
-    private fun updateDatabase() {
-
-        if (!NetworkUtils.isInternetAvailable(this)) {
-            Toast.makeText(
-                this,
-                "اتصال به اینترنت برقرار نیست. لطفا اتصال به اینترنت را بررسی کرده و دوباره تلاش کنید.",
-
-                Toast.LENGTH_SHORT
-            ).show()
-
-            return
-        }
-
-        binding.updateDatabaseButton.startAnimation(rotateAnimation)
-
-        lifecycleScope.launch {
-            val success = updateManager.updateDatabase()
-            if (success) {
-
-
-                binding.databaseUpdateTime.text = getString(
-                    R.string.last_update_time,
-                    NumberUtils.toPersianNumbers(updateManager.getLastUpdateTimeAgo())
-                )
+        setContent {
+            MotmaenBashTheme {
+                val navController = rememberNavController()
+                val targetScreen = handleIntent(intent.data)
+//                AppNavigation(navController, targetScreen, dbHelper)
+                AppNavigation(navController, targetScreen)
 
             }
-
-            binding.updateDatabaseButton.clearAnimation() // Clear animation after update
-
         }
-
-    }
-    private fun setupClickListeners() {
-
-
-        binding.refreshButton.setOnClickListener {
-            binding.refreshButton.startAnimation(rotateAnimation)
-            GlobalScope.launch(Dispatchers.Main) {
-                delay(400) // Simulate loading time
-                displayRandomTip()
-
-                binding.refreshButton.clearAnimation()
-            }
-        }
-
-
-        // FAQ button
-        binding.faqButton.setOnClickListener {
-            startActivity(
-                Intent(
-                    this, FaqActivity::class.java
-                )
-            )
-        }
-
-        // About button
-        binding.aboutButton.setOnClickListener {
-            startActivity(
-                Intent(
-                    this, AboutActivity::class.java
-                )
-            )
-        }
-
-        // App Scan button
-        binding.appScan.setOnClickListener {
-            startActivity(
-                Intent(
-                    this, ScanActivity::class.java
-                )
-            )
-        }
-
-        // URL Scan button
-        binding.urlScan.setOnClickListener {
-            startActivity(
-                Intent(
-                    this, UrlScanActivity::class.java
-                )
-            )
-        }
-
-        // Permissions Explanation button
-        binding.permissionsButton.setOnClickListener {
-            startActivity(Intent(this, PermissionsExplanationActivity::class.java))
-        }
-
-        binding.reportByUser.setOnClickListener {
-            startActivity(Intent(this, UserReportActivity::class.java))
-        }
-
-        binding.updateDatabaseButton.setOnClickListener({ updateDatabase() })
-
-    // Function to display a random tip
-    fun displayRandomTip() {
-        val tip = dbHelper.getRandomTip()
-        binding.tipOfTheDay.text = tip
-
-    }
-
-    private fun displayStats() {
-
-
-        val statsMap = dbHelper.getUserStats()
-
-        val suspiciousLinkDetected = statsMap["suspicious_link_detected"] ?: 0
-        val suspiciousSmsDetected = statsMap["suspicious_sms_detected"] ?: 0
-        val suspiciousAppDetected = statsMap["suspicious_app_detected"] ?: 0
-        val totalScans = suspiciousLinkDetected + suspiciousSmsDetected + suspiciousAppDetected
-
-        binding.suspiciousLinksDetected.text = formatNumber(suspiciousLinkDetected)
-        binding.suspiciousSmsDetected.text = formatNumber(suspiciousSmsDetected)
-        binding.suspiciousAppDetected.text = formatNumber(suspiciousAppDetected)
-        binding.totalScans.text = formatNumber(totalScans)
-
-
     }
 
 
-    private fun updatePermissionsStatus() {
+}
 
-        //
-        
+
+@Composable
+fun AppNavigation(
+//    navController: NavHostController, startDestination: String, dbHelper: DatabaseHelper
+    navController: NavHostController, startDestination: String
+) {
+
+    val context = LocalContext.current
+
+    // Handle back press
+    BackHandler(enabled = true) {
+        if (navController.currentBackStackEntry?.destination?.route == NavRoutes.MAIN_SCREEN) {
+            // If on the main screen, close the app
+            (context as? ComponentActivity)?.finish()
+        } else {
+            // Otherwise, navigate back
+            navController.navigateUp()
+        }
     }
 
+    NavHost(navController = navController, startDestination = startDestination) {
+
+        composable(NavRoutes.MAIN_SCREEN) { MainScreen(navController) }
+        composable(NavRoutes.ABOUT_SCREEN) { AboutScreen(navController) }
+        composable(NavRoutes.USER_REPORT_SCREEN) { UserReportScreen(navController) }
+//        composable(NavRoutes.URL_SCAN_SCREEN) { UrlScanScreen(dbHelper = dbHelper) }
+        composable(NavRoutes.URL_SCAN_SCREEN) { UrlScanScreen(navController) }
+        composable(NavRoutes.APP_SCAN_SCREEN) { AppScanScreen(navController) }
+
+
+        composable(NavRoutes.FAQ_SCREEN) { InfoListScreen(navController, Pages.FAQ) }
+        composable(NavRoutes.PERMISSION_SCREEN) { InfoListScreen(navController, Pages.PERMISSION) }
+
+        composable(NavRoutes.SETTINGS_SCREEN) {
+            SettingsScreen(navController, settingsManager = SettingsManager(context.dataStore))
+//            SettingsScreen()
+        }
     }
+}
+
+
+private fun handleIntent(uri: Uri?): String {
+    return when (uri?.scheme) {
+        "app" -> when (uri.schemeSpecificPart) {
+            "//scan" -> NavRoutes.APP_SCAN_SCREEN
+            "//url_scan" -> NavRoutes.URL_SCAN_SCREEN
+            "//report" -> NavRoutes.USER_REPORT_SCREEN
+            else -> NavRoutes.MAIN_SCREEN
+        }
+
+        else -> NavRoutes.MAIN_SCREEN
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun MainActivityPreview() {
+    MotmaenBashTheme {
+//        AppNavigation(navController, NavRoutes.MAIN_SCREEN, DatabaseHelper(LocalContext.current))
+        AppNavigation(rememberNavController(), NavRoutes.MAIN_SCREEN)
+    }
+}

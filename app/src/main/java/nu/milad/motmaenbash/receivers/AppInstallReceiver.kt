@@ -3,68 +3,65 @@ package nu.milad.motmaenbash.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import nu.milad.motmaenbash.utils.DatabaseHelper
 import android.util.Log
+import nu.milad.motmaenbash.ui.AlertHandlerActivity
+import nu.milad.motmaenbash.ui.AlertHandlerActivity.Companion.AlertLevel
+import nu.milad.motmaenbash.utils.AlertUtils
+import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.PackageUtils
-
 
 class AppInstallReceiver : BroadcastReceiver() {
 
     companion object {
-        const val TAG = "AppInstallReceiver"
+        private const val TAG = "AppInstallReceiver"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
 
+        Log.d(TAG, "Received action: ${intent.action}")
+
+
+        val packageName = intent.data?.schemeSpecificPart ?: return
+
         val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
 
-        if (intent.action == Intent.ACTION_PACKAGE_ADDED ||
-            intent.action == Intent.ACTION_PACKAGE_REPLACED
 
-        ) {
-
-            // Ignore ACTION_PACKAGE_ADDED if it is a replacement
-            if (intent.action == Intent.ACTION_PACKAGE_ADDED && isReplacing) return
-
-            val data: Uri? = intent.data
-            val packageName = data?.encodedSchemeSpecificPart
-
-
-
-
-            packageName?.let {
-                val appInfo = PackageUtils.getAppInfo(context, packageName)
-
-                checkAppAgainstDatabase(context, it)
+        when (intent.action) {
+            Intent.ACTION_PACKAGE_ADDED -> {
+                // Skip if this is just an update to an existing app
+                if (!isReplacing) {
+                    checkAppAgainstDatabase(context, packageName)
+                }
             }
-        } else if (intent.action == Intent.ACTION_PACKAGE_FIRST_LAUNCH) {
-            val packageName = intent.data?.encodedSchemeSpecificPart
 
+            Intent.ACTION_PACKAGE_REPLACED -> {
+                checkAppAgainstDatabase(context, packageName)
+            }
 
-            packageName?.let {
-                // Check against database
-                checkAppAgainstDatabase(context, it)
+            Intent.ACTION_PACKAGE_FIRST_LAUNCH -> {
+                // Check against database on first launch
+                checkAppAgainstDatabase(context, packageName)
             }
         }
     }
 
-
     private fun checkAppAgainstDatabase(context: Context, packageName: String) {
-
+        Log.d(TAG, "Checking app: $packageName")
 
         val dbHelper = DatabaseHelper(context)
         val appInfo = PackageUtils.getAppInfo(context, packageName)
 
+        val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.sha1, appInfo.sha1)
 
-
-        if (dbHelper.isAppSuspicious(packageName, appInfo.sha1, appInfo.sha1)) {
-            // todo:App found suspicious in the database, alert the user
-
+        if (isAppFlagged) {
+            // App found suspicious in the database, alert the user
+            AlertUtils.showAlert(
+                context,
+                AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
+                AlertLevel.ERROR.toString(),
+                packageName,
+                appInfo.sha1
+            )
         }
-
-
     }
-
-
 }

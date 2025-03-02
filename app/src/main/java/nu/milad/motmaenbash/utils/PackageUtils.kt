@@ -43,6 +43,7 @@ object PackageUtils {
             // Retrieve other app information
             val appName = pm.getApplicationLabel(packageInfo.applicationInfo).toString()
             val versionName = packageInfo.versionName ?: "Unknown"
+            val appIcon = pm.getApplicationIcon(packageName)
             val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 packageInfo.longVersionCode
             } else {
@@ -105,6 +106,7 @@ object PackageUtils {
             App(
                 appName,
                 packageName,
+                appIcon,
                 versionCode,
                 sha1,
                 apksha1,
@@ -115,7 +117,7 @@ object PackageUtils {
             )
         } catch (e: Exception) {
             App(
-                "Unknown", packageName, -1, "", "", "Unknown", -1, -1, emptyList()
+                "Unknown", packageName, null, -1, "", "", "Unknown", -1, -1, emptyList()
             )
         }
     }

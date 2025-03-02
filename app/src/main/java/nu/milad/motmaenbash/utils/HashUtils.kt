@@ -29,6 +29,25 @@ object HashUtils {
         return generateHash(input, "SHA-1")
     }
 
+    /**
+     * Generates the SHA-256 hash of a given string.
+     *
+     * @param input The string to hash.
+     * @return The SHA-256 hash as a hexadecimal string.
+     */
+    fun generateSHA256(input: String): String {
+        return generateHash(input, "SHA-256")
+    }
+
+    /**
+     * Generates the SHA-512 hash of a given string.
+     *
+     * @param input The string to hash.
+     * @return The SHA-512 hash as a hexadecimal string.
+     */
+    fun generateSHA512(input: String): String {
+        return generateHash(input, "SHA-512")
+    }
 
     /**
      * Generates a hash of a given string with the specified algorithm.
@@ -38,12 +57,23 @@ object HashUtils {
      * @return The hash as a hexadecimal string.
      */
     private fun generateHash(input: String, algorithm: String): String {
+
+
         val digest = MessageDigest.getInstance(algorithm)
+
         digest.reset()
         val hashBytes = digest.digest(input.toByteArray())
         val hashString = BigInteger(1, hashBytes).toString(16)
-        // Pad with leading zeros
-        return hashString.padStart(32, '0')
+        // Pad with leading zeros (adjust padding based on algorithm)
+        val paddingLength = when (algorithm) {
+            "MD5", "SHA-1" -> 32
+            "SHA-256" -> 64
+            "SHA-512" -> 128
+            else -> 0 // Handle unknown algorithms
+        }
+        return hashString.padStart(paddingLength, '0')
+
+
     }
 
 

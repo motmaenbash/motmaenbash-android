@@ -1,7 +1,5 @@
 package nu.milad.motmaenbash.utils
 
-import android.content.Context
-import nu.milad.motmaenbash.R
 import java.util.Locale
 
 object NumberUtils {

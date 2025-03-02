@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--Root container-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_container"
     android:layout_width="wrap_content"
@@ -7,8 +8,60 @@
     android:alpha="0.85"
     android:background="@drawable/floating_widget_bg"
     android:fitsSystemWindows="false"
-    android:padding="4dp"
+    android:layoutDirection="rtl"
     tools:ignore="UselessParent">
 
+    <!--View while view is collapsed-->
+    <RelativeLayout
+        android:id="@+id/collapse_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/black"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone"
+        tools:visibility="gone">
 
+        <!--Icon of floating widget -->
+        <ImageView
+            android:id="@+id/collapsed_iv"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_check"
+            tools:ignore="ContentDescription" />
+
+        <!--Close button-->
+        <ImageView
+            android:id="@+id/close_btn"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="40dp"
+            android:src="@drawable/ic_close"
+            tools:ignore="ContentDescription" />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/dark"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:alpha="1"
+        android:background="@color/green_dark" />
+
+    <!--View while view is expanded-->
+    <LinearLayout
+        android:id="@+id/expanded_container"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dark"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:visibility="visible"
+        tools:visibility="visible">
+
+        
+    </LinearLayout>
 </RelativeLayout>
