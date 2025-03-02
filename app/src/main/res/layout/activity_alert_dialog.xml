@@ -1,41 +1,138 @@
 <!-- activity_custom_dialog.xml -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f5f5f5"
     android:layoutDirection="rtl"
-    android:orientation="vertical"
+    android:minWidth="320dp"
+    app:cardBackgroundColor="#f5f5f5"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
 
-    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/titleTextView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingBottom="8dp"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:text="عنوان" />
+        android:orientation="vertical"
+        android:padding="8dp">
 
-    <TextView
-        android:id="@+id/messageTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        tools:text="متن پیام" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/okButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="12dp"
-        android:text="متوجه شدم"
-        android:textColor="@android:color/white" />
+            <TextView
+                android:id="@+id/alertBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:background="@color/red"
 
 
-</LinearLayout>
+                android:drawablePadding="4dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="هشدار نصب برنامه!"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                tools:text="نوع هشدار!" />
+
+            <!--            <ImageView-->
+            <!--                android:layout_width="24dp"-->
+            <!--                android:layout_height="24dp"-->
+            <!--                android:layout_alignParentRight="true"-->
+            <!--                android:src="@drawable/ic_restrict"-->
+
+            <!--                app:tint="@color/red" />-->
+
+            <ImageView
+                android:id="@+id/closeButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="left"
+                android:adjustViewBounds="true"
+
+                android:src="@drawable/ic_close"
+
+                app:tint="@color/grey_dark" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="8dp"
+            android:textColor="@color/red"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="عنوان هشدار" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/red" />
+
+        <TextView
+            android:id="@+id/subTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:visibility="gone"
+            tools:text="زیر عنوان هشدار"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/dialogIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginVertical="12dp"
+            android:visibility="gone"
+            tools:srcCompat="@mipmap/ic_launcher"
+            tools:visibility="visible" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/messageTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                tools:text="متن پیام هشدار در اینجا نمایش داده می‌شود.\nمتن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود.متن پیام هشدار در اینجا نمایش داده می‌شود." />
+
+        </ScrollView>
+
+        <Button
+            android:id="@+id/okButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorPrimary"
+            android:padding="12dp"
+            android:text="متوجه شدم"
+            android:textColor="@android:color/white" />
+
+
+        <Button
+            android:id="@+id/uninstallButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:padding="12dp"
+            android:text="حذف سریع این برنامه"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

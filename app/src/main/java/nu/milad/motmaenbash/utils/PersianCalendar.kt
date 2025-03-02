@@ -56,10 +56,8 @@ class PersianCalendar {
      * @return Julian Day number
      */
     private fun JG2JD(year: Int, month: Int, day: Int, J1G0: Int): Int {
-        var jd = ((1461 * (year + 4800 + (month - 14) / 12)) / 4
-                + (367 * (month - 2 - 12 * ((month - 14) / 12))) / 12
-                - (3 * ((year + 4900 + (month - 14) / 12) / 100)) / 4 + day
-                - 32075)
+        var jd =
+            ((1461 * (year + 4800 + (month - 14) / 12)) / 4 + (367 * (month - 2 - 12 * ((month - 14) / 12))) / 12 - (3 * ((year + 4900 + (month - 14) / 12) / 100)) / 4 + day - 32075)
 
         if (J1G0 == 0) jd = jd - (year + 100100 + (month - 8) / 6) / 100 * 3 / 4 + 752
 
@@ -140,8 +138,26 @@ class PersianCalendar {
         leap = 0
 
         val breaks = intArrayOf(
-            -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210,
-            1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178
+            -61,
+            9,
+            38,
+            199,
+            426,
+            686,
+            756,
+            818,
+            1111,
+            1181,
+            1210,
+            1635,
+            2060,
+            2097,
+            2192,
+            2262,
+            2324,
+            2394,
+            2456,
+            3178
         )
 
         gY = jY + 621
@@ -182,10 +198,7 @@ class PersianCalendar {
      */
     override fun toString(): String {
         return String.format(
-            Locale.US, "%04d-%02d-%02d",
-            year,
-            month,
-            day
+            Locale.US, "%04d-%02d-%02d", year, month, day
         )
     }
 

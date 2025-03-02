@@ -12,10 +12,15 @@ object UrlUtils {
         if (url.isEmpty()) {
             return false
         }
+
+        var cleanedUrl = removeQueryString(url)
+
+        cleanedUrl = removeUrlPrefixes(cleanedUrl)
+
         val regex = Regex(
             "^(https?:\\/\\/)?(www\\.)?([a-zA-Z0-9\\-]+\\.)+[a-zA-Z]{2,}(\\/[^\\s]*)?$"
         )
-        return regex.matches(url)
+        return regex.matches(cleanedUrl)
     }
 
     /**
@@ -25,8 +30,11 @@ object UrlUtils {
      * @return True if the URL is a shaparak subdomain, false otherwise.
      */
     fun isShaparakSubdomain(url: String): Boolean {
-        val regex = Regex("""^(https?://)?([a-zA-Z0-9-]+\.)+shaparak\.ir(/.*)?$""")
-        return regex.matches(url) && !url.contains("://shaparak.ir")
+
+        val regex =
+            Regex("""^(https?://)?([a-zA-Z0-9-]+\.)+shaparak\.ir(/.*)?$""", RegexOption.IGNORE_CASE)
+
+        return regex.matches(url)
 
     }
 
@@ -63,5 +71,20 @@ object UrlUtils {
         cleanedUrl = cleanedUrl.replaceFirst("^(http://|https://)".toRegex(), "")
         cleanedUrl = cleanedUrl.replaceFirst("^www\\.".toRegex(), "")
         return cleanedUrl
+    }
+
+    /**
+     * Removes all query strings from the given URL.
+     *
+     * @param url The URL to process.
+     * @return The URL without the query string.
+     */
+    fun removeQueryString(url: String): String {
+        val queryIndex = url.indexOf('?')
+        return if (queryIndex > 0) {
+            url.substring(0, queryIndex)
+        } else {
+            url
+        }
     }
 }

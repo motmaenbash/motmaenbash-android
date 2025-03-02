@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Database Update Frequencies -->
+    <string-array name="database_update_frequency">
+        <item>@string/hourly</item>
+        <item>@string/every_6_hours</item>
+        <item>@string/daily</item>
+    </string-array>
+    <string-array name="database_update_frequency_values">
+        <item>hourly</item>
+        <item>every_6_hours</item>
+        <item>daily</item>
+    </string-array>
+
+    <!-- Theme Options -->
+    <string-array name="theme">
+        <item>@string/light_mode</item>
+        <item>@string/dark_mode</item>
+        <item>@string/system_default</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>system</item>
+    </string-array>
+
+    <!-- Font Options -->
+    <string-array name="font">
+        <item>@string/vazir_matn</item>
+        <item>@string/vazir_matn_rd</item>
+    </string-array>
+    <string-array name="font_values">
+        <item>vazir</item>
+        <item>vazir_dn</item>
+    </string-array>
+
+    <!-- Alert Sounds -->
+    <string-array name="alert_sound">
+        <item>@string/dingdin_sound</item>
+        <item>@string/beep_sound</item>
+    </string-array>
+    <string-array name="alert_sound_values">
+        <item>ding</item>
+        <item>beep</item>
+    </string-array>
+
+
+    <!-- Faq Questions and Answers -->
+    <string-array name="faq_questions">
+        <item>این اپلیکیشن چه کار می‌کند؟</item>
+
+
+    </string-array>
+
+    <string-array name="faq_answers">
+        <item>...</item>
+    </string-array>
+
+
+    <!-- Permission Titles and Descriptions -->
+    <string-array name="permission_titles">
+        <item>۱. چرا نیاز به دسترسی به پیامک‌ها دارید؟</item>
+
+    </string-array>
+
+    <string-array name="permission_descriptions">
+        <item>برای اسکن کردن پیامک‌های دریافتی و شناسایی پیامک‌های مخرب یا فیشینگ، این اپلیکیشن نیاز به دسترسی به پیامک‌های شما دارد. (RECEIVE_SMS)</item>
+
+    </string-array>
+
+</resources>

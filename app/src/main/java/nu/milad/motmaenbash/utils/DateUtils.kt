@@ -45,11 +45,39 @@ object DateUtils {
 
         return when {
             diff < TimeUnit.MINUTES.toMillis(1) -> "لحظاتی قبل"
-            diff < TimeUnit.HOURS.toMillis(1) -> "${toPersianNumbers((diff / TimeUnit.MINUTES.toMillis(1)).toString())} دقیقه قبل"
-            diff < TimeUnit.DAYS.toMillis(1) -> "${toPersianNumbers((diff / TimeUnit.HOURS.toMillis(1)).toString())} ساعت قبل"
+            diff < TimeUnit.HOURS.toMillis(1) -> "${
+                toPersianNumbers(
+                    (diff / TimeUnit.MINUTES.toMillis(
+                        1
+                    )).toString()
+                )
+            } دقیقه قبل"
+
+            diff < TimeUnit.DAYS.toMillis(1) -> "${
+                toPersianNumbers(
+                    (diff / TimeUnit.HOURS.toMillis(
+                        1
+                    )).toString()
+                )
+            } ساعت قبل"
+
             diff < TimeUnit.DAYS.toMillis(7) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(1)).toString())} روز قبل"
-            diff < TimeUnit.DAYS.toMillis(30) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(1) / 7).toString())} هفته قبل"
-            diff < TimeUnit.DAYS.toMillis(365) -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(30)).toString())} ماه قبل"
+            diff < TimeUnit.DAYS.toMillis(30) -> "${
+                toPersianNumbers(
+                    (diff / TimeUnit.DAYS.toMillis(
+                        1
+                    ) / 7).toString()
+                )
+            } هفته قبل"
+
+            diff < TimeUnit.DAYS.toMillis(365) -> "${
+                toPersianNumbers(
+                    (diff / TimeUnit.DAYS.toMillis(
+                        30
+                    )).toString()
+                )
+            } ماه قبل"
+
             else -> "${toPersianNumbers((diff / TimeUnit.DAYS.toMillis(365)).toString())} سال قبل"
         }
     }

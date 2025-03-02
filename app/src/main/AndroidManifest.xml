@@ -2,17 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Permission to draw overlays on top of other apps, used for displaying gateway alerts -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Permission to receive SMS messages -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -21,8 +22,8 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
-
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -30,60 +31,36 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MotmaenBash"
-        tools:targetApi="31">
-        <activity
-            android:name=".ui.ScanActivity"
-            android:exported="false" />
+        android:theme="@style/Base.Theme.MotmaenBash">
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name_fa">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
-        <activity
-            android:name=".ui.UserReportActivity"
-            android:exported="false"
-            android:label="@string/user_report_activity_label" />
-        <activity
-            android:name=".ui.PermissionsExplanationActivity"
-            android:exported="false"
-            android:label="@string/permissions_explanation_activity_label"
-            android:parentActivityName=".ui.MainActivity"
-            />
-        <activity
-            android:name=".ui.FaqActivity"
-            android:exported="false"
-            android:label="@string/faq_activity_label" />
-        <activity
-            android:name=".ui.UrlScanActivity"
-            android:exported="true"
-            android:label="@string/url_scan_activity_label">
 
-            <intent-filter>
-                <action android:name="android.intent.action.PROCESS_TEXT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
         <activity
-            android:name=".ui.AboutActivity"
-            android:exported="false"
-            android:label="@string/about_activity_label" />
+            android:name=".ui.MainActivityOld"
+            android:exported="true" />
+
+
         <activity
-            android:name=".ui.AlertDialogActivity"
-            android:excludeFromRecents="true"
+            android:name=".ui.AlertHandlerActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:noHistory="true"
-            android:taskAffinity=".ui.AlertDialogActivity"
+            android:taskAffinity=""
             android:theme="@style/Theme.Material3.DayNight.Dialog" />
+
+
         <service
             android:name=".services.UrlDetectionService"
             class=".UrlInterceptorService"
@@ -108,10 +85,8 @@
             android:enabled="true"
             android:exported="false" />
 
-
-
         <receiver
-            android:name="BootReceiver"
+            android:name=".receivers.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -120,7 +95,7 @@
         </receiver>
 
         <service
-            android:name=".services.AppInstallService"
+            android:name=".services.MonitoringService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />

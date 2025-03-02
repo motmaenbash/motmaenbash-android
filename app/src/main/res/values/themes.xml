@@ -1,29 +1,18 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.MotmaenBash" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="fontFamily">@font/vazir</item>
-    </style>
-
-    <style name="Toolbar" parent="Widget.Material3.Toolbar">
-        <item name="android:elevation">0dp</item>
-        <item name="android:shadowColor">@android:color/transparent</item>
-
-        <item name="android:layoutDirection">rtl</item>
-        <item name="android:background">@android:color/transparent</item>
-        <item name="titleTextAppearance">@style/Toolbar.Title</item>
-
+        <item name="android:windowBackground">@color/background_light_gray</item>
+        <item name="android:statusBarColor">@color/background_light_gray</item>
+        <item name="android:navigationBarColor">@color/background_light_gray</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 
-    <style name="Toolbar.Title">
-        <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">bold</item>
-
+    <style name="AlertDialog" parent="Theme.Material3.DayNight.Dialog">
+        <!--        <item name="background">@android:color/transparent</item>-->
+        <!--        <item name="android:windowActionBar">false</item>-->
+        <!--        <item name="android:windowNoTitle">true</item>-->
     </style>
-
-    <style name="Theme.MotmaenBash" parent="Base.Theme.MotmaenBash" />
-
 
 </resources>
