@@ -61,7 +61,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.NavRoutes
-import nu.milad.motmaenbash.ui.MainActivityOld
 import nu.milad.motmaenbash.ui.ui.theme.BackgroundLightGray
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.ui.theme.Green
@@ -165,7 +164,7 @@ fun MainScreen(
 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AppName()
+        AppName(navController)
         TipOfDaySection(tip = tipOfTheDay, isRefreshing = isRefreshing, onRefreshClick = {
             viewModel.refreshTipOfTheDay()
         })
@@ -241,9 +240,8 @@ fun MainScreen(
 }
 
 @Composable
-fun AppName() {
+fun AppName(navController: NavController) {
 
-    val context = LocalContext.current
     Column(
 
 
@@ -251,7 +249,7 @@ fun AppName() {
             .padding(top = 24.dp, bottom = 16.dp)
 
             .clickable {
-                context.startActivity(Intent(context, MainActivityOld::class.java))
+                navController.navigate(NavRoutes.ABOUT_SCREEN)
             },
 
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -634,7 +632,7 @@ fun DatabaseUpdateSection(
                     is MainViewModel.UpdateState.Idle -> "آخرین بروزرسانی: ${updateState.lastUpdateTime}"
                     is MainViewModel.UpdateState.Updating -> "در حال بروزرسانی..."
                     is MainViewModel.UpdateState.Success -> "آخرین بروزرسانی: ${updateState.lastUpdateTime}"
-                    is MainViewModel.UpdateState.Error -> "خطا در بروزرسانی. لطفا بعدا تلاش کنید"
+                    is MainViewModel.UpdateState.Error -> "خطا! لطفا بعدا تلاش کنید."
                 }, modifier = Modifier.weight(1f), fontSize = 14.sp, color = when (updateState) {
                     is MainViewModel.UpdateState.Error -> Red
                     else -> Color.Black

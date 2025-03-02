@@ -18,7 +18,7 @@ object UrlUtils {
         cleanedUrl = removeUrlPrefixes(cleanedUrl)
 
         val regex = Regex(
-            "^(https?:\\/\\/)?(www\\.)?([a-zA-Z0-9\\-]+\\.)+[a-zA-Z]{2,}(\\/[^\\s]*)?$"
+            """^([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)(/[^\s]*)?$"""
         )
         return regex.matches(cleanedUrl)
     }
@@ -59,6 +59,7 @@ object UrlUtils {
             domain
         }
     }
+
 
     /**
      * Removes common URL prefixes like http://, https://, and www. from the given URL.

@@ -1,10 +1,24 @@
-*.iml
+# Gradle files
+.gradle/
+.build/
+local.properties
+/.gradle
+
 .gradle
 /local.properties
+
+# IntelliJ/Android Studio files
+*.iml
 .idea/
 .DS_Store
+
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# Release & Keystore files
+/app/release/
+/app/debug/
+/keystore.jks
+*.keystore

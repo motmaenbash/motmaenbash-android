@@ -236,10 +236,10 @@ class UpdateManager(
             DateUtils.getCurrentTimeInMillis() - lastUpdateTime
         )
 
-        // Only update if more than 6 hours have passed
-        return if (hoursSinceUpdate < 6) {
+        // Only update if more than 1 hours have passed
+        return if (hoursSinceUpdate < 1) {
             Toast.makeText(
-                context, "پایگاه داده کمتر از ۶ ساعت پیش به‌روزرسانی شده است", Toast.LENGTH_SHORT
+                context, "پایگاه داده کمتر از ۱ ساعت پیش به‌روزرسانی شده است", Toast.LENGTH_SHORT
             ).show()
             false
         } else true
