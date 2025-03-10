@@ -216,10 +216,13 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
     }
 
     fun checkInitialPermissions() {
+
+        // SMS
         _smsPermissionStatus.value = ContextCompat.checkSelfPermission(
             context, Manifest.permission.RECEIVE_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
+        // Accessibility
         _accessibilitySettingStatus.value = try {
             Settings.Secure.getInt(
                 context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED
@@ -228,9 +231,12 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
             false
         }
 
+        // Overlay
         _overlayPermissionStatus.value =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
 
+
+        // Notifications
         _notificationPermissionStatus.value =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS
