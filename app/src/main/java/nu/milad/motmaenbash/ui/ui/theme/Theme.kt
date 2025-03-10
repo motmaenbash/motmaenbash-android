@@ -69,7 +69,9 @@ fun MotmaenBashTheme(
     val colorScheme = LightColorScheme
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         MaterialTheme(
-            colorScheme = colorScheme, typography = Typography, content = content
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
         )
     }
 }

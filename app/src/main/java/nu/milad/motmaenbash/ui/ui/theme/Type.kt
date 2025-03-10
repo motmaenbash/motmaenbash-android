@@ -17,21 +17,21 @@ val VazirFontFamily = FontFamily(
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = VazirFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = VazirFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 17.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.sp
     ),
     bodySmall = TextStyle(
         fontFamily = VazirFontFamily,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.sp
@@ -61,6 +61,13 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
+    ),
+
+
+    labelLarge = TextStyle(
+//        fontFamily = VazirFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
     ),
 
 

@@ -14,16 +14,12 @@ object AlertUtils {
         param1: String? = null,
         param2: String? = null,
         info: String? = null,
-
-        ) {
-
-
+    ) {
         Log.d("AlertUtils", "showAlert: $alertType")
         Log.d("AlertUtils", "showAlert: $alertLevel")
         Log.d("AlertUtils", "showAlert: $param1")
         Log.d("AlertUtils", "showAlert: $param2")
         Log.d("AlertUtils", "showAlert: $info")
-
 
         val intent = Intent(context, AlertHandlerActivity::class.java).apply {
             putExtra(AlertHandlerActivity.EXTRA_ALERT_TYPE, alertType)
@@ -37,7 +33,6 @@ object AlertUtils {
             putExtra(AlertHandlerActivity.EXTRA_ALERT_INFO, info)
 //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-
         }
         context.startActivity(intent)
     }

@@ -52,6 +52,12 @@ class DatabaseHelper(appContext: Context) :
         prepopulateData(db)
     }
 
+    override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // Call onUpgrade to handle the downgrade
+        // This will effectively reset the database to the new version
+        onUpgrade(db, oldVersion, newVersion)
+    }
+
     private fun createTables(db: SQLiteDatabase) {
 
 
@@ -67,7 +73,7 @@ class DatabaseHelper(appContext: Context) :
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX index_flagged_links_hash ON $TABLE_FLAGGED_LINKS(hash);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_links_hash ON $TABLE_FLAGGED_LINKS(hash);")
 
         // Creating flagged sms senders table
         db.execSQL(
@@ -78,7 +84,7 @@ class DatabaseHelper(appContext: Context) :
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX index_flagged_senders_hash ON $TABLE_FLAGGED_SENDERS(hash);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_senders_hash ON $TABLE_FLAGGED_SENDERS(hash);")
 
 
         // Creating flagged sms messages table
@@ -91,7 +97,7 @@ class DatabaseHelper(appContext: Context) :
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX index_flagged_messages_hash ON $TABLE_FLAGGED_MESSAGES(hash);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_messages_hash ON $TABLE_FLAGGED_MESSAGES(hash);")
 
 
         // Creating flagged sms keywords table
@@ -103,7 +109,7 @@ class DatabaseHelper(appContext: Context) :
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX index_flagged_words ON $TABLE_FLAGGED_WORDS(hash);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_words ON $TABLE_FLAGGED_WORDS(hash);")
 
 
         // Creating flagged apps table
@@ -116,10 +122,10 @@ class DatabaseHelper(appContext: Context) :
                 );
             """
         )
-        // Creating index //todo: add index
-        db.execSQL("CREATE INDEX index_flagged_apps_package_name ON $TABLE_FLAGGED_APPS(package_name);")
-        db.execSQL("CREATE INDEX index_flagged_apps_sha1 ON $TABLE_FLAGGED_APPS(sha1);")
-        db.execSQL("CREATE INDEX index_flagged_apps_apk_sha1 ON $TABLE_FLAGGED_APPS(apk_sha1);")
+        // Creating index
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_package_name ON $TABLE_FLAGGED_APPS(package_name);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_sha1 ON $TABLE_FLAGGED_APPS(sha1);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_apk_sha1 ON $TABLE_FLAGGED_APPS(apk_sha1);")
 
         // Creating tips table if not exists
         db.execSQL(
@@ -141,7 +147,7 @@ class DatabaseHelper(appContext: Context) :
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX index_stats_stat_key ON $TABLE_STATS(stat_key);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_stats_stat_key ON $TABLE_STATS(stat_key);")
 
     }
 

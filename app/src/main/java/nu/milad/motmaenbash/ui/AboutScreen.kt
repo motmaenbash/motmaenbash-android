@@ -108,6 +108,8 @@ fun AppLogo() {
 @Composable
 fun AppInfo() {
 
+    val context = LocalContext.current
+
     Text(
         text = stringResource(id = R.string.app_name_fa),
         style = MaterialTheme.typography.headlineLarge,
@@ -125,6 +127,16 @@ fun AppInfo() {
         text = stringResource(R.string.version, BuildConfig.VERSION_NAME),
         style = MaterialTheme.typography.bodySmall
     )
+
+    Text(
+        text = "https://motmaenbash.ir", style = MaterialTheme.typography.bodySmall.copy(
+            color = ColorPrimary, fontWeight = FontWeight.Bold
+        ), modifier = Modifier
+            .padding(top = 4.dp)
+            .clickable {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://motmaenbash.ir"))
+                context.startActivity(intent)
+            })
 
     HorizontalDivider(
         color = GreyLight, thickness = 1.dp, modifier = Modifier.padding(32.dp, 18.dp)
@@ -170,7 +182,8 @@ fun SocialMediaLinks() {
             )
 
             // URL
-            Text(text = url,
+            Text(
+                text = url,
                 style = MaterialTheme.typography.bodySmall.copy(color = ColorPrimary),
                 modifier = Modifier.clickable {
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))

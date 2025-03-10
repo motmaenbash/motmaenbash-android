@@ -58,7 +58,7 @@
             android:exported="false"
             android:launchMode="singleTask"
             android:taskAffinity=""
-            android:theme="@style/Theme.Material3.DayNight.Dialog" />
+            android:theme="@style/Theme.AppCompat.Dialog.Alert" />
 
 
         <service

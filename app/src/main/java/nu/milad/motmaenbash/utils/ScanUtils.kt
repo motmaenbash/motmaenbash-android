@@ -32,7 +32,7 @@ class ScanUtils(private val context: Context) {
 
 
     fun isSystemApp(packageInfo: PackageInfo): Boolean {
-        return packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
+        return packageInfo.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
 

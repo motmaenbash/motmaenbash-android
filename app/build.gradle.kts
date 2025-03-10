@@ -3,19 +3,20 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    alias(libs.plugins.compose.compiler)
+
 }
 
 android {
     namespace = "nu.milad.motmaenbash"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "nu.milad.motmaenbash"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "Alpha 1.0.0"
-        resourceConfigurations += listOf("en", "fa")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -23,6 +24,9 @@ android {
     }
 
 
+    androidResources {
+        localeFilters += listOf("en", "fa")
+    }
 
     buildFeatures {
         compose = true
@@ -37,6 +41,9 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {
@@ -65,17 +72,15 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.activity)
+
     implementation(libs.cronet.embedded)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.datastore.core.android)
-    testImplementation(libs.junit)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.work.runtime.ktx)
 
@@ -85,17 +90,9 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
 
-    //Other
-    // Glide dependency
-    implementation(libs.glide)
-
-
-    // Testing dependencies
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-
+    // Android Studio Preview support
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.tooling.preview)
 
     //Compose
     val composeBom = platform(libs.androidx.compose.bom)
@@ -103,14 +100,12 @@ dependencies {
     androidTestImplementation(composeBom)
     // Compose dependencies
     implementation(libs.androidx.material3)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.ui.tooling.preview)
+
     implementation(libs.ui)
-    implementation(libs.androidx.preference.ktx)
+
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose.v262)
 
     //Permissions for Jetpack Compose
     implementation(libs.accompanist.permissions)
