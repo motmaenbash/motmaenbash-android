@@ -60,7 +60,7 @@ class AppInstallReceiver : BroadcastReceiver() {
                 AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
                 AlertLevel.ERROR.toString(),
                 packageName,
-                appInfo.sha1
+                appInfo.appName
             )
         }
     }
