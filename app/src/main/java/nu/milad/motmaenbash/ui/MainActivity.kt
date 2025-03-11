@@ -79,10 +79,11 @@ fun AppNavigation(
     BackHandler(enabled = true) {
 
         if (navController.currentBackStackEntry?.destination?.route == NavRoutes.MAIN_SCREEN) {
-            // If on the main screen, close the app
+            // Close the app when on main screen
             (context as? ComponentActivity)?.finish()
 
-            // Otherwise, navigate back
+
+            // Navigate back or return to main screen
         } else if (!navController.navigateUp()) {
             navController.navigate(NavRoutes.MAIN_SCREEN) {
                 popUpTo(0) { inclusive = true }
