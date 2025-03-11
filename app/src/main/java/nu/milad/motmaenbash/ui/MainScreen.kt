@@ -1,8 +1,6 @@
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import android.provider.Settings
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -38,7 +36,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -114,63 +111,71 @@ fun MainScreen(
         )
     }
 
-    // Notification Permission
-    val notificationPermissionState = rememberPermissionState(
-        Manifest.permission.POST_NOTIFICATIONS
-    ) { isGranted ->
-        viewModel.updatePermissionStatus(
-            MainViewModel.PermissionType.NOTIFICATIONS, isGranted
-        )
-    }
-
     // Observe permission statuses
     val smsPermissionStatus by viewModel.smsPermissionStatus.collectAsState()
     val accessibilitySettingStatus by viewModel.accessibilitySettingStatus.collectAsState()
     val overlayPermissionStatus by viewModel.overlayPermissionStatus.collectAsState()
 
+    var showAccessibilityGuide by remember { mutableStateOf(false) }
+    var showOverlayGuide by remember { mutableStateOf(false) }
 
     val PERMISSION_REQUEST_CODE = 1001
 
+    // Permission warning banner state
+    val showPermissionWarning =
+        !smsPermissionStatus || !accessibilitySettingStatus || !overlayPermissionStatus
 
     LaunchedEffect(Unit) {
         Log.d("MainScreen", "LaunchedEffect triggered")
         viewModel.checkInitialPermissions()
     }
 
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp)
-            .verticalScroll(scrollState),
-
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 32.dp, vertical = 16.dp)
+            .verticalScroll(scrollState), horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        // Settings icon
+        IconButton(
+            onClick = { navController.navigate(NavRoutes.SETTINGS_SCREEN) },
+            modifier = Modifier
+                .padding(bottom = 0.dp)
+                .size(32.dp)
+                .align(Alignment.End)
+        ) {
+            Icon(
+                Icons.Outlined.Settings,
+                contentDescription = "تنظیمات",
+                tint = GreyDark,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+
         AppName(navController)
 
         TipOfDaySection(tip = tipOfTheDay, isRefreshing = isRefreshing, onRefreshClick = {
             viewModel.refreshTipOfTheDay()
         })
 
-        ProtectionStatus(smsPermissionStatus = smsPermissionStatus, onSmsPermissionClick = {
-            smsPermissionState.launchPermissionRequest()
-        },
 
-            accessibilitySettingStatus = accessibilitySettingStatus, onAccessibilitySettingClick = {
-                val accessibilityIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                accessibilityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(accessibilityIntent)
-//                viewModel.checkInitialPermissions()
 
-            }, overlayPermissionStatus = overlayPermissionStatus, onOverlayPermissionClick = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:${context.packageName}")
-                    )
-                    context.startActivity(intent)
-//                    viewModel.checkInitialPermissions()
+        ProtectionStatus(
+            showPermissionWarning,
+            onSmsPermissionClick = {
+                smsPermissionState.launchPermissionRequest()
+            },
+            accessibilitySettingStatus = accessibilitySettingStatus,
+            onAccessibilitySettingClick = {
+                if (!accessibilitySettingStatus) {
+                    showAccessibilityGuide = true
+                }
+            },
+            overlayPermissionStatus = overlayPermissionStatus,
+            onOverlayPermissionClick = {
+                if (!overlayPermissionStatus) {
+                    showOverlayGuide = true
                 }
             })
 
@@ -186,25 +191,30 @@ fun MainScreen(
             onReportByUserClick = { navController.navigate(NavRoutes.USER_REPORT_SCREEN) })
 
         DatabaseUpdateSection(updateState = updateState, onUpdateDatabaseClick = {
-
             viewModel.updateDatabase()
-
         })
-
 
         AboutAndFaq(
             onAboutClick = { navController.navigate(NavRoutes.ABOUT_SCREEN) },
             onFaqClick = { navController.navigate(NavRoutes.FAQ_SCREEN) },
             onPermissionsExplanationClick = { navController.navigate(NavRoutes.PERMISSION_SCREEN) },
-            onSettingClick = { navController.navigate(NavRoutes.SETTINGS_SCREEN) },
+        )
 
-            )
+
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 1.dp,
+            color = Color.LightGray.copy(alpha = 0.5f)
+        )
 
         sponsorData?.let {
             SponsorCard(sponsorData = it)
         }
 
         AppVersion(navController)
+
+
+
 
 
         updateDialogState?.let { state ->
@@ -217,8 +227,6 @@ fun MainScreen(
                 })
         }
     }
-
-
 }
 
 
@@ -228,15 +236,12 @@ fun AppName(navController: NavController) {
         modifier = Modifier.clickable(
             indication = null, interactionSource = remember { MutableInteractionSource() },
         ) {
-                navController.navigate(NavRoutes.ABOUT_SCREEN)
-            },
+            navController.navigate(NavRoutes.ABOUT_SCREEN)
+        },
         horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+    ) {
         Text(
-
             color = ColorPrimary,
-
-
             text = stringResource(id = R.string.app_name_fa),
             style = MaterialTheme.typography.headlineLarge,
         )
@@ -245,9 +250,10 @@ fun AppName(navController: NavController) {
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            )
+        )
     }
 }
+
 
 @Composable
 fun TipOfDaySection(
@@ -334,6 +340,8 @@ fun ProtectionStatus(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -341,21 +349,29 @@ fun ProtectionStatus(
             colors = CardDefaults.cardColors(containerColor = Color.White)
 
         ) {
+
+
             Column(modifier = Modifier.padding(16.dp)) {
                 PermissionRow(
                     label = stringResource(id = R.string.sms_protection),
                     isGranted = smsPermissionStatus,
                     onActivateClick = onSmsPermissionClick,
                 )
+
+
+
                 PermissionRow(
                     label = stringResource(id = R.string.accessibility_protection),
                     isGranted = accessibilitySettingStatus,
                     onActivateClick = onAccessibilitySettingClick,
+                    showActivateButton = !accessibilitySettingStatus
+
                 )
                 PermissionRow(
                     label = stringResource(id = R.string.overlay_protection),
                     isGranted = overlayPermissionStatus,
-                    onActivateClick = onOverlayPermissionClick
+                    onActivateClick = onOverlayPermissionClick,
+                    showActivateButton = !overlayPermissionStatus
                 )
                 Row(
                     modifier = Modifier
@@ -379,7 +395,10 @@ fun ProtectionStatus(
 
 @Composable
 fun PermissionRow(
-    label: String, isGranted: Boolean, onActivateClick: () -> Unit
+    label: String,
+    isGranted: Boolean,
+    onActivateClick: () -> Unit,
+    showActivateButton: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -396,7 +415,7 @@ fun PermissionRow(
             color = if (isGranted) Green else Red
 
         )
-        if (!isGranted) {
+        if (!isGranted && showActivateButton) {
             Button(
                 onClick = onActivateClick,
                 colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
@@ -534,7 +553,7 @@ fun ToolCard(
     text: String, icon: Int, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.padding(horizontal = 4.dp, vertical = 16.dp),
+        modifier = modifier.padding(4.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -543,31 +562,27 @@ fun ToolCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
+                .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(40.dp)
                     .padding(bottom = 8.dp),
-                tint = Color.Gray
+                tint = ColorPrimary
             )
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(1.dp),
-                onClick = onClick,
-                colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary),
-                contentPadding = PaddingValues(8.dp)
+            Text(
 
-            ) {
-                Text(
-                    text = text,
-                    textAlign = TextAlign.Center,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 15.sp,
+                color = GreyDark,
+                text = text,
+                textAlign = TextAlign.Center,
+
                 )
-            }
+
         }
     }
 }
@@ -662,7 +677,6 @@ fun AboutAndFaq(
     onAboutClick: () -> Unit,
     onFaqClick: () -> Unit,
     onPermissionsExplanationClick: () -> Unit,
-    onSettingClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -706,18 +720,6 @@ fun AboutAndFaq(
                 )
             }
         }
-        Button(
-            onClick = onSettingClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(1.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Gray
-            )
-        ) {
-            Text(text = "تنظیمات")
-        }
-
     }
 }
 
@@ -806,55 +808,55 @@ fun UpdateDialog(
 ) {
     AlertDialog(
         onDismissRequest = { if (!updateDialogState.forceUpdate) onDismiss() }, title = {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 4.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_update),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(32.dp)
-                    .padding(end = 8.dp),
-                tint = ColorPrimary
-            )
-            Text(
-                text = "نسخه جدید برنامه (${updateDialogState.latestVersionName})",
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-    }, text = {
-        Column {
-            Text(
-                text = if (updateDialogState.forceUpdate) "برای ادامه استفاده از برنامه، لطفا به نسخه جدید به‌روزرسانی کنید."
-                else stringResource(R.string.app_update_message),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 0.dp),
-                fontSize = 15.sp
-            )
-
-            // Available update sources
-            updateDialogState.links.forEach { (title, link) ->
-                Button(
-                    onClick = { onUpdateClick(link) },
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_update),
+                    contentDescription = null,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
-                ) {
-                    Text(text = title)
+                        .size(32.dp)
+                        .padding(end = 8.dp),
+                    tint = ColorPrimary
+                )
+                Text(
+                    text = "نسخه جدید برنامه (${updateDialogState.latestVersionName})",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+        }, text = {
+            Column {
+                Text(
+                    text = if (updateDialogState.forceUpdate) "برای ادامه استفاده از برنامه، لطفا به نسخه جدید به‌روزرسانی کنید."
+                    else stringResource(R.string.app_update_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 0.dp),
+                    fontSize = 15.sp
+                )
+
+                // Available update sources
+                updateDialogState.links.forEach { (title, link) ->
+                    Button(
+                        onClick = { onUpdateClick(link) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
+                    ) {
+                        Text(text = title)
+                    }
                 }
             }
-        }
-    }, confirmButton = {}, dismissButton = if (!updateDialogState.forceUpdate) {
-        {
-            TextButton(
-                onClick = onDismiss, modifier = Modifier.padding(top = 4.dp)
-            ) {
-                Text("بعدا")
+        }, confirmButton = {}, dismissButton = if (!updateDialogState.forceUpdate) {
+            {
+                TextButton(
+                    onClick = onDismiss, modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    Text("بعدا")
+                }
             }
-        }
-    } else null)
+        } else null)
 }
 
 
