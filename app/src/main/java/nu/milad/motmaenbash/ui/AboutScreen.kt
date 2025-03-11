@@ -38,8 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants
@@ -51,16 +49,12 @@ import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
 
 @Composable
-fun AboutScreen(
-    navController: NavController,
-) {
+fun AboutScreen() {
 
     val context = LocalContext.current
 
     AppBar(
         title = stringResource(id = R.string.about_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
     ) { contentPadding ->
 
 
@@ -312,6 +306,6 @@ private fun sendBugReport(context: Context) {
 @Composable
 fun AboutScreenPreview() {
     MotmaenBashTheme {
-        AboutScreen(rememberNavController())
+        AboutScreen()
     }
 }

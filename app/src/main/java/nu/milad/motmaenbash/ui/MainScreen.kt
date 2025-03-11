@@ -11,28 +11,35 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +49,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,9 +71,11 @@ import com.google.accompanist.permissions.rememberPermissionState
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.NavRoutes
+import nu.milad.motmaenbash.ui.LocalNavController
 import nu.milad.motmaenbash.ui.ui.theme.BackgroundLightGray
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.ui.theme.Green
+import nu.milad.motmaenbash.ui.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.ui.theme.Red
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.viewmodels.MainViewModel
@@ -72,14 +84,10 @@ import nu.milad.motmaenbash.viewmodels.MainViewModel
 
 @Composable
 fun MainScreen(
-//    navController: NavController, viewModel: MainViewModel = MainViewModel(
-
-    navController: NavController, viewModel: MainViewModel = viewModel()
-
-
+    viewModel: MainViewModel = viewModel()
 ) {
-
     val context = LocalContext.current
+    val navController = LocalNavController.current
 
 
     val scrollState = rememberScrollState()
@@ -91,14 +99,11 @@ fun MainScreen(
     val suspiciousSmsDetected by viewModel.suspiciousSmsDetected.collectAsState()
     val suspiciousAppDetected by viewModel.suspiciousAppDetected.collectAsState()
 
-
     val updateState by viewModel.updateState.collectAsState()
-
     val updateDialogState by viewModel.updateDialogState.collectAsState()
 
     // Observe sponsor data
     val sponsorData by viewModel.sponsorData.collectAsState()
-
 
     // Permission States
     val smsPermissionState = rememberPermissionState(
@@ -118,26 +123,6 @@ fun MainScreen(
         )
     }
 
-//    val overlayPermissionState = rememberPermissionState(
-//        Manifest.permission.SYSTEM_ALERT_WINDOW
-//    ) { isGranted ->
-//        viewModel.updatePermissionStatus(
-//            MainViewModel.PermissionType.OVERLAY, isGranted
-//        )
-//        viewModel.checkInitialPermissions()
-//    }
-//
-//
-//    val accessibilityPermissionState = rememberPermissionState(
-//        // Use a custom permission for accessibility
-//        Manifest.permission.BIND_ACCESSIBILITY_SERVICE
-//    ) { isGranted ->
-//        viewModel.updatePermissionStatus(
-//            MainViewModel.PermissionType.ACCESSIBILITY, isGranted
-//        )
-//        viewModel.checkInitialPermissions()
-//    }
-
     // Observe permission statuses
     val smsPermissionStatus by viewModel.smsPermissionStatus.collectAsState()
     val accessibilitySettingStatus by viewModel.accessibilitySettingStatus.collectAsState()
@@ -148,10 +133,8 @@ fun MainScreen(
 
 
     LaunchedEffect(Unit) {
-//        viewModel.loadRandomSponsor()
         Log.d("MainScreen", "LaunchedEffect triggered")
         viewModel.checkInitialPermissions()
-//        viewModel.refreshTipOfTheDay()
     }
 
 
@@ -165,6 +148,7 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppName(navController)
+
         TipOfDaySection(tip = tipOfTheDay, isRefreshing = isRefreshing, onRefreshClick = {
             viewModel.refreshTipOfTheDay()
         })
@@ -190,17 +174,14 @@ fun MainScreen(
                 }
             })
 
-
-
-
-
         Stats(
             suspiciousLinksDetected = suspiciousLinksDetected,
             suspiciousSmsDetected = suspiciousSmsDetected,
             suspiciousAppDetected = suspiciousAppDetected,
         )
 
-        Tools(onAppScanClick = { navController.navigate(NavRoutes.APP_SCAN_SCREEN) },
+        Tools(
+            onAppScanClick = { navController.navigate(NavRoutes.APP_SCAN_SCREEN) },
             onUrlScanClick = { navController.navigate(NavRoutes.URL_SCAN_SCREEN) },
             onReportByUserClick = { navController.navigate(NavRoutes.USER_REPORT_SCREEN) })
 
@@ -227,7 +208,8 @@ fun MainScreen(
 
 
         updateDialogState?.let { state ->
-            UpdateDialog(updateDialogState = state,
+            UpdateDialog(
+                updateDialogState = state,
                 onDismiss = { viewModel.dismissUpdateDialog() },
                 onUpdateClick = { link ->
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
@@ -239,21 +221,16 @@ fun MainScreen(
 
 }
 
+
 @Composable
 fun AppName(navController: NavController) {
-
     Column(
-
-
-        modifier = Modifier
-            .padding(top = 24.dp, bottom = 16.dp)
-
-            .clickable {
+        modifier = Modifier.clickable(
+            indication = null, interactionSource = remember { MutableInteractionSource() },
+        ) {
                 navController.navigate(NavRoutes.ABOUT_SCREEN)
             },
-
         horizontalAlignment = Alignment.CenterHorizontally,
-
         ) {
         Text(
 
@@ -268,8 +245,6 @@ fun AppName(navController: NavController) {
             color = Color.Black,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-
-
             )
     }
 }
@@ -507,7 +482,6 @@ fun StatRow(label: String, value: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Tools(
     onAppScanClick: () -> Unit,
@@ -555,7 +529,6 @@ fun Tools(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolCard(
     text: String, icon: Int, onClick: () -> Unit, modifier: Modifier = Modifier
@@ -683,6 +656,7 @@ fun DatabaseUpdateSection(
     }
 }
 
+
 @Composable
 fun AboutAndFaq(
     onAboutClick: () -> Unit,
@@ -697,7 +671,6 @@ fun AboutAndFaq(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-
         ) {
             Button(
                 onClick = onAboutClick,
@@ -705,7 +678,6 @@ fun AboutAndFaq(
                     .weight(1f)
                     .padding(1.dp),
                 contentPadding = PaddingValues(1.dp)
-
             ) {
                 Text(
                     text = "درباره برنامه", textAlign = TextAlign.Center
@@ -717,8 +689,6 @@ fun AboutAndFaq(
                     .weight(1f)
                     .padding(1.dp),
                 contentPadding = PaddingValues(1.dp)
-
-
             ) {
                 Text(
                     text = "سوالات متداول", textAlign = TextAlign.Center,
@@ -730,7 +700,6 @@ fun AboutAndFaq(
                     .weight(1f)
                     .padding(1.dp),
                 contentPadding = PaddingValues(1.dp)
-
             ) {
                 Text(
                     text = "دسترسی‌ها", textAlign = TextAlign.Center
@@ -768,9 +737,11 @@ fun SponsorCard(sponsorData: MainViewModel.SponsorData?) {
     if (sponsorData != null) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-                .clickable {
+                .wrapContentWidth()
+                .padding(4.dp)
+                .clickable(
+                    indication = null, interactionSource = remember { MutableInteractionSource() },
+                ) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(sponsorData.link))
                     context.startActivity(intent)
                 },
@@ -781,7 +752,7 @@ fun SponsorCard(sponsorData: MainViewModel.SponsorData?) {
             Row(
                 verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)
             ) {
-                // Load logo with an image painter
+                // logo
                 Image(
                     painter = rememberAsyncImagePainter(sponsorData.logoUrl),
                     contentDescription = "Sponsor Logo",
@@ -814,8 +785,11 @@ fun SponsorCard(sponsorData: MainViewModel.SponsorData?) {
 fun AppVersion(navController: NavController) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate(NavRoutes.ABOUT_SCREEN) },
+            .wrapContentWidth()
+            .padding(bottom = 8.dp)
+            .clickable(
+                indication = null, interactionSource = remember { MutableInteractionSource() },
+            ) { navController.navigate(NavRoutes.ABOUT_SCREEN) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -830,7 +804,8 @@ fun UpdateDialog(
     onDismiss: () -> Unit,
     onUpdateClick: (String) -> Unit
 ) {
-    AlertDialog(onDismissRequest = { if (!updateDialogState.forceUpdate) onDismiss() }, title = {
+    AlertDialog(
+        onDismissRequest = { if (!updateDialogState.forceUpdate) onDismiss() }, title = {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 4.dp)

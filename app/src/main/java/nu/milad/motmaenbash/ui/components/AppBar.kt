@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import nu.milad.motmaenbash.consts.NavRoutes
+import nu.milad.motmaenbash.ui.LocalNavController
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.ui.theme.VazirFontFamily
 
@@ -27,17 +29,13 @@ import nu.milad.motmaenbash.ui.ui.theme.VazirFontFamily
 @Composable
 fun AppBar(
     title: String,
-    modifier: Modifier = Modifier,
-    onNavigationIconClick: () -> Unit = {},
-    onActionClick: () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit
 ) {
-//    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val titleContentColor = ColorPrimary
-
+    val navController = LocalNavController.current
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -58,7 +56,17 @@ fun AppBar(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigationIconClick) {
+                    IconButton(onClick = {
+                        if (navController.previousBackStackEntry != null) {
+                            navController.navigateUp()
+                        }
+                        // اگر صفحه قبلی وجود نداشت، به صفحه اصلی برگرد
+                        else {
+                            navController.navigate(NavRoutes.MAIN_SCREEN) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

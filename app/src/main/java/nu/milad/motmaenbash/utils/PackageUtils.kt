@@ -132,5 +132,12 @@ object PackageUtils {
 
     }
 
+    fun uninstallApp(context: Context, packageName: String): Intent {
+        return Intent(Intent.ACTION_DELETE).apply {
+            data = "package:$packageName".toUri()
+            putExtra(Intent.EXTRA_RETURN_RESULT, true)
+        }
+    }
+
 
 }

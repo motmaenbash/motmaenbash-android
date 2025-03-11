@@ -17,6 +17,7 @@ open class SettingsManager(private val dataStore: DataStore<Preferences>) {
         val DATABASE_UPDATE_FREQ = stringPreferencesKey("database_update_frequency")
         val THEME = stringPreferencesKey("theme")
         val FONT = stringPreferencesKey("font_selection")
+        val PLAY_SOUND_IN_SILENT_MODE = stringPreferencesKey("play_sound_in_silent_mode")
         val ALERT_SOUND = stringPreferencesKey("alert_sound")
     }
 

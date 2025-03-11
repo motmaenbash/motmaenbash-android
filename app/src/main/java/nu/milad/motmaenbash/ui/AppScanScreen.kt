@@ -1,3 +1,7 @@
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,17 +30,13 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.model.App
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.utils.PackageUtils
 import nu.milad.motmaenbash.viewmodels.AppScanViewModel
 import nu.milad.motmaenbash.viewmodels.ScanState
@@ -43,8 +45,7 @@ import nu.milad.motmaenbash.viewmodels.ScanState
 
 
 fun AppScanScreen(
-//    navController: NavController, viewModel: AppScanViewModel = viewModel()
-    navController: NavController, viewModel: AppScanViewModel = viewModel()
+    viewModel: AppScanViewModel = viewModel()
 
 ) {
 
@@ -53,15 +54,12 @@ fun AppScanScreen(
     val lastScanTime by viewModel.lastScanTime.collectAsState()
     val detectedSuspiciousApps by viewModel.suspiciousApps.collectAsState()
     val scanStatusMessage by viewModel.scanStatusMessage.collectAsState()
-//    val scanInProgress by viewModel.scanInProgress.collectAsState()
 
-//    Log.d("ststst", scanState.toString())
 
     AppBar(
         title = stringResource(id = R.string.app_scan_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
-    ) { innerPadding ->
+
+        ) { innerPadding ->
 
         Column(
             modifier = Modifier
@@ -104,7 +102,7 @@ fun AppScanScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (currentScanState == ScanState.IN_PROGRESS) {
-                CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
             }
 
 
@@ -113,6 +111,7 @@ fun AppScanScreen(
             } else {
                 SuspiciousAppsList(detectedSuspiciousApps)
             }
+
 
         }
     }
@@ -130,6 +129,21 @@ fun SuspiciousAppsList(apps: List<App>) {
 @Composable
 fun SuspiciousAppItem(app: App) {
     val context = LocalContext.current
+    // Track if this app has been uninstalled
+    val (isUninstalled, setUninstalled) = remember { mutableStateOf(false) }
+
+    val uninstallLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val appName = result.data?.getStringExtra("APP_NAME") ?: app.appName
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "برنامه '$appName' با موفقیت حذف شد", Toast.LENGTH_SHORT).show()
+            // Mark as uninstalled when successful
+            setUninstalled(true)
+        } else {
+            Toast.makeText(context, "حذف برنامه '$appName' لغو شد", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -157,20 +171,16 @@ fun SuspiciousAppItem(app: App) {
 
         Button(
             onClick = {
-                PackageUtils.uninstallApp(context, app.packageName, app.appName)
+                val intent = PackageUtils.uninstallApp(context, app.packageName)
+                uninstallLauncher.launch(intent)
             },
+            enabled = !isUninstalled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isUninstalled) Color.Gray else MaterialTheme.colorScheme.primary,
+                disabledContainerColor = Color.Gray
+            )
         ) {
-            Text(text = "حذف برنامه")
+            Text(text = if (isUninstalled) "حذف شد" else "حذف برنامه")
         }
-    }
-}
-
-
-//todo: fix
-@Preview(showBackground = true)
-@Composable
-fun AppScanScreenPreview() {
-    MotmaenBashTheme {
-        AppScanScreen(rememberNavController())
     }
 }

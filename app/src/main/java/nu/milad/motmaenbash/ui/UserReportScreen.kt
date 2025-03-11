@@ -12,8 +12,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants.USER_REPORT_FORM_URL
 import nu.milad.motmaenbash.ui.components.AppBar
@@ -22,13 +20,11 @@ import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
 
 
 @Composable
-fun UserReportScreen(navController: NavController) {
+fun UserReportScreen() {
     val context = LocalContext.current
 
     AppBar(
         title = stringResource(id = R.string.user_report_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -69,6 +65,6 @@ fun UserReportScreen(navController: NavController) {
 @Composable
 fun UserReportScreenPreview() {
     MotmaenBashTheme {
-        UserReportScreen(rememberNavController())
+        UserReportScreen()
     }
 }

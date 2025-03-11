@@ -17,8 +17,6 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.Pages
 import nu.milad.motmaenbash.ui.components.AppBar
@@ -26,7 +24,7 @@ import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
 
 
 @Composable
-fun InfoListScreen(navController: NavController, page: String = Pages.FAQ) {
+fun InfoListScreen(page: String = Pages.FAQ) {
 
 
     val (questions, answers) = when (page) {
@@ -51,8 +49,6 @@ fun InfoListScreen(navController: NavController, page: String = Pages.FAQ) {
 
     AppBar(
         title = stringResource(id = R.string.faq_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -106,7 +102,7 @@ fun InfoCard(question: String, answer: String) {
 @Composable
 fun FaqListScreenPreview() {
     MotmaenBashTheme {
-        InfoListScreen(rememberNavController(), Pages.FAQ)
+        InfoListScreen(Pages.FAQ)
     }
 }
 
@@ -114,6 +110,6 @@ fun FaqListScreenPreview() {
 @Composable
 fun PermissionListScreenPreview() {
     MotmaenBashTheme {
-        InfoListScreen(rememberNavController(), Pages.PERMISSION)
+        InfoListScreen(Pages.PERMISSION)
     }
 }
