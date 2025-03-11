@@ -41,8 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.emptyPreferences
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.ui.components.AppBar
@@ -52,7 +50,7 @@ import nu.milad.motmaenbash.utils.SettingsManager
 import nu.milad.motmaenbash.utils.dataStore
 
 @Composable
-fun SettingsScreen(navController: NavController, settingsManager: SettingsManager) {
+fun SettingsScreen(settingsManager: SettingsManager) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val prefs = settingsManager.preferencesFlow.collectAsState(initial = emptyPreferences())
@@ -60,8 +58,6 @@ fun SettingsScreen(navController: NavController, settingsManager: SettingsManage
 
     AppBar(
         title = stringResource(id = R.string.settings_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
     ) { contentPadding ->
 
         Column(
@@ -245,14 +241,14 @@ fun ListPreference(
             entries.forEachIndexed { index, entry ->
                 DropdownMenuItem(
                     text = {
-                    Text(
-                        entry, style = MaterialTheme.typography.titleSmall
+                        Text(
+                            entry, style = MaterialTheme.typography.titleSmall
 
-                    )
-                }, onClick = {
-                    onValueSelected(values[index])
-                    expanded = false
-                }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                        )
+                    }, onClick = {
+                        onValueSelected(values[index])
+                        expanded = false
+                    }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
             }
         }
@@ -266,5 +262,5 @@ fun ListPreference(
 @Composable
 fun SettingsScreenPreview() {
     val settingsManager = SettingsManager(LocalContext.current.dataStore)
-    SettingsScreen(rememberNavController(), settingsManager)
+    SettingsScreen(settingsManager)
 }

@@ -36,15 +36,18 @@
     <string name="last_scan_time">آخرین اسکن: %1$s</string>
 
 
-    <!-- Settings Activity -->
+    <!-- Settings -->
     <string name="setting_theme">انتخاب تم</string>
     <string name="light_mode">حالت روشن</string>
     <string name="dark_mode">حالت تاریک</string>
     <string name="system_default">پیش‌فرض سیستم</string>
 
     <string name="setting_alert_sound">صدای هشدار</string>
-    <string name="dingdin_sound">صدای دینگ دینگ</string>
-    <string name="beep_sound">صدای بیپ</string>
+    <string name="ding1_sound">صدای دینگ ۱</string>
+    <string name="ding2_sound">صدای دینگ ۲</string>
+    <string name="ding3_sound">صدای دینگ ۳</string>
+    <string name="ding4_sound">صدای دینگ ۴</string>
+    <string name="ding5_sound">صدای دینگ ۵</string>
 
     <string name="setting_database_update_frequency">فرکانس بروزرسانی پایگاه داده</string>
     <string name="hourly">هر ۱ ساعت</string>
@@ -52,8 +55,8 @@
     <string name="daily">هر ۲۴ ساعت</string>
 
     <string name="setting_font">فونت</string>
-    <string name="vazir_matn">وزیر متن</string>
-    <string name="vazir_matn_rd">ساحل</string>
+    <string name="vazir">وزیر متن</string>
+    <string name="sahel">ساحل</string>
 
 
     <string name="setting_alert_silent_mode">پخش صدا در حالت سایلنت</string>

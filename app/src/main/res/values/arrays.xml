@@ -26,22 +26,28 @@
 
     <!-- Font Options -->
     <string-array name="font">
-        <item>@string/vazir_matn</item>
-        <item>@string/vazir_matn_rd</item>
+        <item>@string/vazir</item>
+        <item>@string/sahel</item>
     </string-array>
     <string-array name="font_values">
         <item>vazir</item>
-        <item>vazir_dn</item>
+        <item>sahel</item>
     </string-array>
 
     <!-- Alert Sounds -->
     <string-array name="alert_sound">
-        <item>@string/dingdin_sound</item>
-        <item>@string/beep_sound</item>
+        <item>@string/ding1_sound</item>
+        <item>@string/ding2_sound</item>
+        <item>@string/ding3_sound</item>
+        <item>@string/ding4_sound</item>
+        <item>@string/ding5_sound</item>
     </string-array>
     <string-array name="alert_sound_values">
-        <item>ding</item>
-        <item>beep</item>
+        <item>ding1</item>
+        <item>ding2</item>
+        <item>ding3</item>
+        <item>ding4</item>
+        <item>ding5</item>
     </string-array>
 
     <!-- Play Sound in Silent Mode Options -->
@@ -59,7 +65,6 @@
     <!-- Faq Questions and Answers -->
     <string-array name="faq_questions">
         <item>این اپلیکیشن چه کار می‌کند؟</item>
-
 
     </string-array>
 

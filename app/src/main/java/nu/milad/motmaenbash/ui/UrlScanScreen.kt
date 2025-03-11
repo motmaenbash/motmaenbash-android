@@ -38,8 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
@@ -53,7 +51,6 @@ import nu.milad.motmaenbash.viewmodels.UrlScanViewModel
 
 fun UrlScanScreen(
 
-    navController: NavController,
     initialUrl: String? = null,
     viewModel: UrlScanViewModel = viewModel()
 
@@ -67,9 +64,8 @@ fun UrlScanScreen(
 
     AppBar(
         title = stringResource(id = R.string.url_scan_activity_title),
-        onNavigationIconClick = { navController.navigateUp() },
-        onActionClick = { /* Handle menu action */ },
-    ) { innerPadding ->
+
+        ) { innerPadding ->
 
         Column(
             modifier = Modifier
@@ -217,6 +213,6 @@ fun UrlScanScreen(
 @Composable
 fun UrlScanScreenPreview() {
     MotmaenBashTheme {
-        UrlScanScreen(rememberNavController())
+        UrlScanScreen()
     }
 }

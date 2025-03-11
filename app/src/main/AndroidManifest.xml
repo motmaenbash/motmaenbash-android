@@ -17,6 +17,7 @@
 
     <!-- Permission to receive SMS messages -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:name="android.hardware.telephony"
