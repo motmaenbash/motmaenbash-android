@@ -1,5 +1,5 @@
 package nu.milad.motmaenbash.ui
-
+import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +55,29 @@ fun SettingsScreen(settingsManager: SettingsManager) {
     val scope = rememberCoroutineScope()
     val prefs = settingsManager.preferencesFlow.collectAsState(initial = emptyPreferences())
 
+    // Function to play sound based on sound resource ID
+    fun playSound(soundResId: Int) {
+        try {
+            MediaPlayer.create(context, soundResId).apply {
+                setOnCompletionListener { it.release() }
+                start()
+            }
+        } catch (e: Exception) {
+            // Handle any exceptions quietly
+        }
+    }
+
+    // Helper function to get sound resource ID from value
+    fun getSoundResourceId(value: String): Int {
+        return when (value) {
+            "sound1" -> R.raw.ding1
+            "sound2" -> R.raw.ding2
+            "sound3" -> R.raw.ding3
+            "sound4" -> R.raw.ding4
+            "sound5" -> R.raw.ding5
+            else -> R.raw.ding1
+        }
+    }
 
     AppBar(
         title = stringResource(id = R.string.settings_activity_title),
@@ -100,6 +123,10 @@ fun SettingsScreen(settingsManager: SettingsManager) {
                             settingsManager.saveStringPreference(
                                 SettingsManager.ALERT_SOUND, newValue
                             )
+                            // Play the selected sound when changing the setting
+                            getSoundResourceId(newValue).let { soundId ->
+                                playSound(soundId)
+                            }
                         }
                     })
             }
@@ -253,10 +280,7 @@ fun ListPreference(
             }
         }
     }
-
-
 }
-
 
 @Preview(showBackground = true)
 @Composable
