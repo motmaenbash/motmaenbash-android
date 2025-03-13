@@ -4,13 +4,6 @@ package nu.milad.motmaenbash.ui
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
 import java.util.Locale
 
 open class BaseComposeActivity : ComponentActivity() {
@@ -18,14 +11,6 @@ open class BaseComposeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setLocale()
-        setContent {
-            // Apply theme and content for your activities
-            MotmaenBashTheme {
-                // Your activity's content will go here
-                // Replace this with a placeholder or specific Composable
-                // FaqScreen() or any other screen
-            }
-        }
 //        applyTheme()
     }
 

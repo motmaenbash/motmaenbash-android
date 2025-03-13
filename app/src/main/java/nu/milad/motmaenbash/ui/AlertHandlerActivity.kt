@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,10 +36,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -59,6 +57,7 @@ import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.ui.theme.GreenDark
 import nu.milad.motmaenbash.ui.ui.theme.GreyDark
+import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.ui.theme.Red
 import nu.milad.motmaenbash.ui.ui.theme.Yellow
 import nu.milad.motmaenbash.utils.PackageUtils
@@ -189,21 +188,23 @@ class AlertHandlerActivity : ComponentActivity() {
         }
 
         setContent {
-            AlertDialog(
-                alertType = alertType,
-                alertLevel = alertLevel,
-                title = title,
-                subTitle = subTitle,
-                message = message,
-                param1 = param1,
-                onDismiss = { finishAndRemoveTask() },
-                onUninstall = {
-                    val intent = PackageUtils.uninstallApp(this, param1)
-                    uninstallLauncher.launch(intent)
-                }
-            )
+            MotmaenBashTheme {
 
+                AlertDialog(
+                    alertType = alertType,
+                    alertLevel = alertLevel,
+                    title = title,
+                    subTitle = subTitle,
+                    message = message,
+                    param1 = param1,
+                    onDismiss = { finishAndRemoveTask() },
+                    onUninstall = {
+                        val intent = PackageUtils.uninstallApp(this, param1)
+                        uninstallLauncher.launch(intent)
+                    }
+                )
 
+            }
         }
     }
 
@@ -346,15 +347,7 @@ fun AlertDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onDismiss, modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_close),
-                            contentDescription = "بستن",
-                            tint = GreyDark
-                        )
-                    }
+
 
                     val badgeColor = when (alertLevel) {
                         AlertHandlerActivity.Companion.AlertLevel.NORMAL -> GreenDark
@@ -364,20 +357,36 @@ fun AlertDialog(
 
                     Box(
                         modifier = Modifier
+                            .wrapContentSize()
+
                             .background(
-                                color = badgeColor, shape = RoundedCornerShape(4.dp)
+                                color = badgeColor,
+                                shape = RoundedCornerShape(4.dp)
                             )
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        CompositionLocalProvider(
-                            LocalLayoutDirection provides LayoutDirection.Rtl
-                        ) {
-                            Text(
-                                text = title,
-                                color = androidx.compose.ui.graphics.Color.White,
-                                fontWeight = FontWeight.Bold
+
+                        Text(
+                            text = title,
+                            color = androidx.compose.ui.graphics.Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+
                             )
-                        }
+
+                    }
+
+
+
+                    IconButton(
+                        onClick = onDismiss, modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = "بستن",
+                            tint = GreyDark
+                        )
                     }
                 }
 
@@ -386,47 +395,48 @@ fun AlertDialog(
 
 
 
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
+
+                Text(
+                    text = title,
+                    color = Red,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+
+                HorizontalDivider(
+                    color = Red, thickness = 2.dp
+                )
+
+                if (!subTitle.isNullOrEmpty()) {
                     Text(
-                        text = title,
-                        color = Red,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = subTitle,
+                        color = androidx.compose.ui.graphics.Color.Black,
+                        fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-
-                    HorizontalDivider(
-                        color = Red, thickness = 2.dp
-                    )
-
-                    if (!subTitle.isNullOrEmpty()) {
-                        Text(
-                            text = subTitle,
-                            color = androidx.compose.ui.graphics.Color.Black,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp)
-                        )
-                    }
-
-                    val scrollState = rememberScrollState()
-
-                    Text(
-                        text = message,
-                        color = androidx.compose.ui.graphics.Color.Black,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .verticalScroll(scrollState)
+                            .padding(top = 4.dp)
                     )
                 }
+
+                val scrollState = rememberScrollState()
+
+                Text(
+                    text = message,
+                    color = androidx.compose.ui.graphics.Color.Black,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .verticalScroll(scrollState)
+                )
+
+
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier
@@ -527,51 +537,58 @@ class AlertTypePreviewParameterProvider : PreviewParameterProvider<Int> {
 @Preview(showBackground = true, name = "هشدار پیامک مشکوک")
 @Composable
 fun AlertDialogSmsPreview() {
-    AlertDialog(
-        alertType = AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
-        alertLevel = AlertHandlerActivity.Companion.AlertLevel.WARNING,
-        title = "شناسایی فرستنده مشکوک!",
-        subTitle = null,
-        message = "این فرستنده در لیست سیاه قرار دارد.\n\nفرستنده: 3000123456",
-        param1 = "3000123456",
-        onDismiss = {},
-        onUninstall = {}
-    )
+    MotmaenBashTheme {
+
+        AlertDialog(
+            alertType = AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
+            alertLevel = AlertHandlerActivity.Companion.AlertLevel.WARNING,
+            title = "شناسایی فرستنده مشکوک!",
+            subTitle = null,
+            message = "این فرستنده در لیست سیاه قرار دارد.\n\nفرستنده: 3000123456",
+            param1 = "3000123456",
+            onDismiss = {},
+            onUninstall = {}
+        )
+    }
 }
 
 // تابع پیش‌نمایش برای حالت برنامه مشکوک
 @Preview(showBackground = true, name = "هشدار برنامه مشکوک")
 @Composable
 fun AlertDialogAppPreview() {
-    AlertDialog(
-        alertType = AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
-        alertLevel = AlertHandlerActivity.Companion.AlertLevel.ERROR,
-        title = "برنامه مشکوک!",
-        subTitle = null,
-        message = "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است. لطفا بدون اینکه برنامه را باز کنید، سریعا ان را حذف کنید.",
-        param1 = "حمله فیشینگ",
-        onDismiss = {},
-        onUninstall = {}
-    )
+    MotmaenBashTheme {
+
+        AlertDialog(
+            alertType = AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
+            alertLevel = AlertHandlerActivity.Companion.AlertLevel.ERROR,
+            title = "برنامه مشکوک!",
+            subTitle = null,
+            message = "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است. لطفا بدون اینکه برنامه را باز کنید، سریعا ان را حذف کنید.",
+            param1 = "حمله فیشینگ",
+            onDismiss = {},
+            onUninstall = {}
+        )
+    }
 }
 
 // تابع پیش‌نمایش برای حالت وب گردی مشکوک
 @Preview(showBackground = true, name = "هشدار دامنه مشکوک")
 @Composable
 fun AlertDialogDomainPreview() {
-    AlertDialog(
-        alertType = AlertHandlerActivity.ALERT_TYPE_DOMAIN_FLAGGED,
-        alertLevel = AlertHandlerActivity.Companion.AlertLevel.ERROR,
-        title = "دامنه مشکوک!",
-        subTitle = null,
-        message = "این دامنه در لیست سیاه قرار دارد.",
-        param1 = "",
-        onDismiss = {},
-        onUninstall = {}
-    )
+    MotmaenBashTheme {
+        AlertDialog(
+            alertType = AlertHandlerActivity.ALERT_TYPE_DOMAIN_FLAGGED,
+            alertLevel = AlertHandlerActivity.Companion.AlertLevel.ERROR,
+            title = "دامنه مشکوک!",
+            subTitle = null,
+            message = "این دامنه در لیست سیاه قرار دارد.",
+            param1 = "",
+            onDismiss = {},
+            onUninstall = {}
+        )
+    }
 }
 
-// تابع پیش‌نمایش با استفاده از PreviewParameter
 @Preview(showBackground = true, name = "پیش‌نمایش پارامتری هشدارها")
 @Composable
 fun AlertDialogParameterizedPreview(
@@ -608,15 +625,17 @@ fun AlertDialogParameterizedPreview(
             AlertHandlerActivity.Companion.AlertLevel.NORMAL
         )
     }
+    MotmaenBashTheme {
 
-    AlertDialog(
-        alertType = alertType,
-        alertLevel = level,
-        title = title,
-        subTitle = null,
-        message = message,
-        param1 = "",
-        onDismiss = {},
-        onUninstall = {}
-    )
+        AlertDialog(
+            alertType = alertType,
+            alertLevel = level,
+            title = title,
+            subTitle = null,
+            message = message,
+            param1 = "",
+            onDismiss = {},
+            onUninstall = {}
+        )
+    }
 }
