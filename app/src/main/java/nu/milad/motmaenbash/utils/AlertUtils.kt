@@ -2,7 +2,6 @@ package nu.milad.motmaenbash.utils
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import nu.milad.motmaenbash.ui.AlertHandlerActivity
 
 object AlertUtils {
@@ -15,11 +14,6 @@ object AlertUtils {
         param2: String? = null,
         info: String? = null,
     ) {
-        Log.d("AlertUtils", "showAlert: $alertType")
-        Log.d("AlertUtils", "showAlert: $alertLevel")
-        Log.d("AlertUtils", "showAlert: $param1")
-        Log.d("AlertUtils", "showAlert: $param2")
-        Log.d("AlertUtils", "showAlert: $info")
 
 
         val intent = Intent(context, AlertHandlerActivity::class.java).apply {
