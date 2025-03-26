@@ -7,9 +7,9 @@
         <item>@string/daily</item>
     </string-array>
     <string-array name="database_update_frequency_values">
-        <item>hourly</item>
-        <item>every_6_hours</item>
-        <item>daily</item>
+        <item>1</item>
+        <item>6</item>
+        <item>24</item>
     </string-array>
 
     <!-- Theme Options -->
@@ -41,6 +41,7 @@
         <item>@string/ding3_sound</item>
         <item>@string/ding4_sound</item>
         <item>@string/ding5_sound</item>
+        <item>@string/ding6_sound</item>
     </string-array>
     <string-array name="alert_sound_values">
         <item>ding1</item>
@@ -48,6 +49,7 @@
         <item>ding3</item>
         <item>ding4</item>
         <item>ding5</item>
+        <item>ding6</item>
     </string-array>
 
     <!-- Play Sound in Silent Mode Options -->
