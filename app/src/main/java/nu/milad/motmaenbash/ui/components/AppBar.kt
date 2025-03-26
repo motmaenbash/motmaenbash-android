@@ -2,12 +2,13 @@ package nu.milad.motmaenbash.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,10 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.consts.NavRoutes
-import nu.milad.motmaenbash.ui.LocalNavController
-import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.ui.theme.VazirFontFamily
+import nu.milad.motmaenbash.ui.activities.LocalNavController
+import nu.milad.motmaenbash.ui.theme.GreyMiddle
+import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,8 +37,9 @@ fun AppBar(
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    val titleContentColor = ColorPrimary
     val navController = LocalNavController.current
+
+
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -46,16 +47,16 @@ fun AppBar(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = titleContentColor,
+                    containerColor = colorScheme.background,
+                    titleContentColor = colorScheme.primary,
                 ),
                 title = {
                     Text(
                         title, maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        fontFamily = VazirFontFamily,
+                        fontSize = 16.sp,
+                        style = typography.titleMedium
                     )
                 },
                 navigationIcon = {
@@ -70,14 +71,16 @@ fun AppBar(
 
                     }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            tint = GreyMiddle,
                             contentDescription = "Back"
                         )
                     }
                 },
 
                 scrollBehavior = scrollBehavior,
-            )
+
+                )
         },
     ) { innerPadding ->
         content(

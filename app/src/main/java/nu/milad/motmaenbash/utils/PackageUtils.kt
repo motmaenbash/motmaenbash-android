@@ -46,6 +46,7 @@ object PackageUtils {
             val appName = packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
                 ?: "Unknown App Name"
 
+
             val appIcon = pm.getApplicationIcon(packageName)
 
             val versionName = packageInfo.versionName ?: "Unknown"
@@ -69,6 +70,8 @@ object PackageUtils {
 
 
             // Calculate SHA-1 hash of the app's signatures
+
+
             // Retrieve the signing information safely based on API level
             val sha1 = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 // On API level 28 and above, use signingInfo

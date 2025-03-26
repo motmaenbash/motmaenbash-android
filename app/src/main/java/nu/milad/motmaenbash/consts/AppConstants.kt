@@ -28,6 +28,7 @@ object AppConstants {
     const val APP_PREFERENCES = "AppPreferences"
     const val PREF_KEY_LAST_UPDATE_TIME = "last_database_update_time"
     const val PREF_KEY_FIRST_LAUNCH = "first_launch"
+    const val PREF_KEY_INTRO_SHOWN = "intro_shown"
 
 
     const val DONATE_URL = "https://milad.nu/page/donate"

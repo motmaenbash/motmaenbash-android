@@ -1,26 +1,25 @@
-package nu.milad.motmaenbash.ui
+package nu.milad.motmaenbash.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.Pages
+import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.ui.components.AppCard
+import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
 
 @Composable
@@ -37,28 +36,17 @@ fun InfoListScreen(page: String = Pages.FAQ) {
         else -> stringArrayResource(id = R.array.faq_questions) to stringArrayResource(id = R.array.faq_answers)
     }
 
-//    CenterAlignedTopAppBar(
-//        title = {
-//            Text(
-//                stringResource(id = R.string.faq_activity_title),
-//                style = MaterialTheme.typography.titleLarge
-//            )
-//        },
-//        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
-//    )
-
     AppBar(
         title = stringResource(id = R.string.faq_activity_title),
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp, 2.dp), contentPadding = innerPadding
+                .padding(16.dp, 2.dp),
+            contentPadding = innerPadding
 
         ) {
 
-
-            // FAQ Content
             items(questions.size, key = { index -> questions[index] }) { index ->
                 InfoCard(
                     question = questions[index], answer = answers[index]
@@ -66,31 +54,23 @@ fun InfoListScreen(page: String = Pages.FAQ) {
                 )
             }
 
-
         }
 
     }
 
-
 }
+
 
 @Composable
 fun InfoCard(question: String, answer: String) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White,
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(8.dp)
+    AppCard(
+        cornerRadius = 12.dp,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = question, style = MaterialTheme.typography.headlineSmall)
+            Text(text = question, style = typography.headlineSmall)
             Text(
                 text = answer,
-                style = MaterialTheme.typography.bodySmall,
+                style = typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
@@ -101,15 +81,19 @@ fun InfoCard(question: String, answer: String) {
 @Preview(showBackground = true)
 @Composable
 fun FaqListScreenPreview() {
-    MotmaenBashTheme {
-        InfoListScreen(Pages.FAQ)
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            InfoListScreen(Pages.FAQ)
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PermissionListScreenPreview() {
-    MotmaenBashTheme {
-        InfoListScreen(Pages.PERMISSION)
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            InfoListScreen(Pages.PERMISSION)
+        }
     }
 }

@@ -1,34 +1,36 @@
-package nu.milad.motmaenbash.ui
-import android.media.MediaPlayer
+package nu.milad.motmaenbash.ui.screens
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,44 +42,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.emptyPreferences
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
+import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
-import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
-import nu.milad.motmaenbash.ui.ui.theme.GreyDark
-import nu.milad.motmaenbash.utils.SettingsManager
-import nu.milad.motmaenbash.utils.dataStore
+import nu.milad.motmaenbash.ui.theme.ColorPrimary
+import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 
 @Composable
-fun SettingsScreen(settingsManager: SettingsManager) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val prefs = settingsManager.preferencesFlow.collectAsState(initial = emptyPreferences())
+    val scrollState = rememberScrollState()
+    var showFontInfoDialog by remember { mutableStateOf(false) }
 
-    // Function to play sound based on sound resource ID
-    fun playSound(soundResId: Int) {
-        try {
-            MediaPlayer.create(context, soundResId).apply {
-                setOnCompletionListener { it.release() }
-                start()
-            }
-        } catch (e: Exception) {
-            // Handle any exceptions quietly
-        }
-    }
-
-    // Helper function to get sound resource ID from value
-    fun getSoundResourceId(value: String): Int {
-        return when (value) {
-            "sound1" -> R.raw.ding1
-            "sound2" -> R.raw.ding2
-            "sound3" -> R.raw.ding3
-            "sound4" -> R.raw.ding4
-            "sound5" -> R.raw.ding5
-            else -> R.raw.ding1
-        }
-    }
+    // Collect the preferences state from ViewModel
+    val prefs by viewModel.preferences.collectAsState()
 
     AppBar(
         title = stringResource(id = R.string.settings_activity_title),
@@ -87,13 +70,12 @@ fun SettingsScreen(settingsManager: SettingsManager) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             PreferenceCategory(title = "هشدارها", icon = Icons.Outlined.Notifications) {
-
 
                 ListPreference(
                     title = stringResource(id = R.string.setting_alert_silent_mode),
@@ -101,35 +83,32 @@ fun SettingsScreen(settingsManager: SettingsManager) {
                         .toList(),
                     values = context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
                         .toList(),
-                    currentValue = prefs.value[SettingsManager.PLAY_SOUND_IN_SILENT_MODE]
-                        ?: context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
-                            .first(),
+                    currentValue = prefs[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE]
+                        ?: viewModel.getDefaultValue(
+                            context,
+                            SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE
+                        ),
                     onValueSelected = { newValue ->
-                        scope.launch {
-                            settingsManager.saveStringPreference(
-                                SettingsManager.PLAY_SOUND_IN_SILENT_MODE, newValue
-                            )
-                        }
+                        viewModel.saveStringPreference(
+                            SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE, newValue
+                        )
                     })
 
                 ListPreference(
                     title = stringResource(id = R.string.setting_alert_sound),
                     entries = context.resources.getStringArray(R.array.alert_sound).toList(),
                     values = context.resources.getStringArray(R.array.alert_sound_values).toList(),
-                    currentValue = prefs.value[SettingsManager.ALERT_SOUND]
-                        ?: context.resources.getStringArray(R.array.alert_sound_values).first(),
+                    currentValue = prefs[SettingsViewModel.ALERT_SOUND]
+                        ?: viewModel.getDefaultValue(context, SettingsViewModel.ALERT_SOUND),
                     onValueSelected = { newValue ->
-                        scope.launch {
-                            settingsManager.saveStringPreference(
-                                SettingsManager.ALERT_SOUND, newValue
-                            )
-                            // Play the selected sound when changing the setting
-                            getSoundResourceId(newValue).let { soundId ->
-                                playSound(soundId)
-                            }
-                        }
+                        viewModel.saveStringPreference(
+                            SettingsViewModel.ALERT_SOUND, newValue
+                        )
                     })
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
 
             PreferenceCategory(
                 title = "بروزرسانی پایگاه داده", icon = Icons.Outlined.Refresh,
@@ -140,48 +119,29 @@ fun SettingsScreen(settingsManager: SettingsManager) {
                         .toList(),
                     values = context.resources.getStringArray(R.array.database_update_frequency_values)
                         .toList(),
-                    currentValue = prefs.value[SettingsManager.DATABASE_UPDATE_FREQ]
-                        ?: context.resources.getStringArray(R.array.database_update_frequency_values)
-                            .first(),
+                    currentValue = prefs[SettingsViewModel.DATABASE_UPDATE_FREQ]
+                        ?: viewModel.getDefaultValue(
+                            context,
+                            SettingsViewModel.DATABASE_UPDATE_FREQ
+                        ),
                     onValueSelected = { newValue ->
-                        scope.launch {
-                            settingsManager.saveStringPreference(
-                                SettingsManager.DATABASE_UPDATE_FREQ, newValue
-                            )
-                        }
+                        viewModel.saveStringPreference(
+                            SettingsViewModel.DATABASE_UPDATE_FREQ, newValue
+                        )
                     })
             }
 
-            PreferenceCategory(title = "ظاهر", icon = Icons.Outlined.Menu) {
-                ListPreference(
-                    title = stringResource(id = R.string.setting_theme),
-                    entries = context.resources.getStringArray(R.array.theme).toList(),
-                    values = context.resources.getStringArray(R.array.theme_values).toList(),
-                    currentValue = prefs.value[SettingsManager.THEME]
-                        ?: context.resources.getStringArray(R.array.theme_values).first(),
-                    onValueSelected = { newValue ->
-                        scope.launch {
-                            settingsManager.saveStringPreference(SettingsManager.THEME, newValue)
-                        }
-                    })
-
-                ListPreference(
-                    title = stringResource(id = R.string.setting_font),
-                    entries = context.resources.getStringArray(R.array.font).toList(),
-                    values = context.resources.getStringArray(R.array.font_values).toList(),
-                    currentValue = prefs.value[SettingsManager.FONT]
-                        ?: context.resources.getStringArray(R.array.font_values).first(),
-                    onValueSelected = { newValue ->
-                        scope.launch {
-                            settingsManager.saveStringPreference(SettingsManager.FONT, newValue)
-                        }
-                    })
-            }
 
         }
     }
+
+
 }
 
+
+/**
+ * UI component for grouping related settings
+ */
 @Composable
 fun PreferenceCategory(title: String, icon: ImageVector, content: @Composable () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -202,22 +162,17 @@ fun PreferenceCategory(title: String, icon: ImageVector, content: @Composable ()
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = ColorPrimary
             )
         }
         content()
 
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp, horizontal = 8.dp),
 
-            thickness = .8.dp, color = Color.LightGray.copy(alpha = 0.5f)
-        )
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -226,23 +181,35 @@ fun ListPreference(
     entries: List<String>,
     values: List<String>,
     currentValue: String,
-    onValueSelected: (String) -> Unit
+    onValueSelected: (String) -> Unit,
+    showInfoIcon: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val index = values.indexOf(currentValue)
     val displayValue = if (index != -1) entries[index] else ""
 
-    Text(
-        text = title,
-        modifier = Modifier.padding(start = 48.dp, top = 32.dp),
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = GreyDark
-    )
+
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.padding(start = 48.dp, top = 24.dp),
+            style = typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onBackground
+        )
+
+    }
+
     ExposedDropdownMenuBox(
-        modifier = Modifier.padding(start = 64.dp, end = 24.dp),
+        modifier = Modifier.padding(start = 60.dp, end = 24.dp),
         expanded = expanded,
-        onExpandedChange = { expanded = it }) {
+        onExpandedChange = { expanded = it }
+    ) {
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -250,7 +217,7 @@ fun ListPreference(
             readOnly = true,
             value = displayValue,
             onValueChange = {},
-            textStyle = MaterialTheme.typography.titleSmall,
+            textStyle = typography.titleSmall,
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent
@@ -263,28 +230,37 @@ fun ListPreference(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.exposedDropdownSize()
-        ) {
+            modifier = Modifier
+                .exposedDropdownSize()
+                .background(colorScheme.surface),
+
+            ) {
             entries.forEachIndexed { index, entry ->
                 DropdownMenuItem(
                     text = {
                         Text(
-                            entry, style = MaterialTheme.typography.titleSmall
-
+                            entry, style = typography.titleSmall
                         )
-                    }, onClick = {
+                    },
+                    onClick = {
                         onValueSelected(values[index])
                         expanded = false
-                    }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
             }
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    val settingsManager = SettingsManager(LocalContext.current.dataStore)
-    SettingsScreen(settingsManager)
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            SettingsScreen(
+            )
+        }
+    }
 }

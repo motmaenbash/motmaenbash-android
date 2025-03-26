@@ -7,7 +7,9 @@ import nu.milad.motmaenbash.utils.DatabaseHelper
 
 
 class UrlDetectionService : AccessibilityService() {
-
+    private var isDialogShown = false
+    private var preViousCapturedUrl: String? = null
+    private val previousUrlDetections = HashMap<String, Long>()
     private lateinit var databaseHelper: DatabaseHelper
     private val LOG_TAG = "UrlDetectionService"
 

@@ -11,14 +11,17 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import nu.milad.motmaenbash.BuildConfig
+import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants
 import nu.milad.motmaenbash.consts.AppConstants.APP_PREFERENCES
 import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_LAST_UPDATE_TIME
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_DATA_URL
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_TIPS_URL
 import nu.milad.motmaenbash.viewmodels.MainViewModel
+import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 import nu.milad.motmaenbash.workers.DatabaseUpdateWorker
 import org.json.JSONArray
 import org.json.JSONObject
@@ -37,20 +40,44 @@ class UpdateManager(
     private val workManager = WorkManager.getInstance(context)
     private val dbHelper = DatabaseHelper(context)
 
+    sealed class UpdateState {
+        data class Idle(val lastUpdateTime: String) : UpdateState()
+        object Updating : UpdateState()
+        data class Success(val lastUpdateTime: String) : UpdateState()
+        data class Skipped(val message: String) : UpdateState()
+        data class Error(val message: String) : UpdateState()
+
+    }
+
+    sealed class UpdateResult {
+        object Success : UpdateResult()
+        object Skipped : UpdateResult()
+        data class Error(val message: String) : UpdateResult()
+    }
+
     /**
      * Initiates a database update if conditions are met
      * @return True if update was performed, false otherwise
      */
-    suspend fun updateDatabase(): Boolean {
-        if (!shouldPerformUpdate()) return false
-
-        // Internet connection is not available
-        return if (NetworkUtils.isInternetAvailable(context)) {
-            executeDataUpdate()
-        } else {
-            showNetworkErrorMessage()
-            false
+    suspend fun updateDatabase(): UpdateResult {
+        if (!shouldPerformUpdate()) {
+            return UpdateResult.Skipped
         }
+
+        return if (NetworkUtils.isInternetAvailable(context)) {
+            try {
+                executeDataUpdate(showToast = true)
+                UpdateResult.Success
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during database update: ${e.message}", e)
+                UpdateResult.Error(e.message ?: "Unknown error")
+            }
+        } else {
+            // Internet connection is not available
+            showNetworkErrorMessage()
+            UpdateResult.Skipped
+        }
+
     }
 
     /**
@@ -114,6 +141,7 @@ class UpdateManager(
     suspend fun checkAppUpdate(): MainViewModel.UpdateDialogState? = withContext(Dispatchers.IO) {
         try {
             val response = URL(AppConstants.UPDATE_APP_URL).readText()
+
             val jsonObject = JSONObject(response)
 
             val currentVersionCode = BuildConfig.VERSION_CODE
@@ -196,31 +224,41 @@ class UpdateManager(
     /**
      * Schedules periodic database updates
      */
-    fun scheduleDatabaseUpdate() {
-        // Define constraints
-        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true).build()
+    suspend fun scheduleDatabaseUpdate() {
+        val frequency = context.dataStore.data
+            .firstOrNull()
+            ?.get(SettingsViewModel.DATABASE_UPDATE_FREQ)
+            ?: context.resources.getStringArray(R.array.database_update_frequency_values).first()
+
+
+        Log.d("AppInitialization", "Scheduling database update every $frequency hours")
+
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
 
         // Create a periodic work request
         val databaseUpdateRequest =
-//            PeriodicWorkRequestBuilder<DatabaseUpdateWorker>(24, TimeUnit.HOURS)
-            //todo: fix time for production
-            PeriodicWorkRequestBuilder<DatabaseUpdateWorker>(2, TimeUnit.MINUTES).setConstraints(
+            PeriodicWorkRequestBuilder<DatabaseUpdateWorker>(
+                frequency.toLong(),
+                TimeUnit.HOURS
+            ).setConstraints(
                 constraints
             ).setBackoffCriteria(
                 BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES
             ).build()
 
 
-        // Cancel the existing work
-//        workManager.cancelUniqueWork(WORK_NAME)
-
-
         // Enqueue the periodic work
         workManager.enqueueUniquePeriodicWork(
-            "database_update_work", ExistingPeriodicWorkPolicy.KEEP, databaseUpdateRequest
+            "database_update_work",
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            databaseUpdateRequest
         )
     }
+
 
     /**
      * Determines if an update should be performed based on last update time
