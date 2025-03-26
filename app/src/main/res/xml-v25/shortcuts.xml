@@ -8,7 +8,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:data="app://scan"
-            android:targetClass="nu.milad.motmaenbash.ui.MainActivity"
+            android:targetClass="nu.milad.motmaenbash.ui.activities.MainActivity"
             android:targetPackage="nu.milad.motmaenbash" />
     </shortcut>
 
@@ -21,7 +21,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:data="app://url_scan"
-            android:targetClass="nu.milad.motmaenbash.ui.MainActivity"
+            android:targetClass="nu.milad.motmaenbash.ui.activities.MainActivity"
             android:targetPackage="nu.milad.motmaenbash" />
     </shortcut>
 
@@ -34,7 +34,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:data="app://report"
-            android:targetClass="nu.milad.motmaenbash.ui.MainActivity"
+            android:targetClass="nu.milad.motmaenbash.ui.activities.MainActivity"
             android:targetPackage="nu.milad.motmaenbash" />
     </shortcut>
 </shortcuts>
