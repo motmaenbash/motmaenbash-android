@@ -1,21 +1,17 @@
-package nu.milad.motmaenbash.ui
+package nu.milad.motmaenbash.ui.activities
+
 
 import android.app.ActivityManager
 import android.content.Context
-import android.graphics.Color
-import android.media.AudioManager
-import android.media.SoundPool
+import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,22 +19,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -51,18 +54,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.lifecycleScope
+import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.ui.ui.theme.ColorPrimary
-import nu.milad.motmaenbash.ui.ui.theme.GreenDark
-import nu.milad.motmaenbash.ui.ui.theme.GreyDark
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.ui.theme.Red
-import nu.milad.motmaenbash.ui.ui.theme.Yellow
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_APP_FLAGGED
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_SMS_KEYWORD_FLAGGED
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_SMS_LINK_FLAGGED
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_SMS_PATTERN_FLAGGED
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_SMS_SAFE
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.ALERT_TYPE_SMS_SENDER_FLAGGED
+import nu.milad.motmaenbash.ui.components.AppCard
+import nu.milad.motmaenbash.ui.components.RowDivider
+import nu.milad.motmaenbash.ui.theme.GreenDark
+import nu.milad.motmaenbash.ui.theme.GreyDark
+import nu.milad.motmaenbash.ui.theme.GreyMiddle
+import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.ui.theme.Red
+import nu.milad.motmaenbash.ui.theme.Yellow
+import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.PackageUtils
-import nu.milad.motmaenbash.utils.SettingsManager
 import nu.milad.motmaenbash.utils.dataStore
+import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 
 class AlertHandlerActivity : ComponentActivity() {
 
@@ -96,21 +110,11 @@ class AlertHandlerActivity : ComponentActivity() {
             NORMAL, WARNING, ERROR
         }
 
-        const val UNINSTALL_REQUEST_CODE = 1001
-
         // Sound types
         const val SOUND_TYPE_DING1 = "ding1"
-        const val SOUND_TYPE_DING2 = "ding2"
-        const val SOUND_TYPE_DING3 = "ding3"
-        const val SOUND_TYPE_DING4 = "ding4"
-        const val SOUND_TYPE_DING5 = "ding5"
+
     }
 
-    private var soundPool: SoundPool? = null
-    private var dingSoundId: Int = 0
-
-    private var vibrator: Vibrator? = null
-    private lateinit var settingsManager: SettingsManager
     private var alertSound: String = SOUND_TYPE_DING1
 
     private var playSoundInSilentMode: Boolean = false
@@ -118,57 +122,31 @@ class AlertHandlerActivity : ComponentActivity() {
     private var param1: String = ""
     private var param2: String = ""
 
+    private lateinit var audioHelper: AudioHelper
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize settings manager
-        settingsManager = SettingsManager(dataStore)
+        audioHelper = AudioHelper(this)
 
         // Get user preferences
-        runBlocking {
-            val preferences = settingsManager.preferencesFlow.first()
-            alertSound = preferences[SettingsManager.ALERT_SOUND] ?: SOUND_TYPE_DING1
-
-            val playInSilentPref = preferences[SettingsManager.PLAY_SOUND_IN_SILENT_MODE] ?: "false"
+        lifecycleScope.launch {
+            val preferences = applicationContext.dataStore.data.first()
+            alertSound = preferences[SettingsViewModel.ALERT_SOUND] ?: SOUND_TYPE_DING1
+            val playInSilentPref =
+                preferences[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE] ?: "false"
             playSoundInSilentMode = playInSilentPref == "true"
+            // Vibrate when alert is shown
+            audioHelper.vibrateDevice(this@AlertHandlerActivity)
 
+            // Play sound using SoundPlayer
+            audioHelper.playSound(alertSound, playSoundInSilentMode)
         }
 
-        // Initialize Vibrator
-        vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            val vibratorManager =
-                getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION") getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
-        // Initialize SoundPool with audio attributes
-        soundPool = SoundPool.Builder().setMaxStreams(1).build()
-
-        val soundResId = when (alertSound) {
-            SOUND_TYPE_DING2 -> R.raw.ding2
-            SOUND_TYPE_DING3 -> R.raw.ding3
-            SOUND_TYPE_DING4 -> R.raw.ding4
-            SOUND_TYPE_DING5 -> R.raw.ding5
-            else -> R.raw.ding1
-        }
-
-        // Load sound
-        dingSoundId = soundPool?.load(this, soundResId, 1) ?: 0
-
-        soundPool?.setOnLoadCompleteListener { _, id, status ->
-            if (status == 0 && id == dingSoundId) {
-                // Vibrate when alert is shown
-                vibrateDevice()
-
-                // Play sound if appropriate
-                playAlertSound()
-            }
-        }
 
         val taskDescription = ActivityManager.TaskDescription(
-            getString(R.string.alert_dialog_activity_title), null, Color.TRANSPARENT
+            getString(R.string.alert_dialog_activity_title), null, TRANSPARENT
         )
         setTaskDescription(taskDescription)
 
@@ -197,50 +175,19 @@ class AlertHandlerActivity : ComponentActivity() {
                     subTitle = subTitle,
                     message = message,
                     param1 = param1,
+                    param2 = param2,
                     onDismiss = { finishAndRemoveTask() },
                     onUninstall = {
                         val intent = PackageUtils.uninstallApp(this, param1)
                         uninstallLauncher.launch(intent)
-                    }
+                    },
+                    context = this
                 )
 
             }
         }
     }
 
-    private fun vibrateDevice() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            vibrator?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION") vibrator?.vibrate(500)
-        }
-    }
-
-    private fun playAlertSound() {
-        // Check if we should play sound in silent mode
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val ringerMode = audioManager.ringerMode
-
-        val shouldPlaySound = when {
-            // In normal mode, always play
-            ringerMode == AudioManager.RINGER_MODE_NORMAL -> true
-
-            // In silent/vibrate mode, play only if playSoundInSilentMode is true
-            playSoundInSilentMode -> true
-
-            // Otherwise don't play
-            else -> false
-        }
-
-
-        if (!shouldPlaySound) {
-            return
-        }
-
-
-        soundPool?.play(dingSoundId, 1f, 1f, 1, 0, 1f) ?: -1
-
-    }
 
     private fun getAlertContent(
         alertType: Int, param1: String, param2: String
@@ -248,28 +195,28 @@ class AlertHandlerActivity : ComponentActivity() {
         return when (alertType) {
             ALERT_TYPE_SMS_SENDER_FLAGGED -> Pair(
                 "شناسایی فرستنده مشکوک!",
-                "این فرستنده در لیست سیاه قرار دارد." + "\n\nفرستنده: $param1"
+                "این فرستنده در لیست سیاه قرار دارد." + "\n\nفرستنده پیامک: $param1"
             )
 
             ALERT_TYPE_SMS_LINK_FLAGGED -> Pair(
-                "شناسایی لینک مشکوک!", "متن پیام: $param2\n\nفرستنده: $param1"
+                "شناسایی لینک مشکوک!", "\n\nفرستنده پیامک: $param1"
             )
 
             ALERT_TYPE_SMS_KEYWORD_FLAGGED -> Pair(
-                "کلمه کلیدی مشکوک!", "متن پیام: $param2\n\nفرستنده: $param1"
+                "کلمه کلیدی مشکوک!", "\n\nفرستنده پیامک: $param1"
             )
 
             ALERT_TYPE_SMS_PATTERN_FLAGGED -> Pair(
-                "شناسایی پیامک مشکوک!", "متن پیام: $param2"
+                "شناسایی پیامک مشکوک!", "\n\nفرستنده پیامک: $param1"
             )
 
             ALERT_TYPE_SMS_SAFE -> Pair(
-                "پیامک ایمن", "محتوای مشکوکی شناسایی نشد." + "\n\n$param2\n\nفرستنده: $param1"
+                "پیامک امن", "محتوای مشکوکی شناسایی نشد." + "\n\nفرستنده پیامک: $param1"
             )
 
             ALERT_TYPE_APP_FLAGGED -> Pair(
                 "برنامه مشکوک!",
-                "برنامه $param1 یک برنامه مخرب و بدافزار است. لطفا بدون اینکه برنامه را باز کنید، سریعا ان را حذف کنید."
+                "برنامه «$param2» یک برنامه مخرب و بدافزار است."
             )
 
             ALERT_TYPE_URL_FLAGGED -> Pair(
@@ -288,8 +235,7 @@ class AlertHandlerActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        soundPool?.release()
-        soundPool = null
+        audioHelper.release()
     }
 
 
@@ -310,12 +256,14 @@ class AlertHandlerActivity : ComponentActivity() {
 
 @Composable
 fun AlertDialog(
+    context: Context,
     alertType: Int,
     alertLevel: AlertHandlerActivity.Companion.AlertLevel,
     title: String,
     subTitle: String?,
     message: String,
     param1: String,
+    param2: String? = "",
     onDismiss: () -> Unit,
     onUninstall: () -> Unit
 ) {
@@ -324,17 +272,15 @@ fun AlertDialog(
             dismissOnBackPress = false, dismissOnClickOutside = false
         )
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = androidx.compose.ui.graphics.Color(0xFFF5F5F5)
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            )
+        val badgeColor = when (alertLevel) {
+            AlertHandlerActivity.Companion.AlertLevel.NORMAL -> GreenDark
+            AlertHandlerActivity.Companion.AlertLevel.WARNING -> Yellow
+            AlertHandlerActivity.Companion.AlertLevel.ERROR -> Red
+        }
+
+        AppCard(
+            padding = 16.dp,
+            elevation = 4.dp
         ) {
             Column(
                 modifier = Modifier
@@ -349,32 +295,45 @@ fun AlertDialog(
                 ) {
 
 
-                    val badgeColor = when (alertLevel) {
-                        AlertHandlerActivity.Companion.AlertLevel.NORMAL -> GreenDark
-                        AlertHandlerActivity.Companion.AlertLevel.WARNING -> Yellow
-                        AlertHandlerActivity.Companion.AlertLevel.ERROR -> Red
+                    val (badgeIcon, contentDescription) = when (alertLevel) {
+                        AlertHandlerActivity.Companion.AlertLevel.NORMAL ->
+                            Icons.Outlined.Check to "عادی"
+
+                        AlertHandlerActivity.Companion.AlertLevel.WARNING ->
+                            Icons.Outlined.ErrorOutline to "هشدار"
+
+                        AlertHandlerActivity.Companion.AlertLevel.ERROR ->
+                            Icons.Outlined.ErrorOutline to "خطا"
                     }
 
-                    Box(
+                    Row(
                         modifier = Modifier
                             .wrapContentSize()
-
                             .background(
                                 color = badgeColor,
                                 shape = RoundedCornerShape(4.dp)
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
+                        Icon(
+                            imageVector = badgeIcon,
+                            contentDescription = contentDescription,
+                            tint = colorScheme.onPrimary,
+                            modifier = Modifier
+                                .size(18.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(4.dp))
 
                         Text(
                             text = title,
-                            color = androidx.compose.ui.graphics.Color.White,
-                            fontSize = 14.sp,
+                            color = colorScheme.onPrimary,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-
-                            )
-
+                            textAlign = TextAlign.Center
+                        )
                     }
 
 
@@ -383,9 +342,9 @@ fun AlertDialog(
                         onClick = onDismiss, modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_close),
+                            imageVector = Icons.Default.Close,
                             contentDescription = "بستن",
-                            tint = GreyDark
+                            tint = GreyMiddle
                         )
                     }
                 }
@@ -393,14 +352,10 @@ fun AlertDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
 
-
-
-
-
                 Text(
                     text = title,
-                    color = Red,
-                    fontSize = 18.sp,
+                    color = badgeColor,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -408,14 +363,14 @@ fun AlertDialog(
                         .padding(bottom = 8.dp)
                 )
 
-                HorizontalDivider(
-                    color = Red, thickness = 2.dp
-                )
+
+                RowDivider(verticalPadding = 0.dp)
+
 
                 if (!subTitle.isNullOrEmpty()) {
                     Text(
                         text = subTitle,
-                        color = androidx.compose.ui.graphics.Color.Black,
+                        color = Black,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -428,33 +383,146 @@ fun AlertDialog(
 
                 Text(
                     text = message,
-                    color = androidx.compose.ui.graphics.Color.Black,
-                    fontSize = 16.sp,
+                    color = colorScheme.onSurface,
+                    fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                         .verticalScroll(scrollState)
                 )
 
-
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ColorPrimary
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = "متوجه شدم",
-                        color = androidx.compose.ui.graphics.Color.White,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                if (alertType in listOf(
+                        ALERT_TYPE_SMS_SENDER_FLAGGED,
+                        ALERT_TYPE_SMS_LINK_FLAGGED,
+                        ALERT_TYPE_SMS_KEYWORD_FLAGGED,
+                        ALERT_TYPE_SMS_PATTERN_FLAGGED,
+                        ALERT_TYPE_SMS_SAFE
                     )
-                }
+                ) {
 
-                if (alertType == AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED) {
+
+                    if (param2 != null) {
+                        Text(
+                            text = "متن پیامک:",
+                            color = colorScheme.onSurface,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(16.dp)),
+                            horizontalAlignment = Alignment.Start
+
+                        ) {
+
+                            Text(
+                                text = param2,
+                                color = colorScheme.onSurface,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(colorScheme.background)
+                                    .padding(8.dp)
+
+
+                            )
+
+                        }
+                    }
+
+                    Text(
+                        text = " لطفا بدون اینکه پیامک را باز کنید، سریعا آن را حذف کنید.",
+                        color = colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    )
+
+                } else if (alertType == ALERT_TYPE_APP_FLAGGED) {
+                    // Display app icon and name for app alerts
+                    val appInfo = run {
+                        val pm = context.packageManager
+                        try {
+                            pm.getApplicationInfo(param1, 0)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    if (appInfo != null) {
+
+
+                        Column(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(16.dp)),
+
+                            horizontalAlignment = Alignment.CenterHorizontally
+
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(colorScheme.background)
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    if (param2 != null) {
+                                        Text(
+                                            text = param2,
+                                            color = colorScheme.onSurface,
+                                            fontSize = 14.sp,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    Text(
+                                        text = param1,
+                                        color = colorScheme.onSurfaceVariant,
+                                        fontSize = 12.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        model = appInfo.loadIcon(context.packageManager)
+                                    ),
+                                    contentDescription = "MotmaenBash Logo",
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = " لطفا بدون اینکه برنامه را باز کنید، سریعا آن را حذف کنید.",
+                        color = colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    )
+
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
@@ -470,11 +538,28 @@ fun AlertDialog(
                     {
                         Text(
                             text = "حذف سریع این برنامه",
-                            color = androidx.compose.ui.graphics.Color.White,
+                            color = White,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                } else {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "متوجه شدم",
+                            color = White,
+                            fontSize = 13.sp,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
                 }
+
+
             }
 
 
@@ -484,7 +569,7 @@ fun AlertDialog(
                 AlertHandlerActivity.ALERT_TYPE_SMS_PATTERN_FLAGGED,
                 AlertHandlerActivity.ALERT_TYPE_SMS_SAFE -> "محافظ پیامک"
 
-                AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED -> "محافظ برنامه"
+                ALERT_TYPE_APP_FLAGGED -> "محافظ برنامه"
 
                 AlertHandlerActivity.ALERT_TYPE_URL_FLAGGED,
                 AlertHandlerActivity.ALERT_TYPE_DOMAIN_FLAGGED -> "محافظ وب‌گردی"
@@ -492,26 +577,29 @@ fun AlertDialog(
                 else -> "محافظ"
             }
 
+            RowDivider(verticalPadding = 0.dp)
+
             Text(
 
                 buildAnnotatedString {
                     append("شناسایی شده توسط ")
                     withStyle(
                         style = SpanStyle(
-                            color = GreyDark, fontWeight = FontWeight.Bold
+                            color = GreyMiddle, fontWeight = FontWeight.Bold
                         )
                     ) {
                         append(protectionType)
                     }
                     withStyle(
                         style = SpanStyle(
-                            color = ColorPrimary, fontWeight = FontWeight.Bold
+                            color = colorScheme.primary, fontWeight = FontWeight.Bold
                         )
                     ) {
                         append(" مطمئن باش")
                     }
                 },
-                fontSize = 14.sp,
+
+                fontSize = 12.sp,
                 color = GreyDark,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -528,7 +616,7 @@ class AlertTypePreviewParameterProvider : PreviewParameterProvider<Int> {
     override val values = sequenceOf(
         AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
         AlertHandlerActivity.ALERT_TYPE_SMS_LINK_FLAGGED,
-        AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
+        ALERT_TYPE_APP_FLAGGED,
         AlertHandlerActivity.ALERT_TYPE_URL_FLAGGED
     )
 }
@@ -538,7 +626,6 @@ class AlertTypePreviewParameterProvider : PreviewParameterProvider<Int> {
 @Composable
 fun AlertDialogSmsPreview() {
     MotmaenBashTheme {
-
         AlertDialog(
             alertType = AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
             alertLevel = AlertHandlerActivity.Companion.AlertLevel.WARNING,
@@ -547,7 +634,8 @@ fun AlertDialogSmsPreview() {
             message = "این فرستنده در لیست سیاه قرار دارد.\n\nفرستنده: 3000123456",
             param1 = "3000123456",
             onDismiss = {},
-            onUninstall = {}
+            onUninstall = {},
+            context = LocalContext.current
         )
     }
 }
@@ -556,17 +644,19 @@ fun AlertDialogSmsPreview() {
 @Preview(showBackground = true, name = "هشدار برنامه مشکوک")
 @Composable
 fun AlertDialogAppPreview() {
-    MotmaenBashTheme {
 
+    MotmaenBashTheme {
         AlertDialog(
-            alertType = AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED,
+            alertType = ALERT_TYPE_APP_FLAGGED,
             alertLevel = AlertHandlerActivity.Companion.AlertLevel.ERROR,
             title = "برنامه مشکوک!",
             subTitle = null,
-            message = "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است. لطفا بدون اینکه برنامه را باز کنید، سریعا ان را حذف کنید.",
-            param1 = "حمله فیشینگ",
+            message = "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است.",
+            param1 = "test.app.pack",
+            param2 = "نام برنامه مخرب",
             onDismiss = {},
-            onUninstall = {}
+            onUninstall = {},
+            context = LocalContext.current
         )
     }
 }
@@ -584,7 +674,9 @@ fun AlertDialogDomainPreview() {
             message = "این دامنه در لیست سیاه قرار دارد.",
             param1 = "",
             onDismiss = {},
-            onUninstall = {}
+            onUninstall = {},
+            context = LocalContext.current
+
         )
     }
 }
@@ -607,9 +699,9 @@ fun AlertDialogParameterizedPreview(
             AlertHandlerActivity.Companion.AlertLevel.ERROR
         )
 
-        AlertHandlerActivity.ALERT_TYPE_APP_FLAGGED -> Triple(
+        ALERT_TYPE_APP_FLAGGED -> Triple(
             "برنامه مشکوک!",
-            "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است. لطفا بدون اینکه برنامه را باز کنید، سریعا ان را حذف کنید.",
+            "برنامه حمله فیشینگ یک برنامه مخرب و بدافزار است.",
             AlertHandlerActivity.Companion.AlertLevel.ERROR
         )
 
@@ -635,7 +727,8 @@ fun AlertDialogParameterizedPreview(
             message = message,
             param1 = "",
             onDismiss = {},
-            onUninstall = {}
+            onUninstall = {},
+            context = LocalContext.current
         )
     }
 }

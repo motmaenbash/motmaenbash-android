@@ -1,12 +1,10 @@
-package nu.milad.motmaenbash.ui
-
+package nu.milad.motmaenbash.ui.activities
 
 import AboutScreen
-import AppScanScreen
 import MainScreen
-import UserReportScreen
+import PermissionsIntroScreen
+import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,16 +14,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_INTRO_SHOWN
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.consts.Pages
 import nu.milad.motmaenbash.services.MonitoringService
-import nu.milad.motmaenbash.ui.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.utils.SettingsManager
+import nu.milad.motmaenbash.ui.screens.AppScanScreen
+import nu.milad.motmaenbash.ui.screens.InfoListScreen
+import nu.milad.motmaenbash.ui.screens.SettingsScreen
+import nu.milad.motmaenbash.ui.screens.UrlScanScreen
+import nu.milad.motmaenbash.ui.screens.UserReportScreen
+import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.utils.dataStore
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +39,24 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        actionBar?.hide()
+
+        lifecycleScope.launch {
+
+            val startDestination = handleIntent(intent, this@MainActivity)
+
+            setContent {
+                MotmaenBashTheme {
+                    val navController = rememberNavController()
+                    CompositionLocalProvider(LocalNavController provides navController) {
+                        AppNavigation(startDestination)
+                    }
+                }
+
+            }
+        }
+
 
         // Start the monitoring service
         val serviceIntent = Intent(
@@ -44,24 +68,9 @@ class MainActivity : ComponentActivity() {
         } else {
             startService(serviceIntent)
         }
-
-        setContent {
-            MotmaenBashTheme {
-                val navController = rememberNavController()
-                val targetScreen = handleIntent(intent.data)
-                CompositionLocalProvider(LocalNavController provides navController) {
-                    AppNavigation(targetScreen)
-                }
-
-
-            }
-        }
     }
 
-
 }
-
-
 
 val LocalNavController = compositionLocalOf<NavHostController> {
     error("No NavController provided")
@@ -71,15 +80,15 @@ val LocalNavController = compositionLocalOf<NavHostController> {
 fun AppNavigation(
     startDestination: String
 ) {
-
     val context = LocalContext.current
     val navController = LocalNavController.current
 
     // Handle back press
     BackHandler(enabled = true) {
-
-        if (navController.currentBackStackEntry?.destination?.route == NavRoutes.MAIN_SCREEN) {
-            // Close the app when on main screen
+        if (navController.currentBackStackEntry?.destination?.route == NavRoutes.MAIN_SCREEN ||
+            navController.currentBackStackEntry?.destination?.route == NavRoutes.PERMISSION_INTRO_SCREEN
+        ) {
+            // Close the app when on Main or Intro screen
             (context as? ComponentActivity)?.finish()
 
 
@@ -91,45 +100,47 @@ fun AppNavigation(
         }
     }
 
-
     NavHost(navController = navController, startDestination = startDestination) {
-
         composable(NavRoutes.MAIN_SCREEN) { MainScreen() }
+        composable(NavRoutes.PERMISSION_INTRO_SCREEN) { PermissionsIntroScreen() }
         composable(NavRoutes.ABOUT_SCREEN) { AboutScreen() }
         composable(NavRoutes.USER_REPORT_SCREEN) { UserReportScreen() }
         composable(NavRoutes.URL_SCAN_SCREEN) { UrlScanScreen() }
         composable(NavRoutes.APP_SCAN_SCREEN) { AppScanScreen() }
         composable(NavRoutes.FAQ_SCREEN) { InfoListScreen(Pages.FAQ) }
-        composable(NavRoutes.PERMISSION_SCREEN) {
-            InfoListScreen(
-                Pages.PERMISSION
-            )
-        }
-        composable(NavRoutes.SETTINGS_SCREEN) {
-            SettingsScreen(settingsManager = SettingsManager(context.dataStore))
-        }
+        composable(NavRoutes.PERMISSION_SCREEN) { InfoListScreen(Pages.PERMISSION) }
+        composable(NavRoutes.SETTINGS_SCREEN) { SettingsScreen() }
     }
 }
 
+private suspend fun handleIntent(intent: Intent?, context: Context): String {
+    val dataStore = context.dataStore
 
-private fun handleIntent(uri: Uri?): String {
-    return when (uri?.scheme) {
-        "app" -> when (uri.schemeSpecificPart) {
+    val isIntroShown = dataStore.data.firstOrNull()?.get(
+        booleanPreferencesKey(PREF_KEY_INTRO_SHOWN)
+    ) ?: false
+
+    if (!isIntroShown) {
+        return NavRoutes.PERMISSION_INTRO_SCREEN
+    }
+
+    val data = intent?.data
+
+    return when {
+        // App shortcut scheme handling
+        data?.scheme == "app" -> when (data.schemeSpecificPart) {
             "//scan" -> NavRoutes.APP_SCAN_SCREEN
             "//url_scan" -> NavRoutes.URL_SCAN_SCREEN
             "//report" -> NavRoutes.USER_REPORT_SCREEN
             else -> NavRoutes.MAIN_SCREEN
         }
 
+        // process browser intent (ACTION_SEND, PROCESS_TEXT)
+        intent?.action in listOf(
+            Intent.ACTION_SEND,
+            Intent.ACTION_PROCESS_TEXT
+        ) -> NavRoutes.URL_SCAN_SCREEN
+
         else -> NavRoutes.MAIN_SCREEN
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun MainActivityPreview() {
-    MotmaenBashTheme {
-        AppNavigation(NavRoutes.MAIN_SCREEN)
     }
 }

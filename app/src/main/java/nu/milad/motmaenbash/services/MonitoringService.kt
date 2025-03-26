@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.receivers.AppInstallReceiver
 import nu.milad.motmaenbash.receivers.SmsReceiver
-import nu.milad.motmaenbash.ui.MainActivity
+import nu.milad.motmaenbash.ui.activities.MainActivity
 
 class MonitoringService : Service() {
 
@@ -90,8 +90,8 @@ class MonitoringService : Service() {
 
         return NotificationCompat.Builder(this, SMS_CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(" در حال محافظت توسط مطمئن باش :app")
-            .setSmallIcon(R.drawable.ic_bug)
+            .setContentText(" در حال محافظت توسط مطمئن باش ")
+            .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setSound(null)
             .setVibrate(longArrayOf(0))

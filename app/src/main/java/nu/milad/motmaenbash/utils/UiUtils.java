@@ -11,10 +11,8 @@ import nu.milad.motmaenbash.R;
 
 public class UiUtils {
 
-    private static String TYPEFACE_NAME;
-
     private static final LruCache<String, Typeface> sTypeFaceCache = new LruCache<>(12);
-
+    private static String TYPEFACE_NAME;
     private static Typeface sTypeFace;
 
     public static Typeface getTypeFace(Context context) {
@@ -24,7 +22,7 @@ public class UiUtils {
         sTypeFace = sTypeFaceCache.get(TYPEFACE_NAME);
 
         if (sTypeFace == null) {
-            Typeface sTypeFace = ResourcesCompat.getFont(context, R.font.vazir_matn_medium);
+            Typeface sTypeFace = ResourcesCompat.getFont(context, R.font.vazirmatn_medium);
             sTypeFaceCache.put(TYPEFACE_NAME, sTypeFace);
         }
         return sTypeFace;

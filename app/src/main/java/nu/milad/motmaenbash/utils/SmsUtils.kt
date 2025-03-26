@@ -3,8 +3,15 @@ package nu.milad.motmaenbash.utils
 import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsMessage
+import android.util.Log
+import nu.milad.motmaenbash.utils.TextUtils.arabicToPersian
+import nu.milad.motmaenbash.utils.TextUtils.cleanMessage
+import nu.milad.motmaenbash.utils.TextUtils.extractPhrases
+import nu.milad.motmaenbash.utils.TextUtils.removeLinks
+import nu.milad.motmaenbash.utils.TextUtils.removeShortWords
 
 object SmsUtils {
+
 
     /**
      * Retrieves an SmsMessage object from a PDU (Protocol Data Unit).
@@ -19,5 +26,7 @@ object SmsUtils {
             SmsMessage.createFromPdu(pdu, format)
         } else {
             SmsMessage.createFromPdu(pdu)
+        }
     }
+
 }
