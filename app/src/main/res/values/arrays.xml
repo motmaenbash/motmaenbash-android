@@ -7,15 +7,15 @@
         <item>@string/daily</item>
     </string-array>
     <string-array name="database_update_frequency_values">
-        <item>hourly</item>
-        <item>every_6_hours</item>
-        <item>daily</item>
+        <item>1</item>
+        <item>6</item>
+        <item>24</item>
     </string-array>
 
     <!-- Theme Options -->
     <string-array name="theme">
-        <item>@string/light_mode</item>
-        <item>@string/dark_mode</item>
+        <item>@string/light</item>
+        <item>@string/dark</item>
         <item>@string/system_default</item>
     </string-array>
     <string-array name="theme_values">
@@ -27,11 +27,9 @@
     <!-- Font Options -->
     <string-array name="font">
         <item>@string/vazir</item>
-        <item>@string/sahel</item>
     </string-array>
     <string-array name="font_values">
         <item>vazir</item>
-        <item>sahel</item>
     </string-array>
 
     <!-- Alert Sounds -->
@@ -41,6 +39,7 @@
         <item>@string/ding3_sound</item>
         <item>@string/ding4_sound</item>
         <item>@string/ding5_sound</item>
+        <item>@string/ding6_sound</item>
     </string-array>
     <string-array name="alert_sound_values">
         <item>ding1</item>
@@ -48,6 +47,7 @@
         <item>ding3</item>
         <item>ding4</item>
         <item>ding5</item>
+        <item>ding6</item>
     </string-array>
 
     <!-- Play Sound in Silent Mode Options -->
@@ -83,5 +83,6 @@
         <item>برای اسکن کردن پیامک‌های دریافتی و شناسایی پیامک‌های مخرب یا فیشینگ، این اپلیکیشن نیاز به دسترسی به پیامک‌های شما دارد. (RECEIVE_SMS)</item>
 
     </string-array>
+
 
 </resources>

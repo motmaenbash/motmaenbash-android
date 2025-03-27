@@ -12,7 +12,10 @@
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        android:minSdkVersion="29" />
+
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Permission to receive SMS messages -->
@@ -31,40 +34,57 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Base.Theme.MotmaenBash">
+        android:supportsRtl="true">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:exported="true"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+            </intent-filter>
+
         </activity>
 
         <activity
-            android:name=".ui.MainActivityOld"
-            android:exported="true" />
-
-
-        <activity
-            android:name=".ui.AlertHandlerActivity"
+            android:name=".ui.activities.AlertHandlerActivity"
             android:exported="false"
             android:launchMode="standard"
             android:taskAffinity=""
-            android:theme="@style/Theme.AppCompat.Dialog.Alert" />
+            android:theme="@style/Theme.Material3.DayNight.Dialog" />
+
+
+        <activity
+            android:name=".ui.activities.PermissionTutorialActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Material3.DayNight.Dialog" />
 
 
         <service
             android:name=".services.UrlDetectionService"
-            class=".UrlInterceptorService"
             android:enabled="true"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -81,6 +101,7 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service" />
         </service>
+
         <service
             android:name=".services.FloatingViewService"
             android:enabled="true"

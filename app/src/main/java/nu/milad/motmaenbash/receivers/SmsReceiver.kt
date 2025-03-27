@@ -6,8 +6,8 @@ import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import nu.milad.motmaenbash.ui.AlertHandlerActivity
-import nu.milad.motmaenbash.ui.AlertHandlerActivity.Companion.AlertLevel
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity
+import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.AlertLevel
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.SmsUtils.getSmsMessageFromPdu
@@ -23,7 +23,9 @@ class SmsReceiver : BroadcastReceiver() {
     private lateinit var dbHelper: DatabaseHelper
 
     // HashSet to store unique message IDs
-    private val receivedMessages = HashSet<String>()
+    companion object {
+        private val receivedMessages = HashSet<String>()
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -48,24 +50,22 @@ class SmsReceiver : BroadcastReceiver() {
 
 
                 val smsMessage = getSmsMessageFromPdu(pdu, bundle)
-
                 sender = sender ?: smsMessage.displayOriginatingAddress
-
                 smsMessage.messageBody?.let(fullMessageBody::append)
             }
 
             if (fullMessageBody.isNotBlank()) {
 
                 // Generate a unique message ID
-//                val messageId = "${sender}-${fullMessageBody.toString().hashCode()}"
-//                // Check if this message ID is already processed
-//                if (receivedMessages.contains(messageId)) {
-//                    Log.d(TAG, "Duplicate SMS received, ignoring.")
-//                    return
-//                } else {
-//                    receivedMessages.add(messageId)
-//                }
+                val messageId = "${sender}-${fullMessageBody.toString().hashCode()}"
 
+                // Check if this message ID is already processed
+                if (receivedMessages.contains(messageId)) {
+                    Log.d(TAG, "Duplicate SMS received, ignoring.")
+                    return
+                } else {
+                    receivedMessages.add(messageId)
+                }
 
                 analyzeSmsMessage(context, sender, fullMessageBody.toString())
             }

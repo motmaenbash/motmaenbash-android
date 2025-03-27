@@ -1,7 +1,8 @@
 package nu.milad.motmaenbash.viewmodels
 
 import android.app.Application
-import android.util.Log
+import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,44 +14,60 @@ import nu.milad.motmaenbash.utils.UrlUtils
 
 class UrlScanViewModel(private val context: Application) : AndroidViewModel(context) {
 
-
     private val dbHelper: DatabaseHelper by lazy { DatabaseHelper(context) }
 
-
-    private val _resultText = MutableStateFlow("")
-    val resultText: StateFlow<String> = _resultText.asStateFlow()
-
-    private val _isSafe = MutableStateFlow<Boolean?>(null)
-    val isSafe: StateFlow<Boolean?> = _isSafe.asStateFlow()
-
-    private val _showResult = MutableStateFlow(false)
-    val showResult: StateFlow<Boolean> = _showResult.asStateFlow()
-
-    init {
-
-        Log.d("scan", "initttt")
-    }
+    val _state = MutableStateFlow<ScanState>(ScanState.Initial)
+    val state: StateFlow<ScanState> = _state.asStateFlow()
 
     fun scanUrl(urlToScan: String) {
         viewModelScope.launch {
+            _state.value = ScanState.Loading
+
             val (resultText, isSafe) = when {
                 UrlUtils.isShaparakSubdomain(urlToScan) -> Pair(
-                    "این آدرس متعلق به یک درگاه پرداخت مطمئن است.", true
+                    "این آدرس متعلق به یک درگاه پرداخت امن و مطمئن است.", true
                 )
 
                 dbHelper.isUrlFlagged(urlToScan) -> Pair(
-                    "این آدرس به عنوان یک آدرس مشکوک شناسایی شده است.", false
+                    "هشدار: این آدرس به عنوان یک آدرس مشکوک شناسایی شده است.", false
                 )
 
-                else -> Pair("این آدرس در پایگاه داده ما موجود نیست. لطفا احتیاط کنید.", null)
+                else -> Pair(
+                    "در پایگاه داده ما اطلاعاتی درباره این آدرس اینترنتی موجود نیست. اگر از آن مطمئن هستید، می‌توانید ادامه دهید، اما در صورت تردید، احتیاط کنید.",
+                    null
+                )
             }
-            _resultText.value = resultText
-            _isSafe.value = isSafe
-            _showResult.value = true
+
+            _state.value = ScanState.Result(resultText, isSafe, urlToScan)
         }
     }
 
+    fun getInitialUrl(intent: Intent?): String {
+        return when (intent?.action) {
+            Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty()
+            Intent.ACTION_PROCESS_TEXT -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT).orEmpty()
+                } else ""
+            }
+
+            else -> ""
+        }.trim()
+    }
+
     fun resetResult() {
-        _showResult.value = false
+        _state.value = ScanState.Initial
+    }
+
+    sealed class ScanState {
+        data object Initial : ScanState()
+        data object Loading : ScanState()
+        data class Result(
+            val message: String,
+            val isSafe: Boolean?,
+            val url: String
+        ) : ScanState()
+
+        data class Error(val message: String) : ScanState()
     }
 }

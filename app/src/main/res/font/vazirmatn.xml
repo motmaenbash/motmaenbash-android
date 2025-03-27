@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+    <font
+        app:font="@font/vazirmatn_thin"
+        app:fontStyle="normal"
+        app:fontWeight="100" />
+
+
+    <font
+        app:font="@font/vazirmatn_extra_light"
+        app:fontStyle="normal"
+        app:fontWeight="200" />
+
+
+    <font
+        app:font="@font/vazirmatn_light"
+        app:fontStyle="normal"
+        app:fontWeight="300" />
+
+
+    <font
+        app:font="@font/vazirmatn_regular"
+        app:fontStyle="normal"
+        app:fontWeight="400" />
+
+
+    <font
+        app:font="@font/vazirmatn_medium"
+        app:fontStyle="normal"
+        app:fontWeight="500" />
+
+
+    <font
+        app:font="@font/vazirmatn_semi_bold"
+        app:fontStyle="normal"
+        app:fontWeight="600" />
+
+
+    <font
+        app:font="@font/vazirmatn_bold"
+        app:fontStyle="normal"
+        app:fontWeight="700" />
+
+
+    <font
+        app:font="@font/vazirmatn_extra_bold"
+        app:fontStyle="normal"
+        app:fontWeight="800" />
+
+
+    <font
+        app:font="@font/vazirmatn_black"
+        app:fontStyle="normal"
+        app:fontWeight="900" />
+
+</font-family>

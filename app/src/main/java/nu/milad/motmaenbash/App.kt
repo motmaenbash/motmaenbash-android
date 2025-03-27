@@ -1,30 +1,21 @@
 package nu.milad.motmaenbash
 
 import android.app.Application
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import nu.milad.motmaenbash.consts.AppConstants
-import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_FIRST_LAUNCH
-import java.util.Locale
+import kotlinx.coroutines.withContext
+import nu.milad.motmaenbash.utils.UpdateManager
 
 
 class App : Application() {
 
 
-    private val dataStore: DataStore<Preferences> by preferencesDataStore(name = AppConstants.APP_PREFERENCES)
-
     override fun onCreate() {
         super.onCreate()
 
-        // Set default locale
-        Locale.setDefault(Locale("fa"))
 
         // Launch initialization in a background coroutine
         CoroutineScope(Dispatchers.IO).launch {
@@ -38,18 +29,30 @@ class App : Application() {
 
         try {
 
-            val isFirstLaunch = dataStore.data.firstOrNull()?.get(
-                booleanPreferencesKey(PREF_KEY_FIRST_LAUNCH)
-            ) ?: false
 
-
-
-
-            if (!isFirstLaunch) {
-                dataStore.edit { preferences ->
-                    preferences[booleanPreferencesKey(PREF_KEY_FIRST_LAUNCH)] = true
-                }
+            val workManager = WorkManager.getInstance(applicationContext)
+            val workInfos = withContext(Dispatchers.IO) {
+                workManager.getWorkInfosForUniqueWork("database_update_work").get()
             }
+
+
+            // Check if there's any work currently scheduled or running
+            val isWorkScheduled = workInfos.any { workInfo ->
+                val state = workInfo.state
+                state == WorkInfo.State.RUNNING || state == WorkInfo.State.ENQUEUED
+            }
+
+
+            if (!isWorkScheduled) {
+
+                // Initialize UpdateManager and schedule database update
+                val updateManager = UpdateManager(applicationContext)
+
+                // Schedule periodic database update
+                updateManager.scheduleDatabaseUpdate()
+
+            }
+
 
         } catch (e: Exception) {
 
@@ -58,5 +61,6 @@ class App : Application() {
         }
 
     }
-}
 
+
+}

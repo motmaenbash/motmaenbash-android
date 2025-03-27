@@ -1,15 +1,10 @@
 package nu.milad.motmaenbash.viewmodels
 
-import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +17,9 @@ import nu.milad.motmaenbash.consts.AppConstants
 import nu.milad.motmaenbash.services.UrlDetectionService
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.NumberUtils
+import nu.milad.motmaenbash.utils.PermissionManager
 import nu.milad.motmaenbash.utils.UpdateManager
+import nu.milad.motmaenbash.utils.UpdateManager.UpdateState
 import org.json.JSONObject
 import java.util.Random
 
@@ -30,6 +27,7 @@ import java.util.Random
 class MainViewModel(private val context: Application) : AndroidViewModel(context) {
 
     private val dbHelper: DatabaseHelper by lazy { DatabaseHelper(context) }
+    private val permissionManager: PermissionManager by lazy { PermissionManager(context) }
 
     // Tip of the Day
     private val _tipOfTheDay = MutableStateFlow<String?>(null)
@@ -83,7 +81,6 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         loadDatabaseUpdateTime()
         loadStatsFromDatabase()
         loadRandomSponsor()
-        updateManager.scheduleDatabaseUpdate() // Schedule periodic database updates
         checkInitialPermissions()
         startUrlInterceptorService()
     }
@@ -104,15 +101,11 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         }
     }
 
-
     // Load Database Update Time
     private fun loadDatabaseUpdateTime() {
         viewModelScope.launch {
             val lastUpdateTime = updateManager.getLastUpdateTimeAgo()
-
-
             _updateState.value = UpdateState.Idle(NumberUtils.toPersianNumbers(lastUpdateTime))
-
         }
     }
 
@@ -139,18 +132,26 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
             try {
                 _updateState.value = UpdateState.Updating
 
-                val success = updateManager.updateDatabase() // Call the update method
 
+                when (val result = updateManager.updateDatabase()) {
+                    is UpdateManager.UpdateResult.Success -> {
+                        // Reload the database update time after a successful update
+                        loadDatabaseUpdateTime()
+                        checkForAppUpdates()
+                        _updateState.value =
+                            UpdateState.Success(updateManager.getLastUpdateTimeAgo())
+                    }
 
+                    is UpdateManager.UpdateResult.Skipped -> {
+                        _updateState.value = UpdateState.Idle(updateManager.getLastUpdateTimeAgo())
+                    }
 
-                if (success) {
-                    // Reload the database update time after a successful update
-                    loadDatabaseUpdateTime()
-                    checkForAppUpdates()
-                    _updateState.value = UpdateState.Success(updateManager.getLastUpdateTimeAgo())
-                } else {
-                    _updateState.value = UpdateState.Error("Update failed")
+                    is UpdateManager.UpdateResult.Error -> {
+                        _updateState.value = UpdateState.Error(result.message)
+                    }
                 }
+
+
             } catch (e: Exception) {
                 Log.e("UpdateBug", "Error updating database", e)
                 _updateState.value = UpdateState.Error(e.message ?: "خطای نامشخص")
@@ -158,7 +159,7 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         }
     }
 
-    fun checkForAppUpdates() {
+    private fun checkForAppUpdates() {
         viewModelScope.launch {
             try {
                 val updateState = updateManager.checkAppUpdate()
@@ -173,7 +174,7 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         _updateDialogState.value = null
     }
 
-    fun loadRandomSponsor() {
+    private fun loadRandomSponsor() {
         // Only load if sponsorData is null
         if (_sponsorData.value != null) return
 
@@ -186,7 +187,7 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
                         description = it.optString("description", ""),
                         logoUrl = it.optString("logo", ""),
                         link = it.getString("link"),
-                        color = it.optString("color", null)
+                        color = it.optString("color", "")
                     )
                 }
             } catch (e: Exception) {
@@ -218,31 +219,37 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
     fun checkInitialPermissions() {
 
         // SMS
-        _smsPermissionStatus.value = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.RECEIVE_SMS
-        ) == PackageManager.PERMISSION_GRANTED
+        checkSmsPermission()
 
         // Accessibility
-        _accessibilitySettingStatus.value = try {
-            Settings.Secure.getInt(
-                context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED
-            ) != 0
-        } catch (e: Settings.SettingNotFoundException) {
-            false
-        }
+        checkAccessibilityPermission()
 
         // Overlay
-        _overlayPermissionStatus.value =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
-
+        checkOverlayPermission()
 
         // Notifications
-        _notificationPermissionStatus.value =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
+        checkNotificationPermission()
     }
 
+
+    // Check individual permissions
+    fun checkSmsPermission() {
+        _smsPermissionStatus.value = permissionManager.checkSmsPermission()
+    }
+
+    fun checkAccessibilityPermission() {
+        _accessibilitySettingStatus.value = permissionManager.checkAccessibilityPermission()
+    }
+
+    fun checkOverlayPermission() {
+        _overlayPermissionStatus.value = permissionManager.checkOverlayPermission()
+    }
+
+    fun checkNotificationPermission() {
+        _notificationPermissionStatus.value = permissionManager.checkNotificationPermission()
+    }
+
+    // Update permission status
     fun updatePermissionStatus(type: PermissionType, isGranted: Boolean) {
         when (type) {
             PermissionType.SMS -> _smsPermissionStatus.value = isGranted
@@ -251,6 +258,7 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
             PermissionType.NOTIFICATIONS -> _notificationPermissionStatus.value = isGranted
         }
     }
+
 
     enum class PermissionType {
         SMS, ACCESSIBILITY, OVERLAY, NOTIFICATIONS
@@ -270,10 +278,5 @@ class MainViewModel(private val context: Application) : AndroidViewModel(context
         val links: List<Pair<String, String>>
     )
 
-    sealed class UpdateState {
-        data class Idle(val lastUpdateTime: String) : UpdateState()
-        object Updating : UpdateState()
-        data class Success(val lastUpdateTime: String) : UpdateState()
-        data class Error(val message: String) : UpdateState()
-    }
+
 }

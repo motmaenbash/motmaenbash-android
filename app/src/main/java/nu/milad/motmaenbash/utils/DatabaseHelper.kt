@@ -283,26 +283,17 @@ class DatabaseHelper(appContext: Context) :
         val selectionArgs = arrayOf(packageName, sha1, apkSha1)
         val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
 
-        if (isFlagged) {
-            incrementUserStat(STAT_FLAGGED_APP_DETECTED)
-        }
         return isFlagged
     }
 
 
     fun isSenderFlagged(sender: String): Boolean {
-
-
         val hash = HashUtils.generateSHA256(sender)
-
         val selection = "$COLUMN_HASH = ?"
         val selectionArgs = arrayOf(hash)
         val isFlagged = countData(TABLE_FLAGGED_SENDERS, selection, selectionArgs) > 0
-        if (isFlagged) {
-            incrementUserStat(STAT_FLAGGED_SMS_DETECTED) //Increment stat
-        }
 
-        return false
+        return isFlagged
     }
 
 
@@ -330,7 +321,6 @@ class DatabaseHelper(appContext: Context) :
 
         db.rawQuery(query, wordHashes.toTypedArray()).use { cursor ->
             if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
-                incrementUserStat(STAT_FLAGGED_SMS_DETECTED)
                 return true
             }
         }
@@ -342,14 +332,9 @@ class DatabaseHelper(appContext: Context) :
     fun isMessageFlagged(message: String): Boolean {
 
         val hash = generateNormalizedMessageHash(message) ?: return false
-
-
         val selection = "$COLUMN_HASH = ?"
         val selectionArgs = arrayOf(hash)
         val isFlagged = countData(TABLE_FLAGGED_MESSAGES, selection, selectionArgs) > 0
-        if (isFlagged) {
-            incrementUserStat(STAT_FLAGGED_SMS_DETECTED) //Increment stat
-        }
 
         return isFlagged
     }
@@ -383,8 +368,9 @@ class DatabaseHelper(appContext: Context) :
 
         db.rawQuery(query, (fullUrlHashes + domainHashes).toTypedArray()).use { cursor ->
             if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
-                incrementUserStat(STAT_FLAGGED_SMS_DETECTED)
-                incrementUserStat(STAT_FLAGGED_LINK_DETECTED)
+                //todo: delete after test
+//                incrementUserStat(STAT_FLAGGED_SMS_DETECTED)
+//                incrementUserStat(STAT_FLAGGED_LINK_DETECTED)
                 return true
             }
         }
@@ -412,7 +398,6 @@ class DatabaseHelper(appContext: Context) :
 
         db.rawQuery(query, arrayOf(fullUrlHash, domainHash)).use { cursor ->
             if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
-                incrementUserStat(STAT_FLAGGED_LINK_DETECTED)
                 return true
             }
         }
@@ -444,7 +429,7 @@ class DatabaseHelper(appContext: Context) :
 
         }
         cursor.close()
-        
+
         return randomTip
     }
 
@@ -462,7 +447,7 @@ class DatabaseHelper(appContext: Context) :
     }
 
 
-    private fun incrementUserStat(statKey: String) {
+    fun incrementUserStat(statKey: String) {
         val db = writableDatabase
         val updateQuery = "UPDATE $TABLE_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
         db.execSQL(updateQuery, arrayOf(statKey))
