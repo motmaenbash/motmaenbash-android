@@ -39,6 +39,7 @@ class SmsReceiver : BroadcastReceiver() {
 
         val fullMessageBody = StringBuilder()
         var sender: String? = null
+        var timestamp: Long? = null
 
         dbHelper = DatabaseHelper(context.applicationContext)
 
@@ -51,13 +52,14 @@ class SmsReceiver : BroadcastReceiver() {
 
                 val smsMessage = getSmsMessageFromPdu(pdu, bundle)
                 sender = sender ?: smsMessage.displayOriginatingAddress
+                timestamp = smsMessage.timestampMillis
                 smsMessage.messageBody?.let(fullMessageBody::append)
             }
 
             if (fullMessageBody.isNotBlank()) {
 
                 // Generate a unique message ID
-                val messageId = "${sender}-${fullMessageBody.toString().hashCode()}"
+                val messageId = "${sender}-${fullMessageBody.toString().hashCode()}-${timestamp}"
 
                 // Check if this message ID is already processed
                 if (receivedMessages.contains(messageId)) {
@@ -68,6 +70,8 @@ class SmsReceiver : BroadcastReceiver() {
                 }
 
                 analyzeSmsMessage(context, sender, fullMessageBody.toString())
+
+
             }
 
         } catch (e: Exception) {
@@ -108,8 +112,8 @@ class SmsReceiver : BroadcastReceiver() {
                     context,
                     AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
                     AlertLevel.ERROR.toString(),
-                    sender,
-                    messageText,
+                    param1 = sender,
+                    param2 = messageText,
                 )
                 return
             }
@@ -121,8 +125,8 @@ class SmsReceiver : BroadcastReceiver() {
                     context,
                     AlertHandlerActivity.ALERT_TYPE_SMS_LINK_FLAGGED,
                     AlertLevel.ERROR.toString(),
-                    sender,
-                    messageText,
+                    param1 = sender,
+                    param2 = messageText,
 
 
                     )
@@ -136,8 +140,8 @@ class SmsReceiver : BroadcastReceiver() {
                     context,
                     AlertHandlerActivity.ALERT_TYPE_SMS_KEYWORD_FLAGGED,
                     AlertLevel.ERROR.toString(),
-                    sender,
-                    messageText,
+                    param1 = sender,
+                    param2 = messageText,
 
                     )
                 return
@@ -150,8 +154,8 @@ class SmsReceiver : BroadcastReceiver() {
                     context,
                     AlertHandlerActivity.ALERT_TYPE_SMS_PATTERN_FLAGGED,
                     AlertLevel.ERROR.toString(),
-                    sender,
-                    messageText,
+                    param1 = sender,
+                    param2 = messageText,
 
                     )
                 return
