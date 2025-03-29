@@ -3,14 +3,13 @@ activity = "1.10.1"
 lifecycle = "2.8.7"
 composeUi = "1.7.8"
 material3 = "1.3.1"
-composeBom = "2025.03.00"
+composeBom = "2025.03.01"
 kotlin = "2.1.10"
-datastore = "1.1.3"
+datastore = "1.1.4"
 material = "1.12.0"
 materialIconsExtended = "1.7.8"
 workRuntime = "2.10.0"
 navigationCompose = "2.8.9"
-
 accompanistPermissions = "0.37.2"
 agp = "8.9.1"
 browser = "1.8.0"
@@ -19,16 +18,13 @@ firebaseBom = "33.11.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
-
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
