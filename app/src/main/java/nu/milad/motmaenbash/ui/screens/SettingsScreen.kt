@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DriveFileRenameOutline
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.DropdownMenuItem
@@ -20,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -46,6 +50,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.ui.activities.LocalNavController
+import nu.milad.motmaenbash.ui.components.AppAlertDialog
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
@@ -131,11 +136,39 @@ fun SettingsScreen(
                     })
             }
 
+            Spacer(modifier = Modifier.height(32.dp))
 
+            PreferenceCategory(title = "ظاهر", icon = Icons.Outlined.Menu) {
+
+                ListPreference(
+                    title = stringResource(id = R.string.setting_font),
+                    entries = context.resources.getStringArray(R.array.font).toList(),
+                    values = context.resources.getStringArray(R.array.font_values).toList(),
+                    currentValue = prefs[SettingsViewModel.FONT]
+                        ?: viewModel.getDefaultValue(context, SettingsViewModel.FONT),
+                    onValueSelected = { newValue ->
+                        viewModel.saveStringPreference(SettingsViewModel.FONT, newValue)
+                    },
+                    showInfoIcon = true,
+                    onInfoClick = { showFontInfoDialog = true })
+            }
         }
     }
 
 
+    // Font info dialog
+    if (showFontInfoDialog) {
+
+
+        AppAlertDialog(
+            title = "درباره فونت‌ها",
+            icon = Icons.Outlined.DriveFileRenameOutline,
+            onDismiss = { showFontInfoDialog = false },
+            dismissText = "بستن",
+            message = "فونت‌های وزیر متن و ساحل توسط مرحوم صابر راستی‌کردار طراحی شده‌اند.\nروحش شاد و یادش گرامی 🖤 ",
+        )
+
+    }
 }
 
 
@@ -183,6 +216,7 @@ fun ListPreference(
     currentValue: String,
     onValueSelected: (String) -> Unit,
     showInfoIcon: Boolean = false,
+    onInfoClick: (() -> Unit)? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
     val index = values.indexOf(currentValue)
@@ -192,7 +226,7 @@ fun ListPreference(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -203,6 +237,22 @@ fun ListPreference(
             color = colorScheme.onBackground
         )
 
+        // info icon
+        if (showInfoIcon) {
+            IconButton(
+                onClick = { onInfoClick?.invoke() },
+                modifier = Modifier
+                    .padding(top = 18.dp)
+            ) {
+                Icon(
+
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "اطلاعات بیشتر",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     }
 
     ExposedDropdownMenuBox(
