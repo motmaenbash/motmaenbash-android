@@ -18,6 +18,7 @@
         <item>@string/dark</item>
         <item>@string/system_default</item>
     </string-array>
+
     <string-array name="theme_values">
         <item>light</item>
         <item>dark</item>
@@ -27,9 +28,11 @@
     <!-- Font Options -->
     <string-array name="font">
         <item>@string/vazir</item>
+        <item>@string/sahel</item>
     </string-array>
     <string-array name="font_values">
         <item>vazir</item>
+        <item>sahel</item>
     </string-array>
 
     <!-- Alert Sounds -->

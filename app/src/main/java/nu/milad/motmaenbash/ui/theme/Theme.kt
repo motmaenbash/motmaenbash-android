@@ -1,6 +1,7 @@
 package nu.milad.motmaenbash.ui.theme
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -65,6 +66,7 @@ fun MotmaenBashTheme(
     // Define the font family based on preference
     val fontFamily = when (fontPreference) {
         "vazir" -> VazirFontFamily
+        "sahel" -> SahelFontFamily
         else -> VazirFontFamily
     }
 
