@@ -1,3 +1,5 @@
+package nu.milad.motmaenbash.ui.screens
+
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -31,7 +33,6 @@ import androidx.compose.material.icons.outlined.CurrencyBitcoin
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -60,7 +61,6 @@ import nu.milad.motmaenbash.ui.components.AppLogo
 import nu.milad.motmaenbash.ui.components.RowDivider
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.GreyDark
-import nu.milad.motmaenbash.ui.theme.GreyLight
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.utils.WebUtils
@@ -82,11 +82,11 @@ fun AboutScreen() {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(contentPadding)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppLogo()
-            Spacer(modifier = Modifier.height(12.dp))
+            AppLogo(size = 100.dp)
+            Spacer(modifier = Modifier.height(4.dp))
             AppInfo()
             Spacer(modifier = Modifier.height(18.dp))
             SocialMediaLinks()
@@ -94,41 +94,6 @@ fun AboutScreen() {
             ActionButtons(context)
 
 
-            HorizontalDivider(
-                color = GreyLight, thickness = 1.dp,
-                modifier = Modifier.padding(32.dp, 12.dp)
-            )
-
-            val infiniteTransition = rememberInfiniteTransition(label = "heartAnimation")
-            val scale by infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 1.3f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(800, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "heartBeatAnimation"
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = "Heart",
-                    modifier = Modifier
-                        .size(18.dp)
-                        .scale(scale),
-                    tint = Red
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    "برای مردم ایران",
-                    fontWeight = FontWeight.Bold, color = GreyDark,
-
-                    style = typography.bodySmall,
-                )
-            }
         }
     }
 }
@@ -170,9 +135,7 @@ fun AppInfo() {
                 WebUtils.openUrl(context, "https://motmaenbash.ir")
             })
 
-    HorizontalDivider(
-        color = GreyLight, thickness = 1.dp, modifier = Modifier.padding(32.dp, 18.dp)
-    )
+    RowDivider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
 
 
     Row(
@@ -189,9 +152,9 @@ fun AppInfo() {
 
 
         Text(
-            text = "برنامه‌نویس: میلاد نوری",
-            style = typography.bodyMedium,
-            fontWeight = FontWeight.Bold
+            text = "طراحی و توسعه توسط میلاد نوری",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
         )
 
         Icon(
@@ -199,6 +162,37 @@ fun AppInfo() {
             contentDescription = "Developer",
             modifier = Modifier.size(20.dp),
             tint = GreyDark
+        )
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "heartAnimation")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "heartBeatAnimation"
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Favorite,
+            contentDescription = "Heart",
+            modifier = Modifier
+                .size(18.dp)
+                .scale(scale),
+            tint = Red
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            "برای مردم ایران",
+            fontWeight = FontWeight.Bold, color = GreyDark,
+
+            style = typography.bodySmall,
         )
     }
 
@@ -246,7 +240,7 @@ fun SocialMediaLinks() {
             }
             // Only show divider if it's not the last item
             if (index != links.size - 1) {
-                RowDivider(verticalPadding = 4.dp)
+                RowDivider(verticalPadding = 4.dp, horizontalPadding = 4.dp)
             }
         }
 
@@ -276,11 +270,8 @@ fun ActionButtons(context: Context) {
     }
 
 
-    HorizontalDivider(
-        color = GreyLight, thickness = 1.dp,
-        modifier = Modifier.padding(32.dp, 12.dp)
-    )
 
+    RowDivider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
 
     Row(
         modifier = Modifier.wrapContentSize(),

@@ -40,6 +40,7 @@
     <string name="setting_theme">انتخاب تم</string>
     <string name="light">حالت روشن</string>
     <string name="dark">حالت تاریک</string>
+    <string name="dim">حالت تاریک (Dim)</string>
     <string name="system_default">پیش‌فرض سیستم</string>
 
     <string name="setting_alert_sound">صدای هشدار</string>

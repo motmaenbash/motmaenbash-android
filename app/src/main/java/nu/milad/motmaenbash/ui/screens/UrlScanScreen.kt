@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircleOutline
+import androidx.compose.material.icons.outlined.GppMaybe
+import androidx.compose.material.icons.outlined.RemoveModerator
+import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -33,9 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +58,7 @@ import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.utils.UrlUtils
 import nu.milad.motmaenbash.viewmodels.UrlScanViewModel
 
+
 @Composable
 fun UrlScanScreen(
     viewModel: UrlScanViewModel = viewModel(),
@@ -61,10 +66,21 @@ fun UrlScanScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val focusManager = LocalFocusManager.current
 
     var url by remember { mutableStateOf(initialUrl) }
     val state by viewModel.state.collectAsState()
 
+    fun scanUrl() {
+        if (UrlUtils.validateUrl(url)) {
+            viewModel.scanUrl(url)
+            focusManager.clearFocus() // Clear focus to hide keyboard
+        } else {
+            Toast.makeText(
+                context, "لطفا یک URL معتبر وارد کنید", Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (initialUrl.isEmpty()) {
@@ -76,7 +92,7 @@ fun UrlScanScreen(
                         viewModel.scanUrl(url)
                     } else {
                         Toast.makeText(
-                            context, "لطفا یک URL معتبر وارد کنید", Toast.LENGTH_LONG
+                            context, "لطفا یک آدرس اینترنتی معتبر وارد کنید", Toast.LENGTH_LONG
                         ).show()
 //
                     }
@@ -96,23 +112,18 @@ fun UrlScanScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text(
-                text = "بررسی URL",
-                color = colorScheme.primary,
-                style = typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            Text(
+                color = colorScheme.onBackground,
                 text = "بررسی لینک و آدرس‌های اینترنتی",
-                style = typography.headlineSmall,
+                style = typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding( bottom = 18.dp)
             )
             OutlinedTextField(
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White
+                    unfocusedContainerColor = colorScheme.surface
                 ),
                 value = url,
                 onValueChange = {
@@ -121,7 +132,7 @@ fun UrlScanScreen(
                 },
                 label = {
                     Text(
-                        "لطفا URL را وارد کنید", style = typography.bodySmall
+                        "آدرس اینترنتی مورد نظر را وارد کنید", style = typography.bodySmall
                     )
                 },
                 modifier = Modifier
@@ -129,22 +140,24 @@ fun UrlScanScreen(
                     .padding(bottom = 16.dp),
                 textStyle = TextStyle(
                     textDirection = TextDirection.Ltr, fontSize = 18.sp
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        scanUrl()
+                    }
                 )
             )
             Button(
                 onClick = {
-                    if (UrlUtils.validateUrl(url)) {
-                        viewModel.scanUrl(url)
-                    } else {
-                        Toast.makeText(
-                            context, "لطفا یک URL معتبر وارد کنید", Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    scanUrl()
                 },
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "بررسی آدرس", modifier = Modifier.padding(8.dp)
+                    text = "بررسی", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
 
@@ -157,28 +170,26 @@ fun UrlScanScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(18.dp),
+                                .padding(vertical = 18.dp, horizontal = 24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             val resultIcon = when (currentState.isSafe) {
-                                true -> Icons.Outlined.CheckCircleOutline
-                                false -> Icons.Outlined.Cancel
-                                else -> Icons.AutoMirrored.Outlined.HelpOutline
+                                true -> Icons.Outlined.VerifiedUser
+                                false -> Icons.Outlined.RemoveModerator
+                                else -> Icons.Outlined.GppMaybe
                             }
-                            resultIcon.let {
-                                Icon(
-                                    imageVector = it,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(84.dp)
-                                        .padding(bottom = 8.dp),
-                                    tint = when (currentState.isSafe) {
-                                        true -> Green
-                                        false -> Red
-                                        else -> GreyDark
-                                    }
-                                )
-                            }
+                            Icon(
+                                imageVector = resultIcon,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(84.dp)
+                                    .padding(bottom = 8.dp),
+                                tint = when (currentState.isSafe) {
+                                    true -> Green
+                                    false -> Red
+                                    else -> GreyDark
+                                }
+                            )
                             Text(
                                 text = "${currentState.message}\n${currentState.url}",
                                 style = typography.bodyMedium,

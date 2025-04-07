@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.ui.activities.LocalNavController
-import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
 
@@ -72,7 +71,7 @@ fun AppBar(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            tint = GreyMiddle,
+                            tint = colorScheme.onBackground,
                             contentDescription = "Back"
                         )
                     }

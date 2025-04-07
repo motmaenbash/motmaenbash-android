@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -80,7 +79,7 @@ import nu.milad.motmaenbash.viewmodels.ScanState
 fun AppScanScreen(
     viewModel: AppScanViewModel = viewModel()
 ) {
-    
+
     val currentScanState by viewModel.scanState.collectAsState()
     val lastScanTime by viewModel.lastScanTime.collectAsState()
     val detectedSuspiciousApps by viewModel.suspiciousApps.collectAsState()
@@ -230,7 +229,9 @@ fun SuspiciousAppItem(app: App) {
                 bitmap = icon.toBitmap().asImageBitmap(),
                 contentDescription = app.appName,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp)),
             )
         }
 
@@ -244,7 +245,7 @@ fun SuspiciousAppItem(app: App) {
 
         Button(
             onClick = {
-                val intent = PackageUtils.uninstallApp(context, app.packageName)
+                val intent = PackageUtils.uninstallApp(app.packageName)
                 uninstallLauncher.launch(intent)
             },
             enabled = !isUninstalled,
