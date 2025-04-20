@@ -5,7 +5,6 @@
         \n\nBy enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways and alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.</string>
 
 
-    <!-- Activity Titles -->
     <string name="alert_dialog_activity_title">هشدار!</string>
     <string name="user_report_activity_title">ارسال گزارش</string>
     <string name="permissions_explanation_activity_title">دسترسی‌های برنامه</string>
@@ -14,7 +13,9 @@
     <string name="about_activity_title">درباره برنامه</string>
     <string name="settings_activity_title">تنظیمات</string>
     <string name="app_scan_activity_title">اسکن برنامه‌ها</string>
+    <string name="share_url_label">🕵️ بررسی لینک</string>
 
+    <!-- Screen Titles -->
 
     <!-- Permissions check -->
     <string name="protection_status">وضعیت محافظت</string>
@@ -30,7 +31,7 @@
     <string name="report_time_message">ارسال گزارش تنها چند دقیقه زمان می‌برد.</string>
 
 
-    <!-- App version and last update time -->
+    <!-- App version and updates -->
     <string name="version">نسخه: %1$s</string>
     <string name="last_update_time">آخرین به‌روزرسانی: %1$s</string>
     <string name="last_scan_time">آخرین اسکن: %1$s</string>
@@ -51,8 +52,9 @@
     <string name="ding5_sound">صدای دینگ ۵</string>
     <string name="ding6_sound">صدای دینگ ۶</string>
 
-    <string name="setting_database_update_frequency">فرکانس بروزرسانی پایگاه داده</string>
+    <string name="setting_database_update_frequency">فرکانس به‌روزرسانی پایگاه داده</string>
     <string name="hourly">هر ۱ ساعت</string>
+    <string name="every_3_hours">هر ۳ ساعت</string>
     <string name="every_6_hours">هر ۶ ساعت</string>
     <string name="daily">هر ۲۴ ساعت</string>
 
@@ -72,11 +74,12 @@
 
     <!-- Bug Report -->
     <string name="report_bug_toast_message">اشکالات احتمالی را از طریق ایمیل به ما گزارش دهید</string>
-    <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید...</string>
-    <string name="send_email_chooser_title">ارسال ایمیل ...</string>
+    <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید…</string>
+    <string name="send_email_chooser_title">ارسال ایمیل …</string>
     <string name="no_email_app_found">برنامه‌ای برای ارسال ایمیل یافت نشد.</string>
 
 
     <!-- App Update -->
-    <string name="app_update_message">لطفا برنامه مطمئن باش را به آخرین نسخه بروزرسانی کنید.</string>
+    <string name="app_update_message">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. می‌توانید برنامه را به آخرین نسخه به‌روزرسانی کنید.</string>
+    <string name="app_update_message_force">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. برای ادامه، لطفا برنامه را به‌روزرسانی کنید.</string>
 </resources>

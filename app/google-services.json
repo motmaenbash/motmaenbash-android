@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "987525328112",
     "project_id": "motmaenbash-app",
-    "storage_bucket": "motmaenbash-app.appspot.com"
+    "storage_bucket": "motmaenbash-app.firebasestorage.app"
   },
   "client": [
     {

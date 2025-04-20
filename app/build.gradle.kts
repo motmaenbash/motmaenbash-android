@@ -3,26 +3,26 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("com.google.firebase.firebase-perf")
     alias(libs.plugins.compose.compiler)
+    id("kotlin-parcelize")
 
 }
 
 android {
     namespace = "nu.milad.motmaenbash"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "nu.milad.motmaenbash"
         minSdk = 21
-        targetSdk = 35
-        versionCode = 1
-        versionName = "Alpha 1.0.0"
+        targetSdk = 36
+        versionCode = 4
+        versionName = "1.0.1-alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-    }
+        vectorDrawables.useSupportLibrary = true
 
+    }
 
     androidResources {
         localeFilters += listOf("en", "fa")
@@ -83,7 +83,11 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.inappmessaging.display)
+    //
+    releaseImplementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
 
     // Android Studio Preview support
     debugImplementation(libs.androidx.ui.tooling)

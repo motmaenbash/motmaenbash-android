@@ -2,7 +2,6 @@ package nu.milad.motmaenbash.utils
 
 
 import nu.milad.motmaenbash.utils.NumberUtils.toPersianNumbers
-import tech.tookan.emrooz.utils.PersianCalendar
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -91,14 +90,19 @@ object DateUtils {
      */
     fun convertGregorianToPersian(gregorianDate: String?): String {
 
-        val gregorianDate =
-            SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).parse((gregorianDate))
+        val date =
+            SimpleDateFormat(
+                "yyyy-MM-dd HH:mm",
+                Locale.getDefault()
+            ).parse((gregorianDate.toString()))
 
         val calendar = PersianCalendar()
 
         val cal = Calendar.getInstance()
-        cal.time = gregorianDate
-        calendar.GregorianToPersian(
+        if (date != null) {
+            cal.time = date
+        }
+        calendar.gregorianToPersian(
             cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1,  // Calendar.MONTH is zero-based
             cal.get(Calendar.DAY_OF_MONTH)
         )

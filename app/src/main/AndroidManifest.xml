@@ -28,7 +28,7 @@
 
     <application
         android:name=".App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -51,16 +51,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter>
+            <intent-filter android:label="@string/share_url_label">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <intent-filter>
+            <intent-filter android:label="@string/share_url_label">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="text/plain" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
@@ -71,6 +70,7 @@
         <activity
             android:name=".ui.activities.AlertHandlerActivity"
             android:exported="false"
+            android:label="@string/alert_dialog_activity_title"
             android:launchMode="standard"
             android:taskAffinity=""
             android:theme="@style/Theme.Material3.DayNight.Dialog" />
