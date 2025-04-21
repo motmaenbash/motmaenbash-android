@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- changelog entries -->
+    <string-array name="changelog_versions">
+        <item>...</item>
+    </string-array>
+
+    <string-array name="changelog_changes">
+        <item>...</item>
+    </string-array>
+</resources>

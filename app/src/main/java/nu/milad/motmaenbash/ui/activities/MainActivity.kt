@@ -106,6 +106,7 @@ fun AppNavigation(
         composable(NavRoutes.APP_SCAN_SCREEN) { AppScanScreen() }
         composable(NavRoutes.FAQ_SCREEN) { InfoListScreen(Pages.FAQ) }
         composable(NavRoutes.PERMISSION_SCREEN) { InfoListScreen(Pages.PERMISSION) }
+        composable(NavRoutes.CHANGELOG_SCREEN) { InfoListScreen(Pages.CHANGELOG) }
         composable(NavRoutes.SETTINGS_SCREEN) { SettingsScreen() }
     }
 }

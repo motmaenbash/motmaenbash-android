@@ -98,7 +98,13 @@ fun AboutScreen() {
 
             Divider(verticalPadding = 12.dp)
 
- 
+            Text(
+                text = stringResource(R.string.updates_changelog),
+                style = typography.bodySmall,
+                modifier = Modifier.clickable {
+                    navController.navigate(NavRoutes.CHANGELOG_SCREEN)
+                },
+            )
 
         }
     }

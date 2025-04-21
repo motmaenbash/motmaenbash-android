@@ -123,9 +123,6 @@ class SmsReceiver : BroadcastReceiver() {
                 Alert.AlertType.SMS_SENDER_FLAGGED
 
             // No flagged content detected
-            // Only show in debug mode
-            // todo:remove for production
-//            else -> if (BuildConfig.DEBUG) Alert.AlertType.SMS_NEUTRAL else null
             else -> Alert.AlertType.SMS_NEUTRAL
 
 

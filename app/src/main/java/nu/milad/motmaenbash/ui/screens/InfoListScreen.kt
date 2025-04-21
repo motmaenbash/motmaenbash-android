@@ -36,12 +36,17 @@ fun InfoListScreen(page: String = Pages.FAQ) {
             id = R.array.permission_descriptions
         )
 
+        Pages.CHANGELOG -> stringArrayResource(id = R.array.changelog_versions) to stringArrayResource(
+            id = R.array.changelog_changes
+        )
+
         else -> stringArrayResource(id = R.array.faq_questions) to stringArrayResource(id = R.array.faq_answers)
     }
 
     val title = when (page) {
         Pages.FAQ -> stringResource(id = R.string.faq_screen_title)
         Pages.PERMISSION -> stringResource(id = R.string.permissions_explanation_screen_title)
+        Pages.CHANGELOG -> stringResource(id = R.string.changelog_screen_title)
         else -> stringResource(id = R.string.faq_screen_title)
     }
 
@@ -121,6 +126,16 @@ fun PermissionListScreenPreview() {
     CompositionLocalProvider(LocalNavController provides rememberNavController()) {
         MotmaenBashTheme {
             InfoListScreen(Pages.PERMISSION)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChangelogListScreenPreview() {
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            InfoListScreen(Pages.CHANGELOG)
         }
     }
 }

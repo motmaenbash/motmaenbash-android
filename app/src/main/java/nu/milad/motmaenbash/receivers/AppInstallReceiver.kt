@@ -23,10 +23,7 @@ class AppInstallReceiver : BroadcastReceiver() {
         val packageName = intent.data?.schemeSpecificPart ?: return
 
         val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-
-        Log.d(
-            TAG, "Package name: $packageName, action: ${intent.action}, is replacing: $isReplacing"
-        )
+        
 
         when (intent.action) {
             Intent.ACTION_PACKAGE_ADDED -> {
@@ -41,7 +38,6 @@ class AppInstallReceiver : BroadcastReceiver() {
             }
 
             Intent.ACTION_PACKAGE_FIRST_LAUNCH -> {
-                Log.d(TAG, "Package first launch: $packageName")
                 // Check against database on first launch
                 checkAppAgainstDatabase(context, packageName)
             }
@@ -58,7 +54,6 @@ class AppInstallReceiver : BroadcastReceiver() {
 
         if (isAppFlagged) {
             // App found suspicious in the database, alert the user
-            Log.d(TAG, "Flagged app detected: $packageName")
             AlertUtils.showAlert(
                 context = context,
                 alertType = Alert.AlertType.APP_FLAGGED,

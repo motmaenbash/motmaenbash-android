@@ -10,4 +10,5 @@ object NavRoutes {
     const val SETTINGS_SCREEN = "settingsScreen"
     const val FAQ_SCREEN = "faqScreen"
     const val PERMISSION_SCREEN = "permissionScreen"
+    const val CHANGELOG_SCREEN = "changelogScreen"
 }
