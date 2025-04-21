@@ -2,10 +2,10 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagReportViewIds"
+    android:accessibilityFlags="flagReportViewIds|flagIncludeNotImportantViews"
     android:canRetrieveWindowContent="true"
     android:description="@string/accessibility_service_description"
     android:packageNames="com.android.chrome,org.mozilla.firefox,com.microsoft.emmx,com.opera.browser"
-    android:summary="@string/accessibility_service_description"
-
-    />
+    android:isAccessibilityTool="false"
+    android:settingsActivity="nu.milad.motmaenbash,ui.activities.MainActivity"
+    android:summary="@string/accessibility_service_description" />
