@@ -93,6 +93,9 @@ object AlertUtils {
 
 
             }
+            // Log the alert history in the database
+            dbHelper.logAlertHistory(alertType, param1, param2)
+
         } catch (e: Exception) {
             Log.e("AlertUtils", "Error incrementing stat: ${e.message}")
         } finally {

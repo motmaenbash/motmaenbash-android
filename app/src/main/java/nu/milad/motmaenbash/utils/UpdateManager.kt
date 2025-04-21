@@ -21,6 +21,7 @@ import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_LAST_UPDATE_TIME
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_DATA_URL
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_TIPS_URL
 import nu.milad.motmaenbash.models.AppUpdate
+import nu.milad.motmaenbash.models.UpdateHistory
 import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 import nu.milad.motmaenbash.workers.DatabaseUpdateWorker
 import org.json.JSONArray
@@ -111,6 +112,7 @@ class UpdateManager(
             setLastUpdateTime(DateUtils.getCurrentTimeInMillis())
             fetchLinkData()
 
+            if (isManualUpdate) {
 
                 // Show success message if its a manual update
                 withContext(Dispatchers.Main) {
@@ -119,7 +121,13 @@ class UpdateManager(
                     ).show()
                 }
 
-       
+                // Log the update history
+                dbHelper.logUpdateHistory(UpdateHistory.UpdateType.MANUAL.value)
+            } else {
+                // Log the update history
+                dbHelper.logUpdateHistory(UpdateHistory.UpdateType.AUTO.value)
+            }
+
 
             true
         } catch (e: Exception) {

@@ -17,6 +17,7 @@ import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_APP
 import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_LINK
 import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_SMS
 import nu.milad.motmaenbash.consts.AppConstants.STAT_VERIFIED_GATEWAY
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_ALERT_HISTORY
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_APPS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_MESSAGES
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_SENDERS
@@ -24,6 +25,7 @@ import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_URLS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_WORDS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_STATS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_TIPS
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_UPDATE_HISTORY
 import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.models.Stats
 import nu.milad.motmaenbash.utils.SmsUtils.generateNormalizedMessageHash
@@ -164,6 +166,30 @@ class DatabaseHelper(appContext: Context) :
         // Creating index
         db.execSQL("CREATE INDEX IF NOT EXISTS index_stats_stat_key ON $TABLE_STATS(stat_key);")
 
+
+        // Creating database update history table if not exists
+        db.execSQL(
+            """
+    CREATE TABLE IF NOT EXISTS $TABLE_UPDATE_HISTORY (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type INTEGER NOT NULL, -- manual/auto
+        timestamp INTEGER NOT NULL
+    );
+    """
+        )
+
+        // Creating alert history table if not exists
+        db.execSQL(
+            """
+    CREATE TABLE IF NOT EXISTS $TABLE_ALERT_HISTORY (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type INTEGER NOT NULL,
+        timestamp INTEGER NOT NULL,
+        param1 TEXT,
+        param2 TEXT
+    );
+    """
+        )
     }
 
     private fun dropTables(db: SQLiteDatabase) {
@@ -477,6 +503,26 @@ class DatabaseHelper(appContext: Context) :
         val db = writableDatabase
         val updateQuery = "UPDATE $TABLE_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
         db.execSQL(updateQuery, arrayOf(statKey))
+    }
+
+    fun logUpdateHistory(updateType: Int) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("type", updateType)
+            put("timestamp", System.currentTimeMillis())
+        }
+        db.insert(TABLE_UPDATE_HISTORY, null, values)
+    }
+
+    fun logAlertHistory(alertType: Alert.AlertType, param1: String?, param2: String?) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("type", alertType.value)
+            put("timestamp", System.currentTimeMillis())
+            put("param1", param1)
+            put("param2", param2)
+        }
+        db.insert(TABLE_ALERT_HISTORY, null, values)
     }
 
     fun clearDatabase() {

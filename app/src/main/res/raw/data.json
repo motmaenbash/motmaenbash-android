@@ -1,51 +1,26 @@
 {
-  "suspicious_links": [
+  "flagged_urls": [
     {
-      "url": "sample-link1.com",
-      "type": 0,
-      "description": "مشکوک به فیشینگ",
-      "is_phishing": 1
-    },
-    {
-      "url": "sample-link2.com",
-      "type": 1,
-      "description": "مشکوک به اسکم",
-      "is_phishing": 1
+      "hash": "-",
+      "threat_type": 1,
+      "url_match": 0,
+      "alert_level": 1
     }
   ],
-  "suspicious_senders": [
-    {
-      "sender_number": "+9800000000000"
-    },
-    {
-      "sender_number": "+9800000000001"
-    }
+  "flagged_senders": [
+    "-"
   ],
-  "suspicious_messages": [
-    {
-      "sender_number": "+9800000000002",
-      "message": "این یک پیام فیشینگ است."
-    },
-    {
-      "sender_number": "+9800000000003",
-      "message": "این یک پیام فیشینگ است."
-    }
+  "flagged_messages": [
+    "-"
   ],
-  "suspicious_apps": [
-    {
-      "package_name": "com.temptation.lydia",
-      "sha1": "3SuPq2dXfOVXEtmIHeun5217jfU=",
-      "apk_sha1": "N1/0yjV2ZSOgB0b2BxSXHYDkr18=",
-      "description": "سامانه حمایت"
-    }
+  "flagged_apps": [
   ],
-  "suspicious_keywords": [
-    "فیشینگ۱",
-    "فیشینگ۲",
-    "فیشینگ۳"
+  "flagged_words": [
+    "-"
   ],
   "tips": [
-    "از نصب برنامه‌های ناشناس و از منابع ناشناس خودداری کنید."
+    "با توجه به انتشار نسخه‌های جعلی همراه بانک و اینترنت بانک از سوی کلاهبردارها، اکیدا از جستجوی این خدمات در موتورهای جستجوی خودداری و از سایت اصلی بانک‌ها اقدام به دریافت برنامه‌ها یا خدمات مورد نظر نمایید.",
+    "اخطار مهم: نرم‌افزارهای بانکی از راه‌های ارتباطی نظیر شبکه‌های اجتماعی، پیام‌رسان‌ها، سایت‌ها، بلوتوث، بازارها و... قابل اعتماد نیستند. لطفا از جستجو و نصب این نرم‌افزارها خودداری و فقط از وبگاه بانک اقدام به دریافت نسخه‌های اصلی نمایید."
   ]
 }
-  
+
