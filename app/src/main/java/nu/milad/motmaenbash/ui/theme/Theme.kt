@@ -3,6 +3,7 @@ package nu.milad.motmaenbash.ui.theme
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -20,22 +21,65 @@ import kotlinx.coroutines.flow.map
 import nu.milad.motmaenbash.utils.dataStore
 import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 
+private val DarkColorScheme = darkColorScheme(
+    primary = ColorPrimary_DM,
+    secondary = Grey,
+    tertiary = ColorPrimaryDark,
+    // Background and surface
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    // Container colors
+    primaryContainer = ColorPrimaryDark,
+    // primaryContainer = Color(0xFF1E1E1E),
+    secondaryContainer = Color(0xFF2C2C2C),
+    // Content colors
+    onPrimary = Color(0xFFE0E0E0),
+    onPrimaryContainer = Color(0xFFFFFFFF),
+    onSecondary = Color(0xFFE0E0E0),
+    onTertiary = Color(0xFFFFFFFF),
+    onBackground = Color(0xFFE0E0E0),
+    onSurface = Color(0xFFE0E0E0),
+    errorContainer = Color(0x0DFF5252),
+    onError = Color(0xFFFF5252)
+)
+
+private val DimColorScheme = darkColorScheme(
+    primary = ColorPrimary,
+    secondary = Grey,
+    tertiary = ColorPrimaryDark,
+    primaryContainer = Color(0xFF0E5B9E),
+    // Background and surface
+    background = Color(0xFF15202B),
+    surface = Color(0xFF192734),
+    // Content colors
+    onPrimary = Color(0xFFE1E8ED),
+    onPrimaryContainer = Color(0xFFE1E8ED),
+    onSecondary = Color(0xFFE1E8ED),
+    onTertiary = Color(0xFFE1E8ED),
+    onBackground = Color(0xFFE1E8ED),
+    onSurface = Color(0xFFE1E8ED),
+    errorContainer = Color(0x0DFF6B6B),
+    onError = Color(0xFFFF6B6B)
+)
 
 private val LightColorScheme = lightColorScheme(
     primary = ColorPrimary,
-    secondary = Grey,
+    secondary = GreyDark,
     tertiary = ColorPrimaryDark,
     primaryContainer = ColorPrimary,
     // Background and surface
     background = BackgroundLightGray,
     surface = White,
+    tertiaryContainer = Color(0xFFFFF3E0),
     // Content colors
     onPrimary = White,
     onPrimaryContainer = White,
     onSecondary = White,
-    onTertiary = White,
+    onTertiaryContainer = Color(0xFFC74900),
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
+    errorContainer = Color(0x0DFF0000),
+    onError = Red,
 )
 
 @Composable
@@ -47,7 +91,7 @@ fun MotmaenBashTheme(
     val dataStore = context.dataStore
 
     val themePreference = dataStore.data
-        .map { preferences -> preferences[SettingsViewModel.THEME] ?: "system" }
+        .map { preferences -> preferences[SettingsViewModel.THEME] ?: "light" }
         .collectAsState(initial = "system").value
 
     val fontPreference = dataStore.data
@@ -57,8 +101,9 @@ fun MotmaenBashTheme(
 
     val colorScheme = when (themePreference) {
         "light" -> LightColorScheme
-        "dark" -> LightColorScheme
-        else -> LightColorScheme
+        "dark" -> DarkColorScheme
+        "dim" -> DimColorScheme
+        else -> if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
     }
 
     val isLightTheme = colorScheme == LightColorScheme
@@ -90,7 +135,9 @@ fun MotmaenBashTheme(
     }
 
     CompositionLocalProvider(
-        LocalLayoutDirection provides LayoutDirection.Rtl
+        LocalLayoutDirection provides LayoutDirection.Rtl,
+
+
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

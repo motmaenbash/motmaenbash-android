@@ -73,5 +73,5 @@ fun getTypography(fontFamily: FontFamily = VazirFontFamily): Typography {
         ),
 
 
-        )
+    )
 }

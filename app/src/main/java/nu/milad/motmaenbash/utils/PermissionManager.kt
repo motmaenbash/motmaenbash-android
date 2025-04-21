@@ -12,7 +12,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.delay
-import nu.milad.motmaenbash.services.UrlDetectionService
+import nu.milad.motmaenbash.consts.PermissionType
+import nu.milad.motmaenbash.services.UrlGuardService
 import nu.milad.motmaenbash.ui.activities.PermissionTutorialActivity
 
 /**
@@ -24,7 +25,7 @@ class PermissionManager(private val context: Context) {
      * Check SMS permission
      * @return true if permission is granted, false otherwise
      */
-    fun checkSmsPermission(): Boolean {
+    private fun checkSmsPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.RECEIVE_SMS
@@ -35,8 +36,8 @@ class PermissionManager(private val context: Context) {
      * Check accessibility permission
      * @return true if accessibility service is enabled, false otherwise
      */
-    fun checkAccessibilityPermission(): Boolean {
-        val componentName = ComponentName(context, UrlDetectionService::class.java)
+    private fun checkAccessibilityPermission(): Boolean {
+        val componentName = ComponentName(context, UrlGuardService::class.java)
         val enabledServices = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
@@ -58,7 +59,7 @@ class PermissionManager(private val context: Context) {
      * Check overlay permission
      * @return true if overlay permission is granted, false otherwise
      */
-    fun checkOverlayPermission(): Boolean {
+    private fun checkOverlayPermission(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
     }
 
@@ -66,7 +67,7 @@ class PermissionManager(private val context: Context) {
      * Check notification permission
      * @return true if notification permission is granted, false otherwise
      */
-    fun checkNotificationPermission(): Boolean {
+    private fun checkNotificationPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS
@@ -74,6 +75,33 @@ class PermissionManager(private val context: Context) {
         } else {
             true // Permission not required pre-API 33
         }
+    }
+
+    /**
+     * Check permission status by permission type
+     * @param type The permission type to check
+     * @return true if permission is granted, false otherwise
+     */
+    fun checkPermission(type: PermissionType): Boolean {
+        return when (type) {
+            PermissionType.SMS -> checkSmsPermission()
+            PermissionType.ACCESSIBILITY -> checkAccessibilityPermission()
+            PermissionType.OVERLAY -> checkOverlayPermission()
+            PermissionType.NOTIFICATIONS -> checkNotificationPermission()
+        }
+    }
+
+    /**
+     * Check all application permissions at once
+     * @return Map of permission types to their granted status
+     */
+    fun checkAllPermissions(): Map<PermissionType, Boolean> {
+        return mapOf(
+            PermissionType.SMS to checkSmsPermission(),
+            PermissionType.ACCESSIBILITY to checkAccessibilityPermission(),
+            PermissionType.OVERLAY to checkOverlayPermission(),
+            PermissionType.NOTIFICATIONS to checkNotificationPermission()
+        )
     }
 
     /**
@@ -98,6 +126,28 @@ class PermissionManager(private val context: Context) {
     }
 
     /**
+     * Request notification permission via settings
+     * This is used for devices below Android 13 (API 33) or when permission is permanently denied
+     */
+    fun requestNotificationPermission(context: Context, launcher: ActivityResultLauncher<Intent>) {
+        val intent = Intent().apply {
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                    action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+
+                else -> {
+                    action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                    putExtra("app_package", context.packageName)
+                    putExtra("app_uid", context.applicationInfo.uid)
+                }
+            }
+        }
+        launcher.launch(intent)
+    }
+
+    /**
      * Show overlay permission tutorial
      */
     suspend fun showOverlayPermissionTutorial() {
@@ -107,7 +157,4 @@ class PermissionManager(private val context: Context) {
         context.startActivity(intent)
     }
 
-    fun hasCriticalPermissions(): Boolean {
-        return checkSmsPermission() && checkOverlayPermission()
-    }
 }

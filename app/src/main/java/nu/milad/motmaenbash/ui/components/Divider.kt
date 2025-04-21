@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RowDivider(
+fun Divider(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = 20.dp,
     verticalPadding: Dp = 6.dp,
@@ -29,6 +29,6 @@ fun RowDivider(
 
 @Preview(showBackground = true)
 @Composable
-fun RowDividerPreview() {
-    RowDivider()
+fun DividerPreview() {
+    Divider()
 }

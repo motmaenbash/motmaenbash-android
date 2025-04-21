@@ -1,7 +1,6 @@
 package nu.milad.motmaenbash.viewmodels
 
 import android.app.Application
-import android.media.MediaPlayer
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,8 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.model.App
+import nu.milad.motmaenbash.models.App
+import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.PackageUtils.getAppInfo
 import nu.milad.motmaenbash.utils.ScanUtils
@@ -40,12 +39,8 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
     private val scanScope = CoroutineScope(Job() + Dispatchers.Default)
 
     // Use lazy initialization to prevent preview issues
-    private val mediaPlayer by lazy {
-        try {
-            MediaPlayer.create(context, R.raw.ding1)
-        } catch (e: Exception) {
-            null
-        }
+    private val audioHelper by lazy {
+        AudioHelper(context)
     }
 
     private val _scanState = MutableStateFlow(ScanState.NOT_STARTED)
@@ -76,7 +71,6 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
         _scanState.value = ScanState.IN_PROGRESS
         _suspiciousApps.value = emptyList()
         _currentlyScannedApps.value = emptyList()
-//        _scanStatusMessage.value = "..."
         scanManuallyStopped = false
         // Use an atomic counter for thread-safe progress tracking
         val processedAppsCounter = AtomicInteger(0)
@@ -106,7 +100,9 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                     val suspiciousList = _suspiciousApps.value.toMutableList()
                                     suspiciousList.add(app)
                                     _suspiciousApps.value = suspiciousList
-                                    mediaPlayer?.start()
+
+                                    audioHelper.vibrateDevice(context)
+                                    audioHelper.playDefaultSound()
                                 }
                                 app
                             } else null
@@ -153,7 +149,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
     override fun onCleared() {
         super.onCleared()
         scanScope.cancel()
-        mediaPlayer?.release()
+        audioHelper.release()
     }
 }
 

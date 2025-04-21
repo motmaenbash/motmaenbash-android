@@ -3,6 +3,7 @@ package nu.milad.motmaenbash.viewmodels
 import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -26,7 +27,7 @@ open class SettingsViewModel(
         val DATABASE_UPDATE_FREQ = stringPreferencesKey("database_update_frequency")
         val THEME = stringPreferencesKey("theme")
         val FONT = stringPreferencesKey("font")
-        val PLAY_SOUND_IN_SILENT_MODE = stringPreferencesKey("play_alert_sound_in_silent_mode")
+        val PLAY_SOUND_IN_SILENT_MODE = booleanPreferencesKey("play_alert_sound_in_silent_mode")
         val ALERT_SOUND = stringPreferencesKey("alert_sound")
     }
 
@@ -53,14 +54,25 @@ open class SettingsViewModel(
             }
 
             when (key) {
-                
+
                 // Reschedule periodic updates
                 DATABASE_UPDATE_FREQ -> UpdateManager(getApplication()).scheduleDatabaseUpdate()
 
                 // Play sound feedback
-                ALERT_SOUND -> soundPlayer.playSound(value, respectSilentMode = false)
+                ALERT_SOUND -> soundPlayer.playSound(value, true)
             }
 
+        }
+    }
+
+    /**
+     * Save a boolean preference
+     */
+    fun saveBooleanPreference(key: Preferences.Key<Boolean>, value: Boolean) {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[key] = value
+            }
         }
     }
 
@@ -76,18 +88,27 @@ open class SettingsViewModel(
     // get default values from resources
     fun getDefaultValue(context: Context, key: Preferences.Key<String>): String {
         return when (key) {
-            PLAY_SOUND_IN_SILENT_MODE -> context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
-                .first()
 
             ALERT_SOUND -> context.resources.getStringArray(R.array.alert_sound_values).first()
 
+            // Select the second item from the array
             DATABASE_UPDATE_FREQ -> context.resources.getStringArray(R.array.database_update_frequency_values)
-                .first()
+                .get(1)
 
             THEME -> context.resources.getStringArray(R.array.theme_values).first()
 
             FONT -> context.resources.getStringArray(R.array.font_values).first()
             else -> ""
+        }
+    }
+
+    // Get default boolean value
+    fun getDefaultBooleanValue(context: Context, key: Preferences.Key<Boolean>): Boolean {
+        return when (key) {
+            PLAY_SOUND_IN_SILENT_MODE -> context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
+                .first().toBoolean()
+
+            else -> false
         }
     }
 

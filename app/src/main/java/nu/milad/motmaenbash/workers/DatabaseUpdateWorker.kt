@@ -13,7 +13,7 @@ class DatabaseUpdateWorker(context: Context, params: WorkerParameters) :
         Log.d("DatabaseUpdateWorker", "Worker: Database update started.")
         val updateManager = UpdateManager(applicationContext)
         return try {
-            val isUpdateSuccessful = updateManager.executeDataUpdate(showToast = false)
+            val isUpdateSuccessful = updateManager.executeDataUpdate(isManualUpdate = false)
 
             if (isUpdateSuccessful) {
                 Log.d("DatabaseUpdateWorker", "Worker: Database update completed successfully.")

@@ -25,6 +25,8 @@ val RedLight = Color(0xFFE57373)
 val Red = Color(0xFFF44336)
 val RedDark = Color(0xFFD32F2F)
 val RedVariant = Color(0xFFC62828)
+val Orange = Color(0xFFFF5722)
+val OrangeLight = Color(0xFFFF8A65)    
+val OrangeDark = Color(0xFFE64A19)    
 
-
-val Yellow = Color(0xFFE6B400)
+val Yellow = Color(0xFFFFC107)

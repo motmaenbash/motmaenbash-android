@@ -6,7 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import nu.milad.motmaenbash.consts.AppConstants.APP_PREFERENCES
-import nu.milad.motmaenbash.model.App
+import nu.milad.motmaenbash.models.App
 
 class ScanUtils(private val context: Context) {
 
@@ -31,12 +31,13 @@ class ScanUtils(private val context: Context) {
     }
 
 
-    fun isSystemApp(packageInfo: PackageInfo): Boolean {
+    private fun isSystemApp(packageInfo: PackageInfo): Boolean {
         return packageInfo.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
 
     fun isAppSuspicious(app: App): Boolean {
+
         return dbHelper.isAppFlagged(app.packageName, app.sha1, app.apkSha1)
     }
 
@@ -48,7 +49,7 @@ class ScanUtils(private val context: Context) {
         }
     }
 
-    fun getLastScanTime(): Long {
+    private fun getLastScanTime(): Long {
         val lastScanTime = sharedPreferences.getLong("last_scan_time", 0)
         return lastScanTime
     }

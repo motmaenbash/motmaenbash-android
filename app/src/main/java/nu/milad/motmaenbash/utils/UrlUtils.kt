@@ -1,5 +1,9 @@
 package nu.milad.motmaenbash.utils
 
+import android.util.LruCache
+import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult
+import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.SuspiciousUrl
+
 object UrlUtils {
 
     /**
@@ -13,7 +17,7 @@ object UrlUtils {
             return false
         }
 
-        var cleanedUrl = removeQueryString(url)
+        var cleanedUrl = removeQueryStringAndFragment(url)
 
         cleanedUrl = removeUrlPrefixes(cleanedUrl)
 
@@ -61,6 +65,10 @@ object UrlUtils {
     }
 
 
+    fun extractAndCacheDomain(cache: LruCache<String, String>, url: String): String {
+        return cache.get(url) ?: extractDomain(url).also { cache.put(url, it) }
+    }
+
     /**
      * Removes common URL prefixes like http://, https://, and www. from the given URL.
      *
@@ -68,10 +76,12 @@ object UrlUtils {
      * @return The URL without the common prefixes.
      */
     fun removeUrlPrefixes(url: String): String {
-        var cleanedUrl = url
-        cleanedUrl = cleanedUrl.replaceFirst("^(http://|https://)".toRegex(), "")
-        cleanedUrl = cleanedUrl.replaceFirst("^www\\.".toRegex(), "")
-        return cleanedUrl
+        var processedUrl = url
+
+        processedUrl = processedUrl.replaceFirst("^(http://|https://)".toRegex(), "")
+        processedUrl = processedUrl.replaceFirst("^www\\.".toRegex(), "")
+
+        return processedUrl
     }
 
     /**
@@ -80,12 +90,62 @@ object UrlUtils {
      * @param url The URL to process.
      * @return The URL without the query string.
      */
-    fun removeQueryString(url: String): String {
-        val queryIndex = url.indexOf('?')
-        return if (queryIndex > 0) {
-            url.substring(0, queryIndex)
-        } else {
-            url
+    fun removeQueryStringAndFragment(url: String): String {
+        var processedUrl = url
+
+
+        // Remove query string
+        val queryIndex = processedUrl.indexOf('?')
+        if (queryIndex > 0) {
+            processedUrl = processedUrl.substring(0, queryIndex)
+        }
+
+        // Remove fragment identifier (#) and everything after it
+        val fragmentIndex = processedUrl.indexOf('#')
+        if (fragmentIndex > 0) {
+            processedUrl = processedUrl.substring(0, fragmentIndex)
+        }
+
+        processedUrl = processedUrl.trimEnd('/')
+
+        return processedUrl
+
+
+    }
+
+    fun analyzeUrl(
+        url: String,
+        domainCache: LruCache<String, String>? = null,
+        databaseHelper: DatabaseHelper
+    ): UrlAnalysisResult {
+        try {
+            val normalizedUrl = removeUrlPrefixes(url.trim().lowercase())
+
+            // Use the domain cache if provided
+            val domain = if (domainCache != null) {
+                extractAndCacheDomain(domainCache, normalizedUrl)
+            } else {
+                extractDomain(normalizedUrl)
+            }
+
+
+            return when {
+                isShaparakSubdomain(normalizedUrl) -> UrlAnalysisResult.SafeUrl(normalizedUrl)
+                else -> {
+                    val (isFlagged, threatType, isUrlMatch) = databaseHelper.isUrlFlagged(
+                        normalizedUrl
+                    )
+                    if (isFlagged) {
+                        SuspiciousUrl(normalizedUrl, threatType, isUrlMatch)
+                    } else {
+                        UrlAnalysisResult.NeutralUrl
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            return UrlAnalysisResult.NeutralUrl
         }
     }
+
+
 }

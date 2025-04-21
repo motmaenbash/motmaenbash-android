@@ -16,7 +16,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.ui.activities.LocalNavController
-import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
 
@@ -42,17 +40,18 @@ fun AppBar(
 
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-
+        modifier = Modifier,
         topBar = {
             CenterAlignedTopAppBar(
+//                scrollBehavior = null,
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = colorScheme.background,
                     titleContentColor = colorScheme.primary,
                 ),
                 title = {
                     Text(
-                        title, maxLines = 1,
+                        title,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -61,7 +60,6 @@ fun AppBar(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-
                         // navigate back
                         if (!navController.navigateUp()) {
                             // If no back stack exists, return to main screen
@@ -73,7 +71,7 @@ fun AppBar(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            tint = GreyMiddle,
+                            tint = colorScheme.onBackground,
                             contentDescription = "Back"
                         )
                     }

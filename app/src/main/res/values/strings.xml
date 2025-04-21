@@ -5,23 +5,56 @@
         \n\nBy enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways and alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.</string>
 
 
-    <!-- Activity Titles -->
     <string name="alert_dialog_activity_title">هشدار!</string>
-    <string name="user_report_activity_title">ارسال گزارش</string>
-    <string name="permissions_explanation_activity_title">دسترسی‌های برنامه</string>
-    <string name="faq_activity_title">سوالات متداول</string>
-    <string name="url_scan_activity_title">🕵️ بررسی صفحه پرداخت</string>
-    <string name="about_activity_title">درباره برنامه</string>
-    <string name="settings_activity_title">تنظیمات</string>
-    <string name="app_scan_activity_title">اسکن برنامه‌ها</string>
+    <string name="share_url_label">🕵️ بررسی لینک</string>
+
+    <!-- Screen Titles -->
+    <string name="user_report_screen_title">ارسال گزارش</string>
+    <string name="faq_screen_title">سوالات متداول</string>
+    <string name="permissions_explanation_screen_title">دسترسی‌های برنامه</string>
+    <string name="changelog_screen_title">تاریخچه نسخه‌های برنامه</string>
+    <string name="url_scan_screen_title">بررسی لینک (URL)</string>
+    <string name="about_screen_title">درباره برنامه</string>
+    <string name="settings_screen_title">تنظیمات</string>
+    <string name="app_scan_screen_title">اسکن برنامه‌ها</string>
 
 
-    <!-- Permissions check -->
-    <string name="protection_status">وضعیت محافظت</string>
-    <string name="accessibility_protection">محافظ وب‌گردی</string>
-    <string name="sms_protection">محافظ پیامک</string>
-    <string name="overlay_protection">بررسی اصالت درگاه‌ها</string>
-    <string name="app_install_protection_active">محافظ نصب برنامه: فعال</string>
+    <!--  Guards  -->
+    <string name="guards_status">سپرهای امنیتی</string>
+    <string name="guards_functionality">عملکرد سپرهای مطمئن باش</string>
+
+
+    <!--  Guard Titles -->
+    <string name="sms">پیامک</string>
+    <string name="web">وب‌گردی</string>
+    <string name="app">نصب برنامه</string>
+
+    <string name="guard_sms">سپر پیامک</string>
+    <string name="guard_web">سپر وب‌گردی</string>
+    <string name="guard_gateway">بررسی اصالت درگاه‌ها</string>
+    <string name="guard_app">سپر نصب برنامه</string>
+
+    <!--  Guard Descriptions  -->
+    <string name="guard_sms_description">هشدار به کاربر در صورت شناسایی و تشخیص پیامک‌های مشکوک و فیشینگ</string>
+    <string name="guard_web_description">هشدار به کاربر در صورت شناسایی سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی</string>
+    <string name="guard_gateway_description">بررسی و نمایش نماد درگاه‌های پرداخت معتبر</string>
+    <string name="guard_app_description">هشدار به کاربر در صورت شناسایی برنامه‌های کلاهبرداری و مخرب</string>
+
+
+    <!--  Permission Titles  -->
+    <string name="permission_receive_sms">دسترسی دریافت پیامک جدید</string>
+    <string name="permission_notification">دسترسی نمایش اعلان</string>
+    <string name="permission_accessibility">سرویس دسترسی‌پذیری</string>
+    <string name="permission_overlay">نمایش پنجره روی دیگر برنامه‌ها</string>
+    <string name="permission_query_packages">مشاهده لیست برنامه‌ها</string>
+
+    <!--  Permission Descriptions  -->
+    <string name="permission_receive_sms_description">برای شناسایی و هشدار در مورد پیامک‌های فیشینگ و کلاهبرداری، برنامه به این دسترسی نیاز دارد.</string>
+    <string name="permission_notification_description">این دسترسی امکان اجرای پایدار سرویس برنامه در پیش‌زمینه (Foreground) و نمایش اعلان مربوط به فعال بودن آن را رد اندروید ۸ و بالاتر فراهم می‌کند.</string>
+    <string name="permission_accessibility_description">برای شناسایی و هشدار درباره سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی و نمایش نماد درگاه پرداخت معتبر، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
+    <string name="permission_accessibility_short_description">برای شناسایی سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
+    <string name="permission_overlay_description">در صورت شناسایی هرگونه تهدید مانند پیامک، لینک یا برنامه مشکوک، برای نمایش پنجره هشدار حتی هنگام استفاده از سایر برنامه‌ها، برنامه به این دسترسی نیاز دارد.</string>
+    <string name="permission_settings_may_vary">مراحل فعال‌سازی ممکن است در برخی نسخه‌های اندروید یا مدل‌های گوشی کمی متفاوت باشد.</string>
 
 
     <!-- User Report Activity -->
@@ -30,7 +63,7 @@
     <string name="report_time_message">ارسال گزارش تنها چند دقیقه زمان می‌برد.</string>
 
 
-    <!-- App version and last update time -->
+    <!-- App version and updates -->
     <string name="version">نسخه: %1$s</string>
     <string name="last_update_time">آخرین به‌روزرسانی: %1$s</string>
     <string name="last_scan_time">آخرین اسکن: %1$s</string>
@@ -40,6 +73,7 @@
     <string name="setting_theme">انتخاب تم</string>
     <string name="light">حالت روشن</string>
     <string name="dark">حالت تاریک</string>
+    <string name="dim">حالت تاریک (Dim)</string>
     <string name="system_default">پیش‌فرض سیستم</string>
 
     <string name="setting_alert_sound">صدای هشدار</string>
@@ -50,8 +84,9 @@
     <string name="ding5_sound">صدای دینگ ۵</string>
     <string name="ding6_sound">صدای دینگ ۶</string>
 
-    <string name="setting_database_update_frequency">فرکانس بروزرسانی پایگاه داده</string>
+    <string name="setting_database_update_frequency">فرکانس به‌روزرسانی پایگاه داده</string>
     <string name="hourly">هر ۱ ساعت</string>
+    <string name="every_3_hours">هر ۳ ساعت</string>
     <string name="every_6_hours">هر ۶ ساعت</string>
     <string name="daily">هر ۲۴ ساعت</string>
 
@@ -71,11 +106,21 @@
 
     <!-- Bug Report -->
     <string name="report_bug_toast_message">اشکالات احتمالی را از طریق ایمیل به ما گزارش دهید</string>
-    <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید...</string>
-    <string name="send_email_chooser_title">ارسال ایمیل ...</string>
+    <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید…</string>
+    <string name="send_email_chooser_title">ارسال ایمیل …</string>
     <string name="no_email_app_found">برنامه‌ای برای ارسال ایمیل یافت نشد.</string>
 
 
     <!-- App Update -->
-    <string name="app_update_message">لطفا برنامه مطمئن باش را به آخرین نسخه بروزرسانی کنید.</string>
+    <string name="app_update_message">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. می‌توانید برنامه را به آخرین نسخه به‌روزرسانی کنید.</string>
+    <string name="app_update_message_force">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. برای ادامه، لطفا برنامه را به‌روزرسانی کنید.</string>
+
+    <!-- Notification-->
+    <string name="motmaenbash_general_channel">اعلان‌های برنامه</string>
+    <string name="general_channel_description">کانال اصلی برای دریافت اعلان‌های برنامه</string>
+    <string name="motmaenbash_monitoring_service_channel">اعلان سرویس محافظت</string>
+    <string name="monitoring_service_channel_description">کانال اعلان سرویس محافظت</string>
+    <string name="notification_overlay_required">نیازمند فعال‌سازی دسترسی</string>
+    <string name="notification_active_shields">سپرهای فعال: %1$s</string>
+
 </resources>

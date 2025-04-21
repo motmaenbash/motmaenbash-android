@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import androidx.core.database.sqlite.transaction
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants.COLUMN_HASH
 import nu.milad.motmaenbash.consts.AppConstants.DATABASE_NAME
@@ -12,14 +13,22 @@ import nu.milad.motmaenbash.consts.AppConstants.DATABASE_VERSION
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_APP_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_SMS_DETECTED
+import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_APP
+import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_LINK
+import nu.milad.motmaenbash.consts.AppConstants.STAT_TOTAL_SCANNED_SMS
+import nu.milad.motmaenbash.consts.AppConstants.STAT_VERIFIED_GATEWAY
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_APPS
-import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_LINKS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_MESSAGES
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_SENDERS
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_URLS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_WORDS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_STATS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_TIPS
+import nu.milad.motmaenbash.models.Alert
+import nu.milad.motmaenbash.models.Stats
 import nu.milad.motmaenbash.utils.SmsUtils.generateNormalizedMessageHash
+import nu.milad.motmaenbash.utils.UrlUtils.extractDomain
+import nu.milad.motmaenbash.utils.UrlUtils.removeQueryStringAndFragment
 import org.json.JSONObject
 
 class DatabaseHelper(appContext: Context) :
@@ -27,6 +36,7 @@ class DatabaseHelper(appContext: Context) :
 
 
     private val context = appContext
+
 
     override fun onCreate(db: SQLiteDatabase) {
         createTables(db)
@@ -39,7 +49,6 @@ class DatabaseHelper(appContext: Context) :
         when (oldVersion) {
             1 -> {
                 // Upgrade from version 1 to 2
-
 
             }
 
@@ -60,20 +69,26 @@ class DatabaseHelper(appContext: Context) :
 
     private fun createTables(db: SQLiteDatabase) {
 
-
         // Creating flagged links table
+        // Get the values from the enums for type constraints
+        val threatTypeValues = Alert.ThreatType.entries
+            .joinToString(", ") { it.value.toString() }
+
+        val alertLevelValues = Alert.AlertLevel.entries
+            .joinToString(", ") { it.value.toString() }
+
         db.execSQL(
             """
-                CREATE TABLE $TABLE_FLAGGED_LINKS (
+                CREATE TABLE $TABLE_FLAGGED_URLS (
                     hash TEXT NOT NULL UNIQUE,
-                    type INTEGER NOT NULL CHECK(type IN (1, 2, 3)), -- 1: phishing, 2: scam, 3: ponzi
-                    description TEXT,
-                    check_type INTEGER NOT NULL CHECK(check_type IN (1, 2)), -- 1: domain, 2: specific link
-                    alert_level INTEGER NOT NULL CHECK(alert_level IN (1,2,3))) -- '1:alert', '2:warning', '3:info'
+                    threat_type INTEGER NOT NULL CHECK(threat_type IN ($threatTypeValues)), -- ${Alert.ThreatType.PHISHING.value}: phishing, ${Alert.ThreatType.SCAM.value}: scam, ${Alert.ThreatType.PONZI.value}: ponzi
+                    url_match INTEGER NOT NULL CHECK(url_match IN (0, 1)), -- 0: domain, 1: specific url
+                    alert_level INTEGER NOT NULL CHECK(alert_level IN ($alertLevelValues))) -- '${Alert.AlertLevel.ALERT.value}:alert', '${Alert.AlertLevel.WARNING.value}:warning', '${Alert.AlertLevel.INFO.value}:info'
+
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_links_hash ON $TABLE_FLAGGED_LINKS(hash);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_links_hash ON $TABLE_FLAGGED_URLS(hash);")
 
         // Creating flagged sms senders table
         db.execSQL(
@@ -152,7 +167,7 @@ class DatabaseHelper(appContext: Context) :
     }
 
     private fun dropTables(db: SQLiteDatabase) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_LINKS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_URLS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_SENDERS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_MESSAGES")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_WORDS")
@@ -161,27 +176,28 @@ class DatabaseHelper(appContext: Context) :
     }
 
     private fun prepopulateData(db: SQLiteDatabase?) {
-        db?.beginTransaction()
-        try {
-            val inputStream = context.resources.openRawResource(R.raw.data)
-            val jsonData = inputStream.bufferedReader().use { it.readText() }
-            val jsonObject = JSONObject(jsonData)
+        db?.transaction {
+            try {
+                val inputStream = context.resources.openRawResource(R.raw.data)
+                val jsonData = inputStream.bufferedReader().use { it.readText() }
+                val jsonObject = JSONObject(jsonData)
 
-            insertData(db, TABLE_FLAGGED_LINKS, jsonObject)
-            insertData(db, TABLE_FLAGGED_SENDERS, jsonObject)
-            insertData(db, TABLE_FLAGGED_MESSAGES, jsonObject)
-            insertData(db, TABLE_FLAGGED_WORDS, jsonObject)
-            insertData(db, TABLE_FLAGGED_APPS, jsonObject)
-            insertData(db, TABLE_TIPS, jsonObject)
-
-
+                insertData(this, TABLE_FLAGGED_URLS, jsonObject)
+                insertData(this, TABLE_FLAGGED_SENDERS, jsonObject)
+                insertData(this, TABLE_FLAGGED_MESSAGES, jsonObject)
+                insertData(this, TABLE_FLAGGED_WORDS, jsonObject)
+                insertData(this, TABLE_FLAGGED_APPS, jsonObject)
+                insertData(this, TABLE_TIPS, jsonObject)
 
 
-            db?.setTransactionSuccessful()
-        } catch (e: Exception) {
-            Log.e("DatabaseHelper", "Error prepopulating data: ${e.message}", e)  // Added logging
-        } finally {
-            db?.endTransaction()
+            } catch (e: Exception) {
+                Log.e(
+                    "DatabaseHelper",
+                    "Error prepopulating data: ${e.message}",
+                    e
+                )  // Added logging
+            } finally {
+            }
         }
     }
 
@@ -190,9 +206,14 @@ class DatabaseHelper(appContext: Context) :
 
         val insertQuery = """
         INSERT OR IGNORE INTO $TABLE_STATS (stat_key, stat_count) VALUES
+            ('$STAT_VERIFIED_GATEWAY', 0),
             ('$STAT_FLAGGED_LINK_DETECTED', 0),
             ('$STAT_FLAGGED_SMS_DETECTED', 0),
-            ('$STAT_FLAGGED_APP_DETECTED', 0)
+            ('$STAT_FLAGGED_APP_DETECTED', 0),
+        
+            ('$STAT_TOTAL_SCANNED_LINK', 0),
+            ('$STAT_TOTAL_SCANNED_SMS', 0),
+            ('$STAT_TOTAL_SCANNED_APP', 0)
     """
         db?.execSQL(insertQuery)
 
@@ -202,7 +223,7 @@ class DatabaseHelper(appContext: Context) :
 
     fun populateDatabaseWithFetchedData(jsonObject: JSONObject) {
         val tables = arrayOf(
-            TABLE_FLAGGED_LINKS,
+            TABLE_FLAGGED_URLS,
             TABLE_FLAGGED_SENDERS,
             TABLE_FLAGGED_MESSAGES,
             TABLE_FLAGGED_WORDS,
@@ -222,59 +243,57 @@ class DatabaseHelper(appContext: Context) :
         db: SQLiteDatabase?, tableName: String, jsonData: JSONObject
     ) {
         val jsonArray = jsonData.optJSONArray(tableName) ?: return
-        db?.beginTransaction()
-        try {
-            for (i in 0 until jsonArray.length()) {
+        db?.transaction {
+            try {
+                for (i in 0 until jsonArray.length()) {
 
 
-                val contentValues = ContentValues()
+                    val contentValues = ContentValues()
 
-                when (tableName) {
-                    TABLE_FLAGGED_LINKS -> {
-                        val jsonObject = jsonArray.getJSONObject(i)
-                        contentValues.apply {
-                            put("hash", jsonObject.optString("hash"))
-                            put("type", jsonObject.optInt("type"))
-                            put("description", jsonObject.optString("description"))
-                            put("check_type", jsonObject.optInt("check_type"))
-                            put("alert_level", jsonObject.optInt("alert_level"))
+                    when (tableName) {
+                        TABLE_FLAGGED_URLS -> {
+                            val jsonObject = jsonArray.getJSONObject(i)
+                            contentValues.apply {
+                                put("hash", jsonObject.optString("hash"))
+                                put("threat_type", jsonObject.optInt("threat_type"))
+                                put("url_match", jsonObject.optInt("url_match"))
+                                put("alert_level", jsonObject.optInt("alert_level"))
+                            }
                         }
-                    }
 
 
-                    TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
+                        TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
 
-                        contentValues.put("hash", jsonArray.getString(i))
-                    }
-
-
-                    TABLE_TIPS -> {
-                        val tip = jsonArray.getString(i)
-                        contentValues.apply {
-                            put("tip", tip)
+                            contentValues.put("hash", jsonArray.getString(i))
                         }
-                    }
 
-                    TABLE_FLAGGED_APPS -> {
-                        val jsonObject = jsonArray.getJSONObject(i)
-                        contentValues.apply {
-                            put("package_name", jsonObject.optString("package_name"))
 
-                            put("sha1", jsonObject.optString("sha1", null))
-                            put("apk_sha1", jsonObject.optString("apk_sha1", null))
+                        TABLE_TIPS -> {
+                            val tip = jsonArray.getString(i)
+                            contentValues.apply {
+                                put("tip", tip)
+                            }
                         }
+
+                        TABLE_FLAGGED_APPS -> {
+                            val jsonObject = jsonArray.getJSONObject(i)
+                            contentValues.apply {
+                                put("package_name", jsonObject.optString("package_name"))
+
+                                put("sha1", jsonObject.optString("sha1", ""))
+                                put("apk_sha1", jsonObject.optString("apk_sha1", ""))
+                            }
+                        }
+
+
                     }
 
-
+                    this.insertWithOnConflict(
+                        tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
+                    )
                 }
-
-                db?.insertWithOnConflict(
-                    tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
-                )
+            } finally {
             }
-            db?.setTransactionSuccessful()
-        } finally {
-            db?.endTransaction()
         }
     }
 
@@ -310,8 +329,6 @@ class DatabaseHelper(appContext: Context) :
         val placeholders = wordHashes.joinToString(",") { "?" }
 
 
-        val db = readableDatabase
-
         // Query to check if any word hash exists in the flagged words table
         val query =
             "SELECT COUNT(*) FROM $TABLE_FLAGGED_WORDS WHERE $COLUMN_HASH IN ($placeholders) LIMIT 1"
@@ -319,7 +336,7 @@ class DatabaseHelper(appContext: Context) :
 
         Log.d("DatabaseHelper", "Query: $query")
 
-        db.rawQuery(query, wordHashes.toTypedArray()).use { cursor ->
+        readableDatabase.rawQuery(query, wordHashes.toTypedArray()).use { cursor ->
             if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
                 return true
             }
@@ -340,14 +357,13 @@ class DatabaseHelper(appContext: Context) :
     }
 
     fun hasFlaggedLink(links: List<String>): Boolean {
-        val db = readableDatabase
 
         val fullUrlHashes = mutableListOf<String>()
         val domainHashes = mutableListOf<String>()
 
         links.forEach { link ->
             val cleanedLink = UrlUtils.removeUrlPrefixes(link)
-            val domain = UrlUtils.extractDomain(link)
+            val domain = extractDomain(link)
 
             // Generate hashes for both cleaned URL and domain
             val fullUrlHash = HashUtils.generateSHA256(cleanedLink)
@@ -363,54 +379,57 @@ class DatabaseHelper(appContext: Context) :
 
 
         val query =
-            "SELECT COUNT(*) FROM $TABLE_FLAGGED_LINKS WHERE ($COLUMN_HASH IN($fullUrlPlaceholders) AND check_type = 2) OR ($COLUMN_HASH IN($domainPlaceholders) AND check_type = 1) LIMIT 1"
+            "SELECT COUNT(*) FROM $TABLE_FLAGGED_URLS WHERE ($COLUMN_HASH IN($fullUrlPlaceholders) AND url_match = 1) OR ($COLUMN_HASH IN($domainPlaceholders) AND url_match = 0) LIMIT 1"
 
 
-        db.rawQuery(query, (fullUrlHashes + domainHashes).toTypedArray()).use { cursor ->
-            if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
-                //todo: delete after test
-//                incrementUserStat(STAT_FLAGGED_SMS_DETECTED)
-//                incrementUserStat(STAT_FLAGGED_LINK_DETECTED)
-                return true
+        readableDatabase.rawQuery(query, (fullUrlHashes + domainHashes).toTypedArray())
+            .use { cursor ->
+                if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
+                    return true
+                }
             }
-        }
 
         return false
     }
 
-    fun isUrlFlagged(url: String): Boolean {
+    // This function returns a triple: (isFlagged, threatType, isUrlMatch)
+    fun isUrlFlagged(url: String): Triple<Boolean, Alert.ThreatType?, Boolean> {
 
-        val db = readableDatabase
+        var cleanedUrl = UrlUtils.removeUrlPrefixes(url).lowercase()
+        cleanedUrl = removeQueryStringAndFragment(cleanedUrl)
+        val domain = extractDomain(url)
 
-        var cleanedLink = UrlUtils.removeUrlPrefixes(url).lowercase()
-        cleanedLink = UrlUtils.removeQueryString(cleanedLink)
-        val domain = UrlUtils.extractDomain(url)
-
-        val fullUrlHash = HashUtils.generateSHA256(cleanedLink)
+        val urlHash = HashUtils.generateSHA256(cleanedUrl)
         val domainHash = HashUtils.generateSHA256(domain)
 
-        val query = """
-        SELECT COUNT(*) FROM $TABLE_FLAGGED_LINKS 
-        WHERE (($COLUMN_HASH = ? AND check_type = 2) OR 
-               ($COLUMN_HASH = ? AND check_type = 1)) 
-        LIMIT 1
-    """
 
-        db.rawQuery(query, arrayOf(fullUrlHash, domainHash)).use { cursor ->
-            if (cursor.moveToFirst() && cursor.getInt(0) > 0) {
-                return true
+        // First check for domain match (url_match = 0)
+        val domainQuery =
+            "SELECT threat_type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 0 LIMIT 1"
+        readableDatabase.rawQuery(domainQuery, arrayOf(domainHash)).use { cursor ->
+            if (cursor.moveToFirst()) {
+                val typeValue = cursor.getInt(0)
+                return Triple(true, Alert.ThreatType.fromInt(typeValue), false)
+            }
+        }
+        // Then check for specific URL match (url_match = 1)
+        val urlQuery =
+            "SELECT type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 1 LIMIT 1"
+        readableDatabase.rawQuery(urlQuery, arrayOf(urlHash)).use { cursor ->
+            if (cursor.moveToFirst()) {
+                val typeValue = cursor.getInt(0)
+                return Triple(true, Alert.ThreatType.fromInt(typeValue), true)
             }
         }
 
-        return false
+        return Triple(false, null, false)
     }
 
     private fun countData(tableName: String, selection: String, selectionArgs: Array<String>): Int {
-        val db = readableDatabase
         val query = "SELECT COUNT(*) FROM $tableName WHERE $selection LIMIT 1"
 
         var count = 0
-        db.rawQuery(query, selectionArgs).use { cursor ->
+        readableDatabase.rawQuery(query, selectionArgs).use { cursor ->
             if (cursor.moveToFirst()) {
                 count = cursor.getInt(0)
             }
@@ -421,31 +440,38 @@ class DatabaseHelper(appContext: Context) :
     }
 
     fun getRandomTip(): String {
-        val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT tip FROM $TABLE_TIPS ORDER BY RANDOM() LIMIT 1", null)
-        var randomTip = ""
+        val cursor =
+            readableDatabase.rawQuery("SELECT tip FROM $TABLE_TIPS ORDER BY RANDOM() LIMIT 1", null)
+        var tip = ""
         if (cursor.moveToFirst()) {
-            randomTip = cursor.getString(cursor.getColumnIndexOrThrow("tip"))
+            tip = cursor.getString(cursor.getColumnIndexOrThrow("tip"))
 
         }
         cursor.close()
 
-        return randomTip
+        return tip
     }
 
-    fun getUserStats(): Map<String, Int> {
-        val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT stat_key, stat_count FROM $TABLE_STATS", null)
-        val statsMap = mutableMapOf<String, Int>()
+
+    fun getUserStats(): Stats {
+        val cursor =
+            readableDatabase.rawQuery("SELECT stat_key, stat_count FROM $TABLE_STATS", null)
+
+        val map = mutableMapOf<String, Int>()
         while (cursor.moveToNext()) {
-            val statKey = cursor.getString(cursor.getColumnIndexOrThrow("stat_key"))
-            val statValue = cursor.getInt(cursor.getColumnIndexOrThrow("stat_count"))
-            statsMap[statKey] = statValue
+            val key = cursor.getString(cursor.getColumnIndexOrThrow("stat_key"))
+            val value = cursor.getInt(cursor.getColumnIndexOrThrow("stat_count"))
+            map[key] = value
         }
         cursor.close()
-        return statsMap
-    }
 
+        return Stats(
+            suspiciousLinksDetected = map[STAT_FLAGGED_LINK_DETECTED] ?: 0,
+            suspiciousSmsDetected = map[STAT_FLAGGED_SMS_DETECTED] ?: 0,
+            suspiciousAppDetected = map[STAT_FLAGGED_APP_DETECTED] ?: 0,
+            verifiedGatewayDetected = map[STAT_VERIFIED_GATEWAY] ?: 0
+        )
+    }
 
     fun incrementUserStat(statKey: String) {
         val db = writableDatabase
@@ -457,7 +483,7 @@ class DatabaseHelper(appContext: Context) :
         val db = writableDatabase
         try {
             val tables = arrayOf(
-                TABLE_FLAGGED_LINKS,
+                TABLE_FLAGGED_URLS,
                 TABLE_FLAGGED_SENDERS,
                 TABLE_FLAGGED_MESSAGES,
                 TABLE_FLAGGED_WORDS,

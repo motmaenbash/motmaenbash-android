@@ -3,11 +3,13 @@
     <!-- Database Update Frequencies -->
     <string-array name="database_update_frequency">
         <item>@string/hourly</item>
+        <item>@string/every_3_hours</item>
         <item>@string/every_6_hours</item>
         <item>@string/daily</item>
     </string-array>
     <string-array name="database_update_frequency_values">
         <item>1</item>
+        <item>3</item>
         <item>6</item>
         <item>24</item>
     </string-array>
@@ -16,12 +18,14 @@
     <string-array name="theme">
         <item>@string/light</item>
         <item>@string/dark</item>
+        <item>@string/dim</item>
         <item>@string/system_default</item>
     </string-array>
 
     <string-array name="theme_values">
         <item>light</item>
         <item>dark</item>
+        <item>dim</item>
         <item>system</item>
     </string-array>
 
@@ -58,51 +62,10 @@
         <item>بله</item>
         <item>خیر</item>
     </string-array>
-    
+
     <string-array name="play_sound_in_silent_mode_values">
         <item>true</item>
         <item>false</item>
-    </string-array>
-
-
-    <!-- Faq Questions and Answers -->
-    <string-array name="faq_questions">
-        <item>این اپلیکیشن چه کار می‌کند؟</item>
-
-    </string-array>
-
-    <string-array name="faq_answers">
-        <item>...</item>
-    </string-array>
-
-
-    <!-- Permission Titles and Descriptions -->
-    <string-array name="permission_titles">
-        <item>دسترسی‌های اینترنت و وضعیت شبکه (INTERNET و ACCESS_NETWORK_STATE)</item>
-        <item>دسترسی دریافت پیامک جدید (RECEIVE_SMS)</item>
-        <item>سرویس دسترسی‌پذیری (BIND_ACCESSIBILITY_SERVICE)</item>
-        <item>دسترسی نمایش روی سایر برنامه‌ها (SYSTEM_ALERT_WINDOW)</item>
-        <item>دسترسی لیست برنامه‌های نصب شده (QUERY_ALL_PACKAGES)</item>
-        <item>دسترسی درخواست حذف برنامه (REQUEST_DELETE_PACKAGES)</item>
-        <item>دسترسی اجرای سرویس پیش‌زمینه (FOREGROUND_SERVICE)</item>
-        <item>دسترسی سرویس پیش‌زمینه برای همگام‌سازی داده (FOREGROUND_SERVICE_DATA_SYNC)</item>
-        <item>دسترسی نمایش اعلان (POST_NOTIFICATIONS)</item>
-        <item>دسترسی اجرای پس از راه‌اندازی (بوت) مجدد دستگاه (RECEIVE_BOOT_COMPLETED)</item>
-        <item>دسترسی ویبره (VIBRATE)</item>
-    </string-array>
-
-    <string-array name="permission_descriptions">
-        <item>این برنامه برای به‌روزرسانی پایگاه داده و دریافت اطلاعات جدید، به دسترسی اینترنت نیاز دارد. همچنین به‌منظور جلوگیری از بروز خطاهای ناشی از عدم دسترسی به اینترنت، دسترسی به وضعیت شبکه نیز مورد نیاز است.</item>
-        <item>این برنامه برای شناسایی پیامک‌های مشکوک و فیشینگ، به دسترسی دریافت پیامک جدید نیاز دارد. توجه داشته باشید این دسترسی تنها شامل پیامک تازه دریافت‌شده است و برنامه به هیچ وجه دسترسی به ارسال پیامک یا مشاهده پیامک‌های ذخیره‌شده کاربر را ندارد.</item>
-        <item>این برنامه برای شناسایی سایت‌های فیشینگ و هشدار به کاربر هنگام وب‌گردی، نیاز به دسترسی به سرویس دسترسی‌پذیری دارد. با استفاده از این دسترسی، لینک‌ها و صفحات مشکوک بررسی می‌شوند و در صورت مشاهده موارد خطرناک، هشدار لازم نمایش داده می‌شود. همچنین در هنگام استفاده از درگاه‌های پرداخت، اصالت درگاه‌های معتبر شاپرک به کاربر اطلاع داده می‌شود.</item>
-        <item>این برنامه برای نمایش هشدارها، به این دسترسی نیاز دارد. به‌وسیله این دسترسی، برنامه می‌تواند هشدارها را حتی زمانی که در حال استفاده از برنامه‌های دیگر هستید، به شما نمایش دهد.</item>
-        <item>این برنامه برای اسکن برنامه‌های نصب شده به منظور شناسایی برنامه‌های مشکوک و فیشینگ، به لیست برنامه‌های نصب‌شده نیاز دارد.</item>
-        <item>این برنامه هنگام شناسایی برنامه مشکوک، به کاربر هشدار داده و پیشنهاد حذف برنامه را می‌دهد. برای این منظور، به این دسترسی نیاز دارد. توجه داشته باشید که این دسترسی تنها درخواست حذف را به سیستم ارسال می‌کند و کاربر باید تایید کند که برنامه را حذف کند. هیچ‌گونه اقدام خودکاری برای حذف برنامه انجام نمی‌شود و حذف تنها با تایید کاربر امکان‌پذیر است.</item>
-        <item>برای اطمینان از اینکه سپرهای امنیتی پیامک، وب‌گردی، نصب برنامه و… همیشه فعال باقی می‌مانند، این برنامه از اندروید نسخه ۸ (Android 8) به بالا به این دسترسی نیاز دارد. بدیهی‌ست روی نسخه‌های قدیمی‌تر اندروید این دسترسی دریافت نمی‌شود.</item>
-        <item>برای اجرای سرویس‌های پیش‌زمینه که مسئول همگام‌سازی داده‌ها هستند، این برنامه به این دسترسی نیاز دارد. توجه داشته باشید که این دسترسی از اندروید نسخه ۱۰ (Android 10) به بالا دریافت می‌شود.</item>
-        <item>از اندروید نسخه ۸ (Android 8) به بالا، برای راه‌اندازی سرویس‌های پیش‌زمینه، نمایش اعلان ضروری است تا کاربر از در حال اجرا بودن سرویس برنامه آگاه شود. برای این منظور، برنامه به این دسترسی نیاز دارد. همچنین، ممکن است در برخی موارد اطلاع‌رسانی‌هایی نظیر نسخه جدید نرم‌افزار و… از طریق اعلان‌ها به کاربر صورت گیرد.</item>
-        <item>برای اطمینان از اینکه برنامه پس از راه‌اندازی مجدد دستگاه همچنان فعال باقی می‌ماند، این برنامه به این دسترسی نیاز دارد.</item>
-        <item>برای ایجاد لرزش هنگام نمایش هشدار شناسایی پیامک‌ها، لینک‌ها و برنامه‌های مشکوک، این برنامه به دسترسی ویبره نیاز دارد.</item>
     </string-array>
 
 </resources>

@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult
+import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.TextUtils
 import nu.milad.motmaenbash.utils.UrlUtils
 
 class UrlScanViewModel(private val context: Application) : AndroidViewModel(context) {
@@ -18,24 +21,35 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
 
     val _state = MutableStateFlow<ScanState>(ScanState.Initial)
     val state: StateFlow<ScanState> = _state.asStateFlow()
+    private val audioHelper by lazy {
+        AudioHelper(context)
+    }
 
     fun scanUrl(urlToScan: String) {
         viewModelScope.launch {
             _state.value = ScanState.Loading
 
-            val (resultText, isSafe) = when {
-                UrlUtils.isShaparakSubdomain(urlToScan) -> Pair(
+            val result = UrlUtils.analyzeUrl(url = urlToScan, databaseHelper = dbHelper)
+
+
+            val (resultText, isSafe) = when (result) {
+                is UrlAnalysisResult.SafeUrl -> Pair(
                     "این آدرس متعلق به یک درگاه پرداخت امن و مطمئن است.", true
                 )
 
-                dbHelper.isUrlFlagged(urlToScan) -> Pair(
+                is UrlAnalysisResult.SuspiciousUrl -> Pair(
                     "هشدار: این آدرس به عنوان یک آدرس مشکوک شناسایی شده است.", false
                 )
 
-                else -> Pair(
+                is UrlAnalysisResult.NeutralUrl -> Pair(
                     "در پایگاه داده ما اطلاعاتی درباره این آدرس اینترنتی موجود نیست. اگر از آن مطمئن هستید، می‌توانید ادامه دهید، اما در صورت تردید، احتیاط کنید.",
                     null
                 )
+            }
+
+            if (isSafe == false) {
+                audioHelper.vibrateDevice(context)
+                audioHelper.playDefaultSound()
             }
 
             _state.value = ScanState.Result(resultText, isSafe, urlToScan)
@@ -43,7 +57,7 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
     }
 
     fun getInitialUrl(intent: Intent?): String {
-        return when (intent?.action) {
+        val text = when (intent?.action) {
             Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT).orEmpty()
             Intent.ACTION_PROCESS_TEXT -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -53,6 +67,10 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
 
             else -> ""
         }.trim()
+
+        // Extract first URL from shared text
+        val links = TextUtils.extractLinks(text)
+        return links.firstOrNull() ?: ""
     }
 
     fun resetResult() {

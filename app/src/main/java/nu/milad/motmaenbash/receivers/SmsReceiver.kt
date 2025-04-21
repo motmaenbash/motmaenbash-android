@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity
-import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity.Companion.AlertLevel
+import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.SmsUtils.getSmsMessageFromPdu
@@ -17,21 +15,21 @@ import nu.milad.motmaenbash.utils.TextUtils.removeShortWords
 
 class SmsReceiver : BroadcastReceiver() {
 
-    private val TAG = "SmsReceiver"
 
+    companion object {
+        private const val TAG = "SmsReceiver"
+
+        // HashSet to store unique message IDs
+        private val receivedMessages = HashSet<String>()
+    }
 
     private lateinit var dbHelper: DatabaseHelper
 
-    // HashSet to store unique message IDs
-    companion object {
-        private val receivedMessages = HashSet<String>()
-    }
 
     override fun onReceive(context: Context, intent: Intent) {
 
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        Log.d(TAG, "SMS received")
 
         val bundle = intent.extras ?: return
 
@@ -47,13 +45,17 @@ class SmsReceiver : BroadcastReceiver() {
 
 
         try {
-            pdus.forEach { pdu ->
+            pdus.forEachIndexed { index, pdu ->
 
 
                 val smsMessage = getSmsMessageFromPdu(pdu, bundle)
-                sender = sender ?: smsMessage.displayOriginatingAddress
-                timestamp = smsMessage.timestampMillis
+
                 smsMessage.messageBody?.let(fullMessageBody::append)
+                // Set sender and timestamp only once from the first SMS part
+                if (index == 0) {
+                    sender = smsMessage.displayOriginatingAddress
+                    timestamp = smsMessage.timestampMillis
+                }
             }
 
             if (fullMessageBody.isNotBlank()) {
@@ -77,7 +79,6 @@ class SmsReceiver : BroadcastReceiver() {
         } catch (e: Exception) {
             e.printStackTrace()
             Log.e(TAG, "Error processing SMS", e)
-            FirebaseCrashlytics.getInstance().recordException(e)
         }
 
 
@@ -100,67 +101,45 @@ class SmsReceiver : BroadcastReceiver() {
         // Extract links from the message
         val extractedLinks = extractLinks(messageText)
 
-        Log.d(TAG, extractedLinks.toString())
 
-
-        when {
-
-
-            // Check if the sender is flagged
-            sender != null && dbHelper.isSenderFlagged(sender) -> {
-                AlertUtils.showAlert(
-                    context,
-                    AlertHandlerActivity.ALERT_TYPE_SMS_SENDER_FLAGGED,
-                    AlertLevel.ERROR.toString(),
-                    param1 = sender,
-                    param2 = messageText,
-                )
-                return
-            }
+        // Determine alert type
+        val alertType = when {
 
 
             // Check if extracted links are flagged
-            extractedLinks.isNotEmpty() && dbHelper.hasFlaggedLink(extractedLinks) -> {
-                AlertUtils.showAlert(
-                    context,
-                    AlertHandlerActivity.ALERT_TYPE_SMS_LINK_FLAGGED,
-                    AlertLevel.ERROR.toString(),
-                    param1 = sender,
-                    param2 = messageText,
-
-
-                    )
-                return
-            }
-
+            extractedLinks.isNotEmpty() && dbHelper.hasFlaggedLink(extractedLinks) ->
+                Alert.AlertType.SMS_LINK_FLAGGED
 
             // Check if the message contains any flagged keywords
-            dbHelper.hasFlaggedWord(messageText) -> {
-                AlertUtils.showAlert(
-                    context,
-                    AlertHandlerActivity.ALERT_TYPE_SMS_KEYWORD_FLAGGED,
-                    AlertLevel.ERROR.toString(),
-                    param1 = sender,
-                    param2 = messageText,
-
-                    )
-                return
-            }
+            dbHelper.hasFlaggedWord(messageText) ->
+                Alert.AlertType.SMS_KEYWORD_FLAGGED
 
             // Check if the message pattern is flagged
-            dbHelper.isMessageFlagged(messageText) -> {
+            dbHelper.isMessageFlagged(messageText) ->
+                Alert.AlertType.SMS_PATTERN_FLAGGED
 
-                AlertUtils.showAlert(
-                    context,
-                    AlertHandlerActivity.ALERT_TYPE_SMS_PATTERN_FLAGGED,
-                    AlertLevel.ERROR.toString(),
-                    param1 = sender,
-                    param2 = messageText,
+            // Check if the sender is flagged
+            sender != null && dbHelper.isSenderFlagged(sender) ->
+                Alert.AlertType.SMS_SENDER_FLAGGED
 
-                    )
-                return
-            }
+            // No flagged content detected
+            // Only show in debug mode
+            // todo:remove for production
+//            else -> if (BuildConfig.DEBUG) Alert.AlertType.SMS_NEUTRAL else null
+            else -> Alert.AlertType.SMS_NEUTRAL
 
+
+        }
+
+        // Show alert if needed
+        alertType.let {
+            AlertUtils.showAlert(
+                context = context,
+                alertType = it,
+                alertLevel = if (it == Alert.AlertType.SMS_SENDER_FLAGGED) Alert.AlertLevel.WARNING else if (it == Alert.AlertType.SMS_NEUTRAL) Alert.AlertLevel.NEUTRAL else Alert.AlertLevel.ALERT,
+                param1 = sender!!,
+                param2 = messageText
+            )
 
         }
 

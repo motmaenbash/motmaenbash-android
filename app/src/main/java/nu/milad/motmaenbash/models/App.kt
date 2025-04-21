@@ -1,4 +1,4 @@
-package nu.milad.motmaenbash.model
+package nu.milad.motmaenbash.models
 
 import android.graphics.drawable.Drawable
 

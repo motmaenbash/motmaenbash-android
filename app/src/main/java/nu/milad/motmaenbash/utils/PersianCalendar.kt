@@ -1,4 +1,4 @@
-package tech.tookan.emrooz.utils
+package nu.milad.motmaenbash.utils
 
 import java.util.Locale
 
@@ -55,7 +55,7 @@ class PersianCalendar {
      * to be set to 1 for Julian and to 0 for Gregorian calendar
      * @return Julian Day number
      */
-    private fun JG2JD(year: Int, month: Int, day: Int, J1G0: Int): Int {
+    private fun jG2JD(year: Int, month: Int, day: Int, J1G0: Int): Int {
         var jd =
             ((1461 * (year + 4800 + (month - 14) / 12)) / 4 + (367 * (month - 2 - 12 * ((month - 14) / 12))) / 12 - (3 * ((year + 4900 + (month - 14) / 12) / 100)) / 4 + day - 32075)
 
@@ -76,7 +76,7 @@ class PersianCalendar {
      * @param J1G0
      * to be set to 1 for Julian and to 0 for Gregorian calendar
      */
-    private fun JD2JG(JD: Int, J1G0: Int) {
+    private fun jD2JG(JD: Int, J1G0: Int) {
         val i: Int
         var j: Int
 
@@ -98,26 +98,26 @@ class PersianCalendar {
      * @param JDN
      * the Julian Day number
      */
-    private fun JD2Jal(JDN: Int) {
-        JD2JG(JDN, 0)
+    private fun jD2Jal(JDN: Int) {
+        jD2JG(JDN, 0)
 
         jY = gY - 621
-        JalCal(jY)
+        jalCal(jY)
 
-        val JDN1F = JG2JD(gY, 3, march, 0)
-        var k = JDN - JDN1F
+        val jDN1F = jG2JD(gY, 3, march, 0)
+        var k = JDN - jDN1F
         if (k >= 0) {
             if (k <= 185) {
                 jM = 1 + k / 31
                 jD = (k % 31) + 1
                 return
             } else {
-                k = k - 186
+                k -= 186
             }
         } else {
-            jY = jY - 1
-            k = k + 179
-            if (leap == 1) k = k + 1
+            jY -= 1
+            k += 179
+            if (leap == 1) k += 1
         }
 
         jM = 7 + k / 30
@@ -133,7 +133,7 @@ class PersianCalendar {
      * @param jY
      * Jalali calendar year (-61 to 3177)
      */
-    private fun JalCal(jY: Int) {
+    private fun jalCal(jY: Int) {
         march = 0
         leap = 0
 
@@ -170,9 +170,9 @@ class PersianCalendar {
             jump = jm - jp
             if (jY < jm) {
                 var N = jY - jp
-                leapJ = leapJ + N / 33 * 8 + (N % 33 + 3) / 4
+                leapJ += N / 33 * 8 + (N % 33 + 3) / 4
 
-                if ((jump % 33) == 4 && (jump - N) == 4) leapJ = leapJ + 1
+                if ((jump % 33) == 4 && (jump - N) == 4) leapJ += 1
 
                 val leapG = (gY / 4) - ((gY / 100 + 1) * 3 / 4) - 150
 
@@ -186,7 +186,7 @@ class PersianCalendar {
                 break
             }
 
-            leapJ = leapJ + jump / 33 * 8 + (jump % 33) / 4
+            leapJ += jump / 33 * 8 + (jump % 33) / 4
             jp = jm
         }
     }
@@ -213,9 +213,9 @@ class PersianCalendar {
      * @param day
      * `int`
      */
-    fun GregorianToPersian(year: Int, month: Int, day: Int) {
-        val jd = JG2JD(year, month + 1, day, 0)
-        JD2Jal(jd)
+    fun gregorianToPersian(year: Int, month: Int, day: Int) {
+        val jd = jG2JD(year, month + 1, day, 0)
+        jD2Jal(jd)
         this.year = jY
         this.month = jM
         this.day = jD
