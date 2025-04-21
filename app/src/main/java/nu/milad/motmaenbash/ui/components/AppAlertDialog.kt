@@ -1,12 +1,9 @@
 package nu.milad.motmaenbash.ui.components
 
-import PermissionGuideDialog
-import UpdateDialog
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,13 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
-import nu.milad.motmaenbash.ui.activities.TutorialDialog
-import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.viewmodels.MainViewModel
 
 @Composable
 fun AppAlertDialog(
@@ -48,12 +41,16 @@ fun AppAlertDialog(
     links: List<Pair<String, String>>? = null,
 ) {
     AlertDialog(
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+        modifier = Modifier
+            .padding(horizontal = 24.dp),
         containerColor = colorScheme.surface,
         onDismissRequest = onDismiss,
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 4.dp)
             ) {
                 Icon(
                     imageVector = icon,
@@ -73,7 +70,7 @@ fun AppAlertDialog(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 0.dp)
             ) {
                 // show body message
                 if (message != null) {
@@ -136,48 +133,8 @@ fun AppAlertDialog(
                     )
                 }
             }
-        } else null
-    )
-}
+        } else null,
 
-@Preview(showBackground = true)
-@Composable
-fun AppAlertDialogUpdatePreview() {
-    MotmaenBashTheme {
-        // Mock forced update state
-        val mockUpdateState = MainViewModel.UpdateDialogState(
-            latestVersionName = "2.1.0",
-            forceUpdate = true,
-            links = listOf("دانلود از سایت" to "https://motmaenbash.ir")
+
         )
-        Surface(modifier = Modifier.fillMaxSize()) {
-            UpdateDialog(
-                updateDialogState = mockUpdateState,
-                onDismiss = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppAlertDialogPermissionPreview() {
-    MotmaenBashTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            PermissionGuideDialog(
-                permissionType = MainViewModel.PermissionType.ACCESSIBILITY,
-                onConfirm = { }
-            ) { }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppAlertDialogTutorialPreview() {
-    MotmaenBashTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            TutorialDialog()
-        }
-    }
 }

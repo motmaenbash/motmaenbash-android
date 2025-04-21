@@ -62,7 +62,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.model.App
+import nu.milad.motmaenbash.models.App
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
@@ -91,7 +91,7 @@ fun AppScanScreen(
     }
 
     AppBar(
-        title = stringResource(id = R.string.app_scan_activity_title),
+        title = stringResource(id = R.string.app_scan_screen_title),
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -270,7 +270,7 @@ fun CurrentlyScannedAppsView(viewModel: AppScanViewModel = viewModel()) {
                 .padding(vertical = 8.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "در حال بارگیری برنامه‌ها...")
+            Text(text = "در حال دریافت لیست برنامه‌ها...", fontSize = 15.sp)
         }
         return
     }

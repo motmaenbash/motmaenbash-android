@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    Disable manifest receivers for API level 26 and above.
+    On newer Android versions (8.0+), we register receivers dynamically in
+    the MonitoringService to comply with background execution limits.
+    -->
+    <bool name="enable_manifest_receivers">false</bool>
+</resources>

@@ -23,7 +23,6 @@ import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants.USER_REPORT_FORM_URL
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
-import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
 
@@ -34,7 +33,7 @@ fun UserReportScreen() {
     val scrollState = rememberScrollState()
 
     AppBar(
-        title = stringResource(id = R.string.user_report_activity_title),
+        title = stringResource(id = R.string.user_report_screen_title),
     ) { innerPadding ->
         Column(
             modifier = Modifier

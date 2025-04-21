@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    Enable manifest receivers for API level 25 and below.
+    On older Android versions (7.1.1 and below), we use manifest-declared receivers
+    instead of dynamically registered receivers due to background restrictions.
+    -->
+    <bool name="enable_manifest_receivers">true</bool>
+</resources>

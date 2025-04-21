@@ -1,8 +1,5 @@
 package nu.milad.motmaenbash.ui.activities
 
-import AboutScreen
-import MainScreen
-import PermissionsIntroScreen
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -25,13 +22,16 @@ import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_INTRO_SHOWN
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.consts.Pages
-import nu.milad.motmaenbash.services.MonitoringService
+import nu.milad.motmaenbash.ui.screens.AboutScreen
 import nu.milad.motmaenbash.ui.screens.AppScanScreen
 import nu.milad.motmaenbash.ui.screens.InfoListScreen
+import nu.milad.motmaenbash.ui.screens.IntroScreen
+import nu.milad.motmaenbash.ui.screens.MainScreen
 import nu.milad.motmaenbash.ui.screens.SettingsScreen
 import nu.milad.motmaenbash.ui.screens.UrlScanScreen
 import nu.milad.motmaenbash.ui.screens.UserReportScreen
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.utils.ServiceUtils
 import nu.milad.motmaenbash.utils.dataStore
 
 class MainActivity : ComponentActivity() {
@@ -57,18 +57,13 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
-        // Start the monitoring service
-        val serviceIntent = Intent(
-            this,
-            MonitoringService::class.java
-        )
+        // Only start monitoring service on Android 8 (Oreo) and above
+        // On older Android versions, we use manifest-declared receivers instead
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
+            ServiceUtils().startMonitoringService(this)
         }
     }
+
 
 }
 
@@ -101,7 +96,7 @@ fun AppNavigation(
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(NavRoutes.MAIN_SCREEN) { MainScreen() }
-        composable(NavRoutes.PERMISSION_INTRO_SCREEN) { PermissionsIntroScreen() }
+        composable(NavRoutes.PERMISSION_INTRO_SCREEN) { IntroScreen() }
         composable(NavRoutes.ABOUT_SCREEN) { AboutScreen() }
         composable(NavRoutes.USER_REPORT_SCREEN) { UserReportScreen() }
         composable(NavRoutes.URL_SCAN_SCREEN) { UrlScanScreen() }

@@ -51,14 +51,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants
+import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.components.AppLogo
-import nu.milad.motmaenbash.ui.components.RowDivider
+import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
@@ -71,9 +73,10 @@ fun AboutScreen() {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val navController = LocalNavController.current
 
     AppBar(
-        title = stringResource(id = R.string.about_activity_title),
+        title = stringResource(id = R.string.about_screen_title),
     ) { contentPadding ->
 
 
@@ -85,22 +88,22 @@ fun AboutScreen() {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppLogo(size = 100.dp)
+            AppLogo(size = 96.dp)
             Spacer(modifier = Modifier.height(4.dp))
-            AppInfo()
+            AppInfo(navController)
             Spacer(modifier = Modifier.height(18.dp))
             SocialMediaLinks()
             Spacer(modifier = Modifier.height(18.dp))
             ActionButtons(context)
 
-
+        
         }
     }
 }
 
 
 @Composable
-fun AppInfo() {
+fun AppInfo(navController: NavController) {
 
     val context = LocalContext.current
 
@@ -111,7 +114,7 @@ fun AppInfo() {
     )
 
     Text(
-        text = "اپلیکیشن تشخیص فیشینگ",
+        text = "برنامه تشخیص فیشینگ",
         color = colorScheme.onBackground,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
@@ -121,7 +124,10 @@ fun AppInfo() {
 
     Text(
         text = stringResource(R.string.version, BuildConfig.VERSION_NAME),
-        style = typography.bodySmall
+        style = typography.bodySmall,
+        modifier = Modifier.clickable {
+            navController.navigate(NavRoutes.CHANGELOG_SCREEN)
+        },
     )
 
     Text(
@@ -135,7 +141,7 @@ fun AppInfo() {
                 WebUtils.openUrl(context, "https://motmaenbash.ir")
             })
 
-    RowDivider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
+    Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
 
 
     Row(
@@ -238,9 +244,9 @@ fun SocialMediaLinks() {
                         WebUtils.openUrl(context, url)
                     })
             }
-            // Only show divider if it's not the last item
+            // show divider if it's not the last item
             if (index != links.size - 1) {
-                RowDivider(verticalPadding = 4.dp, horizontalPadding = 4.dp)
+                Divider(verticalPadding = 4.dp, horizontalPadding = 4.dp)
             }
         }
 
@@ -263,6 +269,7 @@ fun ActionButtons(context: Context) {
         Spacer(modifier = Modifier.width(4.dp))
 
         Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
             text = "حـمـایـت مـالـی",
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
@@ -271,7 +278,7 @@ fun ActionButtons(context: Context) {
 
 
 
-    RowDivider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
+    Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
 
     Row(
         modifier = Modifier.wrapContentSize(),
@@ -316,7 +323,7 @@ private fun shareAppInfo(context: Context) {
         putExtra(
             Intent.EXTRA_TEXT, """
                 📱 سلام. برنامه «مطمئن باش» رو ببین.
-                این اپلیکیشن بهت کمک می‌کنه تا کمتر در دام فیشینگ و کلاهبرداری‌های اینترنتی بیفتی.
+                این برنامه موبایل بهت کمک می‌کنه تا کمتر در دام فیشینگ و کلاهبرداری‌های اینترنتی بیفتی.
 
                 🔒 شناسایی پیامک‌های فیشینگ و هشدار به شما
                 🔍 هشدار درباره لینک‌های مشکوک شناسایی شده
@@ -358,7 +365,7 @@ private fun sendBugReport(context: Context) {
                 feedbackIntent, context.getString(R.string.send_email_chooser_title)
             )
         )
-    } catch (e: ActivityNotFoundException) {
+    } catch (_: ActivityNotFoundException) {
         Toast.makeText(context, context.getString(R.string.no_email_app_found), Toast.LENGTH_SHORT)
             .show()
     }

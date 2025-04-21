@@ -1,5 +1,11 @@
+package nu.milad.motmaenbash.ui.screens
+
+
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,7 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.AccessibilityNew
-import androidx.compose.material.icons.outlined.KeyboardDoubleArrowLeft
+import androidx.compose.material.icons.outlined.KeyboardDoubleArrowRight
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Sms
@@ -55,33 +61,39 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_INTRO_SHOWN
+import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.NavRoutes
+import nu.milad.motmaenbash.consts.PermissionType
 import nu.milad.motmaenbash.ui.activities.LocalNavController
+import nu.milad.motmaenbash.ui.components.AccessibilityPermissionDialog
 import nu.milad.motmaenbash.ui.components.AppLogo
+import nu.milad.motmaenbash.ui.components.NotificationPermissionDialog
+import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
-import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.theme.RedVariant
 import nu.milad.motmaenbash.utils.PermissionManager
-import nu.milad.motmaenbash.utils.dataStore
-import nu.milad.motmaenbash.viewmodels.MainViewModel
+import nu.milad.motmaenbash.utils.ServiceUtils
+import nu.milad.motmaenbash.viewmodels.IntroViewModel
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
+fun IntroScreen(viewModel: IntroViewModel = viewModel()) {
     val context = LocalContext.current
     val navController = LocalNavController.current
     val permissionManager = remember { PermissionManager(context) }
@@ -89,11 +101,36 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
 
     val scrollState = rememberScrollState()
 
-    // Permission states
+    // Observe permission statuses
     val smsPermissionStatus by viewModel.smsPermissionStatus.collectAsState()
     val overlayPermissionStatus by viewModel.overlayPermissionStatus.collectAsState()
     val accessibilitySettingStatus by viewModel.accessibilitySettingStatus.collectAsState()
     val notificationPermissionStatus by viewModel.notificationPermissionStatus.collectAsState()
+
+    var showSmsPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionDeniedDialog by remember { mutableStateOf(false) }
+
+
+    // Permission States
+    val smsPermissionState = rememberPermissionState(
+        Manifest.permission.RECEIVE_SMS
+    ) { isGranted ->
+        viewModel.updatePermissionStatus(
+            PermissionType.SMS, isGranted
+        )
+    }
+
+
+    // Notification Permission
+    val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS) { isGranted ->
+            viewModel.updatePermissionStatus(
+                PermissionType.NOTIFICATIONS, isGranted
+            )
+        }
+    } else {
+        null
+    }
 
     // Store required permissions and get remaining ones
     val allPermissionSteps = remember {
@@ -124,17 +161,49 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
         requiredPermissions.getOrNull(currentStepIndex) ?: "completed"
     }
 
+    val isLastStep = currentStepIndex == requiredPermissions.size - 1
+
+    var showAccessibilityGuide by remember { mutableStateOf(false) }
+
+    // SMS Settings Launcher
+    val smsSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.checkPermissionStatus(PermissionType.SMS)
+    }
+
+    // Notification Settings Launcher
+    val notificationSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            viewModel.checkPermissionStatus(PermissionType.NOTIFICATIONS)
+        }
+    }
+
     // Prevent returning to permission screen after navigating to main screen
     DisposableEffect(key1 = Unit) {
         val onBackPressedCallback = {
-            if (currentStep == "accessibility" && accessibilitySettingStatus) {
-                true // Consume back press when we've navigated to main screen
-            } else {
-                false
-            }
+            currentStep == "accessibility" && accessibilitySettingStatus // Consume back press when we've navigated to main screen
         }
         onDispose {
             // Clean up if needed
+        }
+    }
+
+    // Function to navigate to main screen
+    val navigateToMainScreen = {
+        coroutineScope.launch {
+            // Mark as not first launch inside coroutine
+            viewModel.markIntroAsShown()
+
+            // Navigate to main screen after preferences are updated
+            navController.navigate(NavRoutes.MAIN_SCREEN) {
+                // Clear back stack so user can't go back to permission screen
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
         }
     }
 
@@ -142,35 +211,19 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
     val overlayLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        viewModel.checkOverlayPermission()
+        viewModel.checkPermissionStatus(PermissionType.OVERLAY)
     }
 
-    val notificationLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        viewModel.updatePermissionStatus(MainViewModel.PermissionType.NOTIFICATIONS, isGranted)
-    }
-
-    val smsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        viewModel.updatePermissionStatus(MainViewModel.PermissionType.SMS, isGranted)
-    }
-
-    // Accessibility guide dialog
-    var showAccessibilityGuide by remember { mutableStateOf(false) }
+    // Accessibility settings launcher
     val accessibilitySettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        viewModel.checkAccessibilityPermission()
+        viewModel.checkPermissionStatus(PermissionType.ACCESSIBILITY)
     }
 
     // Check initial permissions
     LaunchedEffect(Unit) {
-        viewModel.checkOverlayPermission()
-        viewModel.checkNotificationPermission()
-        viewModel.checkAccessibilityPermission()
-        viewModel.checkSmsPermission()
+        viewModel.checkInitialPermissions()
     }
 
     LaunchedEffect(
@@ -181,6 +234,7 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
     ) {
         when (currentStep) {
             "intro" -> {
+                // Nothing to do for intro
             }
 
             "overlay" -> if (overlayPermissionStatus) {
@@ -189,6 +243,11 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
             }
 
             "notifications" -> if (notificationPermissionStatus) {
+
+                // Start the monitoring service when notification permission is granted
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ServiceUtils().startMonitoringService(context)
+                }
                 delay(500)
                 currentStepIndex++
             }
@@ -200,12 +259,7 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
 
             "accessibility" -> if (accessibilitySettingStatus) {
                 delay(500)
-                navController.navigate(NavRoutes.MAIN_SCREEN) {
-                    // Clear back stack so user can't go back to permission screen
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
+                navigateToMainScreen()
             }
         }
     }
@@ -217,23 +271,12 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
         }
     }
 
-    // Get the appropriate icon for the current step
-    remember(currentStep) {
-        when (currentStep) {
-            "overlay" -> Icons.Outlined.PhoneAndroid
-            "notifications" -> Icons.Outlined.Notifications
-            "sms" -> Icons.Outlined.Sms
-            "accessibility" -> Icons.Outlined.AccessibilityNew
-            else -> null
-        }
-    }
-
+    // Main UI
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
             .systemBarsPadding(),
-
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -253,7 +296,7 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AppLogo(100.dp)
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             "به «مطمئن باش» خوش آمدید",
@@ -283,100 +326,87 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
                 }
 
                 "overlay" -> PermissionStep(
-                    title = "نمایش پنجره روی سایر برنامه‌ها",
+                    title = stringResource(id = R.string.permission_overlay),
                     permissionName = "SYSTEM_ALERT_WINDOW",
-                    description = "برای نمایش هشدارهای فوری هنگام شناسایی تهدید، نیاز به این دسترسی داریم",
+                    description = stringResource(id = R.string.permission_overlay_description),
                     icon = Icons.Outlined.PhoneAndroid,
                     isGranted = overlayPermissionStatus,
+                    isLastStep = isLastStep,
                     onGrant = {
                         permissionManager.requestOverlayPermission(context, overlayLauncher)
-                        viewModel.checkOverlayPermission()
-                        viewModel.viewModelScope.launch {
+                        coroutineScope.launch {
                             permissionManager.showOverlayPermissionTutorial()
                         }
                     },
                     onNext = {
                         currentStepIndex++
-                    }
+                    },
+                    onComplete = { navigateToMainScreen() }
                 )
 
                 "notifications" -> PermissionStep(
-                    title = "دسترسی نمایش اعلان",
+                    title = stringResource(id = R.string.permission_notification),
                     permissionName = "POST_NOTIFICATIONS",
-                    description = "برای ارسال هشدارهای سریع در مورد تهدیدات امنیتی و فیشینگ، نیاز به این دسترسی داریم",
+                    description = stringResource(id = R.string.permission_notification_description),
                     icon = Icons.Outlined.Notifications,
                     isGranted = notificationPermissionStatus,
+                    isLastStep = isLastStep,
                     onGrant = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+                        if (notificationPermissionState?.status?.isGranted == false && notificationPermissionState.status.shouldShowRationale) {
+                            showNotificationPermissionDeniedDialog = true
                         } else {
-                            viewModel.updatePermissionStatus(
-                                MainViewModel.PermissionType.NOTIFICATIONS,
-                                true
-                            )
+                            viewModel.setHasRequestedNotificationPermission(true)
+                            notificationPermissionState?.launchPermissionRequest()
+
+                        }
+
+                    },
+
+
+                    onNext = {
+                        currentStepIndex++
+                    },
+                    onComplete = { navigateToMainScreen() }
+                )
+
+                "sms" -> PermissionStep(
+                    title = stringResource(id = R.string.permission_receive_sms),
+                    permissionName = "RECEIVE_SMS",
+                    description = stringResource(id = R.string.permission_receive_sms_description),
+                    icon = Icons.Outlined.Sms,
+                    isGranted = smsPermissionStatus,
+                    isLastStep = isLastStep,
+                    onGrant = {
+
+
+                        if (!smsPermissionState.status.isGranted && smsPermissionState.status.shouldShowRationale) {
+                            showSmsPermissionDeniedDialog = true
+                        } else {
+                            viewModel.setHasRequestedSmsPermission(true)
+                            smsPermissionState.launchPermissionRequest()
                         }
                     },
                     onNext = {
                         currentStepIndex++
                     },
-                )
-
-                "sms" -> PermissionStep(
-                    title = "دسترسی دریافت پیامک",
-                    permissionName = "RECEIVE_SMS",
-                    description = "برای شناسایی و مسدود کردن پیامک‌های فیشینگ و کلاهبرداری، نیاز به دسترسی خواندن پیامک داریم",
-                    icon = Icons.Outlined.Sms,
-                    isGranted = smsPermissionStatus,
-                    onGrant = { smsLauncher.launch(Manifest.permission.RECEIVE_SMS) },
-                    onNext = {
-                        currentStepIndex++
-                    }
+                    onComplete = { navigateToMainScreen() }
                 )
 
                 "accessibility" -> {
                     PermissionStep(
                         title = "سرویس دسترسی‌پذیری",
                         permissionName = "ACCESSIBILITY_SERVICE",
-                        description = "برای محافظت از شما در برابر برنامه‌های مخرب و شناسایی سایت‌های فیشینگ، به این دسترسی نیاز داریم",
+                        description = stringResource(id = R.string.permission_accessibility_short_description),
                         icon = Icons.Outlined.AccessibilityNew,
                         isGranted = accessibilitySettingStatus,
+                        isLastStep = true, // Always the last step
                         onGrant = { showAccessibilityGuide = true },
-                        content = {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    // Launch a coroutine to handle the suspend function
-                                    coroutineScope.launch {
-                                        val dataStore = context.dataStore
-
-                                        // Mark as not first launch inside coroutine
-                                        dataStore.edit { preferences ->
-                                            preferences[booleanPreferencesKey(PREF_KEY_INTRO_SHOWN)] =
-                                                true
-                                        }
-
-                                        // Navigate to main screen after preferences are updated
-                                        navController.navigate(NavRoutes.MAIN_SCREEN) {
-                                            // Clear back stack so user can't go back to permission screen
-                                            popUpTo(navController.graph.startDestinationId) {
-                                                inclusive = true
-                                            }
-                                        }
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreyDark,
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Text("ورود به برنامه")
-                            }
-                        }
+                        onComplete = { navigateToMainScreen() }
                     )
 
                     if (showAccessibilityGuide) {
-                        PermissionGuideDialog(
-                            permissionType = MainViewModel.PermissionType.ACCESSIBILITY,
+                        AccessibilityPermissionDialog(
                             onConfirm = {
                                 showAccessibilityGuide = false
                                 permissionManager.launchAccessibilitySettings(
@@ -389,13 +419,147 @@ fun PermissionsIntroScreen(viewModel: MainViewModel = viewModel()) {
                 }
             }
         }
-        if (currentStep ==
-            "intro"
-        )
+        if (currentStep == "intro") {
             DeveloperCredit()
+        }
+
+
+        // SMS Permission Denied Dialog
+        if (showSmsPermissionDeniedDialog) {
+            SmsPermissionDialog(
+                onConfirm = {
+                    // Open app settings directly
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                    }
+                    smsSettingsLauncher.launch(intent)
+                    showSmsPermissionDeniedDialog = false
+                },
+                onDismiss = { showSmsPermissionDeniedDialog = false }
+            )
+        }
+
+        // Notification Permission Denied Dialog (For API 33+)
+        if (showNotificationPermissionDeniedDialog) {
+            NotificationPermissionDialog(
+                onConfirm = {
+                    // Open app notification settings
+                    permissionManager.requestNotificationPermission(
+                        context,
+                        notificationSettingsLauncher
+                    )
+                    showNotificationPermissionDeniedDialog = false
+                },
+                onDismiss = { showNotificationPermissionDeniedDialog = false }
+            )
+        }
     }
 }
 
+@Composable
+fun PermissionStep(
+    title: String,
+    permissionName: String = "",
+    description: String,
+    isGranted: Boolean,
+    isLastStep: Boolean = false,
+    icon: ImageVector? = null,
+    onGrant: () -> Unit,
+    onNext: (() -> Unit)? = null,
+    onComplete: (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorScheme.background)
+            .systemBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Animated icon for the permission
+        icon?.let {
+            AnimatedPermissionIcon(it)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Title and description
+        Text(
+            title,
+            style = typography.headlineSmall,
+            color = colorScheme.primary,
+            fontSize = 17.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+
+        if (permissionName.isNotEmpty()) {
+            Text(
+                permissionName,
+                style = typography.bodySmall,
+                color = GreyMiddle,
+                fontSize = 13.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            description,
+            style = typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp,
+            modifier = Modifier
+                .padding(horizontal = 12.dp),
+            color = colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onGrant,
+            enabled = !isGranted,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isGranted) Color.Gray else ColorPrimary,
+                contentColor = Color.White
+            )
+        ) {
+            Text(if (isGranted) "تکمیل شده" else "فعال‌سازی دسترسی")
+        }
+
+        // Show "Next Step" button if not the last step
+        if (!isLastStep && onNext != null) {
+            Spacer(modifier = Modifier.width(16.dp))
+            TextButton(
+                onClick = onNext,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = colorScheme.primary
+                )
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.KeyboardDoubleArrowRight,
+                        contentDescription = "Next",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("گام بعدی")
+                }
+            }
+        }
+
+        // Show "Enter the app" button if this is the last step
+        if (isLastStep) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = { onComplete?.invoke() },
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
+
+                ) {
+                Text("ورود به برنامه")
+            }
+        }
+
+        // Custom content section
+        content?.invoke()
+    }
+}
 
 @Composable
 fun AnimatedPermissionIcon(icon: ImageVector) {
@@ -448,7 +612,7 @@ fun DeveloperCredit() {
     ) {
 
         Text(
-            "توسعه توسط میلاد نوری",
+            "طراحی و توسعه توسط میلاد نوری",
             style = typography.bodySmall,
             color = GreyMiddle,
 
@@ -458,6 +622,7 @@ fun DeveloperCredit() {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(bottom = 8.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Favorite,
@@ -467,7 +632,7 @@ fun DeveloperCredit() {
                     .scale(scale),
                 tint = RedVariant
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 "برای مردم ایران",
                 fontWeight = FontWeight.Bold, color = GreyMiddle,
@@ -475,103 +640,6 @@ fun DeveloperCredit() {
                 style = typography.bodySmall,
             )
         }
-    }
-}
-
-@Composable
-fun PermissionStep(
-    title: String,
-    permissionName: String = "",
-    description: String,
-    isGranted: Boolean,
-    icon: ImageVector? = null,
-    onGrant: () -> Unit,
-    onNext: (() -> Unit)? = null,
-    content: @Composable (() -> Unit)? = null
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colorScheme.background)
-            .systemBarsPadding(),
-
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Animated icon for the permission
-        icon?.let {
-            AnimatedPermissionIcon(it)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Title and description
-        Text(
-            title,
-            style = typography.headlineSmall,
-            color = colorScheme.primary,
-            fontSize = 17.sp
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        if (permissionName.isNotEmpty()) {
-            Text(
-                permissionName,
-                style = typography.bodySmall,
-                color = GreyMiddle,
-                fontSize = 12.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            description,
-            style = typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .padding(horizontal = 12.dp),
-            color = colorScheme.onBackground
-
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Button(
-            onClick = onGrant,
-            enabled = !isGranted,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isGranted) Color.Gray else ColorPrimary,
-                contentColor = Color.White
-            )
-        ) {
-            Text(if (isGranted) "تکمیل شده" else "فعال‌سازی دسترسی")
-        }
-
-        if (onNext != null) {
-            Spacer(modifier = Modifier.width(16.dp))
-            TextButton(
-                onClick = onNext,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = colorScheme.primary
-                )
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("گام بعدی")
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Icon(
-                        imageVector = Icons.Outlined.KeyboardDoubleArrowLeft,
-                        contentDescription = "Next",
-                        modifier = Modifier.size(16.dp)
-                    )
-
-
-                }
-            }
-        }
-
-        // Custom content section
-        content?.invoke()
-
     }
 }
 
@@ -594,11 +662,46 @@ fun PermissionStepPreview() {
                     verticalArrangement = Arrangement.Center
                 ) {
                     PermissionStep(
-                        title = "نمایش پنجره روی سایر برنامه‌ها",
+                        title = stringResource(id = R.string.permission_overlay),
                         permissionName = "SYSTEM_ALERT_WINDOW",
                         description = "برای نمایش هشدارهای فوری هنگام شناسایی تهدید، نیاز به این دسترسی داریم",
                         icon = Icons.Outlined.PhoneAndroid,
                         isGranted = false,
+                        onGrant = { },
+                        onNext = { }
+                    )
+                }
+
+                DeveloperCredit()
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun PermissionLastStepPreview() {
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    PermissionStep(
+                        title = stringResource(id = R.string.permission_overlay),
+                        permissionName = "SYSTEM_ALERT_WINDOW",
+                        description = "برای نمایش هشدارهای فوری هنگام شناسایی تهدید، نیاز به این دسترسی داریم",
+                        icon = Icons.Outlined.PhoneAndroid,
+                        isGranted = false,
+                        isLastStep = true,
                         onGrant = { },
                         onNext = { }
                     )

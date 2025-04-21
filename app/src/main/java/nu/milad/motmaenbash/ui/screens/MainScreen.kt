@@ -1,5 +1,10 @@
+package nu.milad.motmaenbash.ui.screens
+
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,26 +39,30 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.AdsClick
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Face
+import androidx.compose.material.icons.outlined.GppGood
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.RemoveModerator
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -69,10 +78,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -82,22 +93,32 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.NavRoutes
+import nu.milad.motmaenbash.consts.PermissionType
+import nu.milad.motmaenbash.models.Link
+import nu.milad.motmaenbash.models.Stats
 import nu.milad.motmaenbash.ui.activities.LocalNavController
-import nu.milad.motmaenbash.ui.components.AppAlertDialog
+import nu.milad.motmaenbash.ui.components.AccessibilityPermissionDialog
 import nu.milad.motmaenbash.ui.components.AppCard
-import nu.milad.motmaenbash.ui.components.RowDivider
-import nu.milad.motmaenbash.ui.theme.Green
+import nu.milad.motmaenbash.ui.components.CriticalPermissionsInfoDialog
+import nu.milad.motmaenbash.ui.components.Divider
+import nu.milad.motmaenbash.ui.components.GuardsInfoDialog
+import nu.milad.motmaenbash.ui.components.NotificationPermissionDialog
+import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
+import nu.milad.motmaenbash.ui.components.UpdateDialog
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.theme.Red
+import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.PermissionManager
+import nu.milad.motmaenbash.utils.ServiceUtils
 import nu.milad.motmaenbash.utils.UpdateManager.UpdateState
 import nu.milad.motmaenbash.utils.WebUtils
 import nu.milad.motmaenbash.viewmodels.MainViewModel
@@ -111,35 +132,39 @@ fun MainScreen(
     val navController = LocalNavController.current
     val permissionManager = remember { PermissionManager(context) }
 
+
     val scrollState = rememberScrollState()
     val tipOfTheDay by viewModel.tipOfTheDay.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     //Stats
-    val suspiciousLinksDetected by viewModel.suspiciousLinksDetected.collectAsState()
-    val suspiciousSmsDetected by viewModel.suspiciousSmsDetected.collectAsState()
-    val suspiciousAppDetected by viewModel.suspiciousAppDetected.collectAsState()
+    val stats by viewModel.stats.collectAsState()
 
     val updateState by viewModel.updateState.collectAsState()
     val updateDialogState by viewModel.updateDialogState.collectAsState()
 
-    // Observe sponsor data
-    val sponsorData by viewModel.sponsorData.collectAsState()
+    // Observe link data
+    val linkData by viewModel.linkData.collectAsState()
+
+
+    var showSmsPermissionDeniedDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionDeniedDialog by remember { mutableStateOf(false) }
 
     // Permission States
     val smsPermissionState = rememberPermissionState(
         Manifest.permission.RECEIVE_SMS
     ) { isGranted ->
         viewModel.updatePermissionStatus(
-            MainViewModel.PermissionType.SMS, isGranted
+            PermissionType.SMS, isGranted
         )
     }
+
 
     // Notification Permission
     val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS) { isGranted ->
             viewModel.updatePermissionStatus(
-                MainViewModel.PermissionType.NOTIFICATIONS, isGranted
+                PermissionType.NOTIFICATIONS, isGranted
             )
         }
     } else {
@@ -149,14 +174,22 @@ fun MainScreen(
 
     // Observe permission statuses
     val smsPermissionStatus by viewModel.smsPermissionStatus.collectAsState()
+    val notificationPermissionStatus by viewModel.notificationPermissionStatus.collectAsState()
+
+
     val accessibilitySettingStatus by viewModel.accessibilitySettingStatus.collectAsState()
     val overlayPermissionStatus by viewModel.overlayPermissionStatus.collectAsState()
 
     var showAccessibilityGuide by remember { mutableStateOf(false) }
 
-    // Permission warning banner state
-    val showPermissionWarning =
-        !smsPermissionStatus || !accessibilitySettingStatus || !overlayPermissionStatus
+
+    var showCriticalPermissionsInfoDialog by remember { mutableStateOf(false) }
+
+
+    val isCriticalPermissionsMissing =
+        !notificationPermissionStatus || !overlayPermissionStatus
+
+
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -167,7 +200,7 @@ fun MainScreen(
         // Add delay to allow system to update
         viewModel.viewModelScope.launch {
             delay(300)
-            viewModel.checkAccessibilityPermission()
+            viewModel.checkPermissionStatus(PermissionType.ACCESSIBILITY)
         }
     }
 
@@ -175,15 +208,72 @@ fun MainScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
         // When user returns from settings, check if permission is now granted
-        viewModel.checkOverlayPermission()
+        viewModel.checkPermissionStatus(PermissionType.OVERLAY)
     }
 
 
+    // SMS Settings Launcher
+    val smsSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.checkPermissionStatus(PermissionType.SMS)
+    }
 
+    // Notification Settings Launcher
+    val notificationSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            viewModel.checkPermissionStatus(PermissionType.NOTIFICATIONS)
+        }
+    }
+
+    var showChangelog by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         viewModel.checkInitialPermissions()
     }
+
+    LaunchedEffect(smsPermissionState.status.isGranted) {
+
+        when {
+            smsPermissionState.status.isGranted -> {
+                showSmsPermissionDeniedDialog = false
+            }
+
+            !smsPermissionState.status.isGranted &&
+                    !smsPermissionState.status.shouldShowRationale &&
+                    viewModel.hasRequestedSmsPermission.value -> {
+                showSmsPermissionDeniedDialog = true
+            }
+        }
+
+    }
+
+
+    LaunchedEffect(notificationPermissionState?.status?.isGranted) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            notificationPermissionState != null
+        ) {
+
+            when {
+                notificationPermissionState.status.isGranted -> {
+                    showNotificationPermissionDeniedDialog = false
+                    // Start the monitoring service when notification permission is granted
+                    ServiceUtils().startMonitoringService(context)
+
+                }
+
+                !notificationPermissionState.status.isGranted &&
+                        !notificationPermissionState.status.shouldShowRationale &&
+                        viewModel.hasRequestedNotificationPermission.value -> {
+                    showNotificationPermissionDeniedDialog = true
+                }
+            }
+        }
+    }
+
+
 
     Column(
         modifier = Modifier
@@ -199,236 +289,6 @@ fun MainScreen(
                 .systemBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-//
-//            //todo:delete
-//
-//
-//            val radioOptions = listOf("Option 1", "Option 2", "Option 3")
-//            var selectedOption by remember { mutableStateOf(radioOptions[0]) }
-//            var textFieldValue by remember { mutableStateOf("") }
-//            val sliderValue by remember { mutableFloatStateOf(0f) }
-//
-//
-//            Column(
-//                modifier = Modifier
-//                    .wrapContentSize()
-//                    .padding(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                // Sample Text
-//                Text(
-//                    text = "Primary Color Text",
-//                    color = colorScheme.primary,
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Sample Button
-//                Button(
-//                    onClick = { /* Handle click */ },
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text(
-//                        text = "Primary Button",
-//                        color = colorScheme.onPrimary
-//                    )
-//                }
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Sample Card
-//                Card(
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Column(
-//                        modifier = Modifier.padding(16.dp)
-//                    ) {
-//                        Text(
-//                            text = "Surface Background Card",
-//                            color = colorScheme.onSurface,
-//                        )
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                        Text(
-//                            text = "This is a sample card.",
-//                            color = colorScheme.onSurface,
-//                        )
-//                    }
-//                }
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Sample Tertiary Text
-//                Text(
-//                    text = "Tertiary Color Text",
-//                    color = colorScheme.tertiary,
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Sample Icon Button
-//                IconButton(
-//                    onClick = { /* Handle click */ },
-//                    modifier = Modifier
-//                        .size(40.dp)
-//                        .background(colorScheme.tertiary)
-//                        .padding(8.dp)
-//                ) {
-//                    Icon(
-//                        Icons.Default.Settings,
-//                        contentDescription = "Settings",
-//                        tint = colorScheme.onTertiary
-//                    )
-//                }
-//            }
-//
-//
-//            // Sample RadioButton Group
-//            Column {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 8.dp)
-//                ) {
-//                    RadioButton(
-//                        selected = selectedOption == "text",
-//                        onClick = { selectedOption = "text22" },
-//                        colors = RadioButtonDefaults.colors(
-//                            unselectedColor = colorScheme.onBackground,
-//                            selectedColor = colorScheme.primary
-//                        )
-//                    )
-//                    Text(
-//                        text = "text",
-//                        color = colorScheme.onBackground,
-//                        modifier = Modifier.padding(start = 8.dp)
-//                    )
-//                }
-//
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample Switch
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(vertical = 8.dp)
-//            ) {
-//                Switch(
-//                    checked = true,
-//                    onCheckedChange = { },
-//                    colors = SwitchDefaults.colors(
-//                        checkedThumbColor = colorScheme.primary,
-//                        uncheckedThumbColor = colorScheme.onSurface,
-//                        checkedTrackColor = colorScheme.primary.copy(alpha = 0.5f),
-//                        uncheckedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f)
-//                    )
-//                )
-//
-//                Switch(
-//                    checked = false,
-//                    onCheckedChange = { },
-//                    colors = SwitchDefaults.colors(
-//                        checkedThumbColor = colorScheme.primary,
-//                        uncheckedThumbColor = colorScheme.onSurface,
-//                        checkedTrackColor = colorScheme.primary.copy(alpha = 0.5f),
-//                        uncheckedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f)
-//                    )
-//                )
-//                Text(
-//                    text = "Switch",
-//                    color = colorScheme.onBackground,
-//                    modifier = Modifier.padding(start = 8.dp)
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample TextField
-//            TextField(
-//                value = textFieldValue,
-//                onValueChange = { textFieldValue = it },
-//                label = { Text("Text Field") },
-//
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample Checkbox
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(vertical = 8.dp)
-//            ) {
-//                Checkbox(
-//                    checked = true,
-//                    colors = CheckboxDefaults.colors(
-//                        uncheckedColor = colorScheme.onSurface,
-//                        checkedColor = colorScheme.primary
-//                    ),
-//                    onCheckedChange = { },
-//
-//                    )
-//                Checkbox(
-//                    checked = false,
-//                    colors = CheckboxDefaults.colors(
-//                        uncheckedColor = colorScheme.onSurface,
-//                        checkedColor = colorScheme.primary
-//                    ),
-//                    onCheckedChange = { },
-//
-//                    )
-//                Text(
-//                    text = "Checkbox",
-//                    color = colorScheme.onBackground,
-//                    modifier = Modifier.padding(start = 8.dp)
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample Slider
-//            Slider(
-//                value = sliderValue,
-//                onValueChange = { },
-//                valueRange = 0f..100f,
-//                colors = SliderDefaults.colors(
-//                    thumbColor = colorScheme.primary,
-//                    activeTrackColor = colorScheme.primary,
-//                    inactiveTrackColor = colorScheme.onSurface.copy(alpha = 0.5f)
-//                ),
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample Button using Secondary Color
-//            Button(
-//                onClick = { /* Handle click */ },
-//                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text(
-//                    text = "Secondary Button",
-//                    color = colorScheme.onSecondary
-//                )
-//            }
-//
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Sample Text using OnSecondary Color for text
-//            Text(
-//                text = "Text using OnSecondary Color",
-//                color = colorScheme.onSecondary,
-//            )
-//            //todo: delete till here
 
 
             // Settings icon
@@ -454,126 +314,94 @@ fun MainScreen(
             })
 
 
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(100.dp)
-//                    .padding(8.dp)
-//                    .clip(RoundedCornerShape(16.dp))
-//            ) {
-//                val exoPlayer = remember {
-//                    ExoPlayer.Builder(context).build().apply {
-//                        val mediaItem = MediaItem.fromUri(
-//                            "android.resource://${context.packageName}/${R.raw.emoji}".toUri()
-//                        )
-//                        setMediaItem(mediaItem)
-//                        repeatMode = Player.REPEAT_MODE_ALL
-//                        playWhenReady = true
-//                        prepare()
-//                    }
-//                }
-//
-//                DisposableEffect(Unit) {
-//                    onDispose {
-//                        exoPlayer.release()
-//                    }
-//                }
-//
-//                AndroidView(
-//                    factory = { ctx ->
-//                        PlayerView(ctx).apply {
-//                            player = exoPlayer
-//                            useController = false
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxSize()
-//                )
-//            }
-//
-//            Text(
-//                modifier = Modifier
-//                    .padding(bottom = 12.dp),
-//                color = Yellow,
-//                text = "عه! ان که عه؟! آغاعه اموجه عه آیا؟ بعام؟!",
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 16.sp
-//
-//            )
+            if (isCriticalPermissionsMissing) {
+                CriticalPermissionsSection(
+                    notificationPermissionStatus = notificationPermissionStatus,
+                    overlayPermissionStatus = overlayPermissionStatus,
+                    onNotificationPermissionClick = {
+                        if (notificationPermissionState?.status?.isGranted == false && notificationPermissionState.status.shouldShowRationale) {
+                            showNotificationPermissionDeniedDialog = true
+                        } else {
+                            viewModel.setHasRequestedNotificationPermission(true)
+                            notificationPermissionState?.launchPermissionRequest()
+                        }
+
+                    },
+                    onOverlayPermissionClick = {
+                        permissionManager.requestOverlayPermission(context, overlaySettingsLauncher)
+                        coroutineScope.launch {
+                            permissionManager.showOverlayPermissionTutorial()
+                        }
+                    },
+                    onMoreInfoClick = {
+                        showCriticalPermissionsInfoDialog = true
+                    }
+                )
+            }
+
 
             ProtectionStatus(
-                showPermissionWarning,
                 smsPermissionStatus = smsPermissionStatus,
                 onSmsPermissionClick = {
-                    smsPermissionState.launchPermissionRequest()
+                    if (!smsPermissionState.status.isGranted && smsPermissionState.status.shouldShowRationale) {
+                        showSmsPermissionDeniedDialog = true
+                    } else {
+                        viewModel.setHasRequestedSmsPermission(true)
+                        smsPermissionState.launchPermissionRequest()
+                    }
                 },
+//                notificationPermissionStatus = notificationPermissionStatus,
                 accessibilitySettingStatus = accessibilitySettingStatus,
                 onAccessibilitySettingClick = {
-
                     if (!accessibilitySettingStatus) {
                         showAccessibilityGuide = true
                     }
                 },
-                overlayPermissionStatus = overlayPermissionStatus,
-                onOverlayPermissionClick = {
-
-                    permissionManager.requestOverlayPermission(context, overlaySettingsLauncher)
-                    viewModel.checkOverlayPermission()  // Update status after request
-
-                    coroutineScope.launch {
-                        permissionManager.showOverlayPermissionTutorial()
-                    }
-
-
-                })
-
-            Stats(
-                suspiciousLinksDetected = suspiciousLinksDetected,
-                suspiciousSmsDetected = suspiciousSmsDetected,
-                suspiciousAppDetected = suspiciousAppDetected,
+//                overlayPermissionStatus = overlayPermissionStatus,
+//                onOverlayPermissionClick = {
+//                    permissionManager.requestOverlayPermission(context, overlaySettingsLauncher)
+//                    viewModel.checkOverlayPermission()
+//                    coroutineScope.launch {
+//                        permissionManager.showOverlayPermissionTutorial()
+//                    }
+//                }
+                isCriticalPermissionsMissing = isCriticalPermissionsMissing
             )
+
+
+            Stats(stats = stats)
 
             Tools(
                 onAppScanClick = { navController.navigate(NavRoutes.APP_SCAN_SCREEN) },
                 onUrlScanClick = { navController.navigate(NavRoutes.URL_SCAN_SCREEN) },
                 onReportByUserClick = { navController.navigate(NavRoutes.USER_REPORT_SCREEN) })
 
-            DatabaseUpdateSection(updateState = updateState, onUpdateDatabaseClick = {
+
+            Spacer(Modifier.size(16.dp))
+
+            UpdateSection(updateState = updateState, onUpdateDatabaseClick = {
                 viewModel.updateDatabase()
             })
 
+            Spacer(Modifier.size(16.dp))
 
-            Spacer(modifier = Modifier.size(8.dp))
+            AboutAndFaqs(navController)
 
-
-            AboutAndFaq(
-                onAboutClick = { navController.navigate(NavRoutes.ABOUT_SCREEN) },
-                onFaqClick = { navController.navigate(NavRoutes.FAQ_SCREEN) },
-                onPermissionsExplanationClick = { navController.navigate(NavRoutes.PERMISSION_SCREEN) },
-            )
-
-
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp,
-                color = Color.LightGray.copy(alpha = 0.5f)
-            )
-
-            sponsorData?.let {
-                SponsorCard(sponsorData = it)
+            linkData?.let {
+                LinkCard(linkData = it)
             }
-
 
             // TODO: Remove beta notice after final release
             BetaNotice()
 
+            Divider()
 
             AppVersion(navController)
 
 
 
             if (showAccessibilityGuide) {
-                PermissionGuideDialog(
-                    permissionType = MainViewModel.PermissionType.ACCESSIBILITY,
+                AccessibilityPermissionDialog(
                     onConfirm = {
                         showAccessibilityGuide = false
                         permissionManager.launchAccessibilitySettings(accessibilitySettingsLauncher)
@@ -588,6 +416,44 @@ fun MainScreen(
                     onDismiss = { showAccessibilityGuide = false }
                 )
             }
+
+            // SMS Permission Denied Dialog
+            if (showSmsPermissionDeniedDialog) {
+                SmsPermissionDialog(
+                    onConfirm = {
+                        // Open app settings directly
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        smsSettingsLauncher.launch(intent)
+                        showSmsPermissionDeniedDialog = false
+                    },
+                    onDismiss = { showSmsPermissionDeniedDialog = false },
+                )
+            }
+
+            // Notification Permission Denied Dialog (For API 33+)
+            if (showNotificationPermissionDeniedDialog) {
+                NotificationPermissionDialog(
+                    onConfirm = {
+                        // Open app notification settings
+                        permissionManager.requestNotificationPermission(
+                            context,
+                            notificationSettingsLauncher
+                        )
+                        showNotificationPermissionDeniedDialog = false
+                    },
+                    onDismiss = { showNotificationPermissionDeniedDialog = false }
+
+                )
+            }
+
+            if (showCriticalPermissionsInfoDialog) {
+                CriticalPermissionsInfoDialog(
+                    onDismiss = { showCriticalPermissionsInfoDialog = false }
+                )
+            }
+
 
             updateDialogState?.let { updateDialogState ->
 
@@ -620,7 +486,7 @@ fun AppName(navController: NavController) {
 
             )
         Text(
-            text = "اپلیکیشن تشخیص فیشینگ",
+            text = "برنامه تشخیص فیشینگ",
             color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
@@ -629,17 +495,15 @@ fun AppName(navController: NavController) {
 }
 
 @Composable
-fun SectionTitle(
-    title: String
-) {
+fun SectionTitle(text: String, textColor: Color = colorScheme.primary) {
     Text(
-        text = title,
-        color = colorScheme.primary,
+        text = text,
+        color = textColor,
         fontSize = 16.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 8.dp, start = 12.dp, bottom = 4.dp)
-    )
 
+    )
 }
 
 
@@ -661,7 +525,7 @@ fun TipOfDaySection(
             AppCard(padding = 0.dp) {
 
                 Text(
-                    text = tip ?: "در حال بارگیری...",
+                    text = tip ?: "در حال دریافت...",
                     modifier = Modifier
                         .padding(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
                         .fillMaxWidth()
@@ -697,22 +561,126 @@ fun TipOfDaySection(
 }
 
 @Composable
-fun PermissionWarningBanner(
-    smsPermissionStatus: Boolean,
-    accessibilitySettingStatus: Boolean,
-    overlayPermissionStatus: Boolean
+fun CriticalPermissionsSection(
+    notificationPermissionStatus: Boolean,
+    overlayPermissionStatus: Boolean,
+    onNotificationPermissionClick: () -> Unit,
+    onOverlayPermissionClick: () -> Unit,
+    onMoreInfoClick: () -> Unit
 ) {
-    val missingPermissions = mutableListOf<String>()
 
-    if (!smsPermissionStatus) missingPermissions.add("دسترسی پیامک")
-    if (!accessibilitySettingStatus) missingPermissions.add("دسترسی دسترسی‌پذیری")
-    if (!overlayPermissionStatus) missingPermissions.add("نمایش روی سایر برنامه‌ها")
+    val missingPermissions = mutableListOf<String>()
+    if (!overlayPermissionStatus) {
+        missingPermissions.add(stringResource(id = R.string.permission_overlay))
+    }
+    if (!notificationPermissionStatus) {
+        missingPermissions.add(stringResource(id = R.string.permission_notification))
+    }
+
+    if (missingPermissions.isNotEmpty()) {
+        Column {
+            SectionTitle(
+                text = "دسترسی‌های مورد نیاز"
+            )
+
+            AppCard(
+                padding = 8.dp,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = colorScheme.onError
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    PermissionWarningBanner(
+                        warningTitle = "برای شروع، برنامه به این دسترسی‌ها نیاز دارد:",
+                        missingPermissions = missingPermissions,
+                        warningIcon = Icons.Outlined.Info
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp, end = 16.dp, bottom = 8.dp
+                    )
+                ) {
+
+                    // Notification Permission Status
+                    ProtectionRow(
+                        title = stringResource(id = R.string.permission_notification),
+                        isGranted = notificationPermissionStatus,
+                        onActivateClick = onNotificationPermissionClick,
+                        enabledIcon = Icons.Outlined.CheckCircle,
+                        disabledIcon = Icons.Outlined.ErrorOutline
+                    )
+                    Divider()
+
+
+                    // Overlay Permission Status
+                    ProtectionRow(
+                        title = stringResource(id = R.string.permission_overlay),
+                        isGranted = overlayPermissionStatus,
+                        onActivateClick = onOverlayPermissionClick,
+                        enabledIcon = Icons.Outlined.CheckCircle,
+                        disabledIcon = Icons.Outlined.ErrorOutline
+                    )
+                    Divider()
+
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = onMoreInfoClick,
+                            modifier = Modifier
+                                .height(32.dp),
+
+
+                            ) {
+                            Icon(
+                                Icons.Outlined.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = GreyMiddle
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = "اطلاعات بیشتر",
+                                style = typography.bodySmall,
+                                color = GreyMiddle,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun PermissionWarningBanner(
+    missingPermissions: List<String>,
+    warningTitle: String,
+    warningIcon: ImageVector = Icons.Outlined.PrivacyTip
+) {
 
     if (missingPermissions.isNotEmpty()) {
 
         AppCard(
-            containerColor = Color.Red.copy(alpha = 0.05f),
-            cornerRadius = 12.dp, //todo: check and dfelete if not needed
+            containerColor = colorScheme.errorContainer,
+            cornerRadius = 12.dp,
             padding = 0.dp
         ) {
             Column(
@@ -723,15 +691,15 @@ fun PermissionWarningBanner(
                     modifier = Modifier.padding(bottom = 4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.PrivacyTip,
+                        imageVector = warningIcon,
                         contentDescription = "هشدار",
-                        tint = Color.Red,
+                        tint = colorScheme.onError,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.size(4.dp))
                     Text(
-                        text = "برای حفاظت کامل، دسترسی‌های زیر را فعال کنید:",
-                        color = Color.Red,
+                        text = warningTitle,
+                        color = colorScheme.onError,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth()
@@ -741,7 +709,7 @@ fun PermissionWarningBanner(
                 missingPermissions.forEach { permission ->
                     Text(
                         text = "• $permission",
-                        color = Color.Red,
+                        color = colorScheme.onError,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Right,
                         modifier = Modifier.fillMaxWidth()
@@ -755,276 +723,169 @@ fun PermissionWarningBanner(
 
 @Composable
 fun ProtectionStatus(
-    showPermissionWarning: Boolean,
     smsPermissionStatus: Boolean,
     onSmsPermissionClick: () -> Unit,
     accessibilitySettingStatus: Boolean,
     onAccessibilitySettingClick: () -> Unit,
-    overlayPermissionStatus: Boolean,
-    onOverlayPermissionClick: () -> Unit
+    isCriticalPermissionsMissing: Boolean = false // Add this parameter
 ) {
     // state for showing the protector info dialog
     var showProtectorInfoDialog by remember { mutableStateOf(false) }
 
+    val missingPermissions = mutableListOf<String>()
+    if (!smsPermissionStatus) missingPermissions.add(stringResource(id = R.string.permission_receive_sms))
+    if (!accessibilitySettingStatus) missingPermissions.add(stringResource(id = R.string.permission_accessibility))
+
     // Define permissions as a list of triples: (label, isGranted, activateAction)
     val permissions = listOf(
         Triple(
-            stringResource(id = R.string.sms_protection),
-            smsPermissionStatus,
+            stringResource(id = R.string.guard_sms),
+            smsPermissionStatus && !isCriticalPermissionsMissing,
             onSmsPermissionClick
         ),
         Triple(
-            stringResource(id = R.string.accessibility_protection),
-            accessibilitySettingStatus,
+            stringResource(id = R.string.guard_web),
+            accessibilitySettingStatus && !isCriticalPermissionsMissing,
             onAccessibilitySettingClick
         ),
         Triple(
-            stringResource(id = R.string.overlay_protection),
-            overlayPermissionStatus,
-            onOverlayPermissionClick
+            stringResource(id = R.string.guard_gateway),
+            accessibilitySettingStatus && !isCriticalPermissionsMissing,
+            onAccessibilitySettingClick
         ),
-        Triple("محافظ نصب برنامه", true, {}) // This one is always active with no action
+        Triple(
+            stringResource(id = R.string.guard_app),
+            !isCriticalPermissionsMissing
+        ) {} // This one is always active with no action
     )
 
 
     Column {
-        SectionTitle(stringResource(id = R.string.protection_status))
+        SectionTitle(stringResource(id = R.string.guards_status))
 
-        AppCard(
-            padding = 8.dp,
-            modifier = Modifier.fillMaxWidth(),
-            border = if (showPermissionWarning) {
-                BorderStroke(
-                    width = 1.dp,
-                    color = Color.Red.copy(alpha = 0.5f)
-                )
-            } else {
-                null
-            }
-
-        ) {
-
-
-            if (showPermissionWarning) {
-                //Permission Warning
-                Column(modifier = Modifier.padding(8.dp)) {
-
-                    PermissionWarningBanner(
-                        smsPermissionStatus = smsPermissionStatus,
-                        accessibilitySettingStatus = accessibilitySettingStatus,
-                        overlayPermissionStatus = overlayPermissionStatus
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // The original card content
+            AppCard(
+                padding = 8.dp,
+                modifier = Modifier.fillMaxWidth(),
+                border = if (missingPermissions.isNotEmpty() && !isCriticalPermissionsMissing) {
+                    BorderStroke(
+                        width = 1.dp,
+                        color = colorScheme.errorContainer
                     )
+                } else {
+                    null
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            Column(
-                modifier = Modifier.padding(
-                    start = 16.dp, end = 16.dp, bottom = 8
-                        .dp
-                )
             ) {
-
-
-                permissions.forEach { (label, isGranted, onActivateClick) ->
-                    PermissionRow(
-                        label = label,
-                        isGranted = isGranted,
-                        onActivateClick = onActivateClick,
-                    )
-
-                    RowDivider()
+                if (missingPermissions.isNotEmpty() && !isCriticalPermissionsMissing) {
+                    // Permission Warning
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        PermissionWarningBanner(
+                            warningTitle = "برای حفاظت کامل، دسترسی‌های زیر را فعال کنید:",
+                            missingPermissions = missingPermissions,
+                            warningIcon = Icons.Outlined.PrivacyTip
+                        )
+                    }
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp, end = 16.dp, bottom = 8.dp
+                    )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .clickable {
-                                showProtectorInfoDialog = true
-                            },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "More Information",
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(horizontal = 4.dp),
-                            tint = GreyMiddle
+                    permissions.forEach { (label, isGranted, onActivateClick) ->
+                        ProtectionRow(
+                            title = label,
+                            isGranted = isGranted,
+                            onActivateClick = onActivateClick,
                         )
 
-                        Text(
-                            modifier = Modifier.padding(end = 4.dp),
-                            text = "اطلاعات بیشتر",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Left,
-                            color = GreyMiddle
-                        )
+                        Divider()
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = { showProtectorInfoDialog = true },
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Outlined.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = GreyMiddle
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = "اطلاعات بیشتر",
+                                style = typography.bodySmall,
+                                color = GreyMiddle,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                 }
             }
 
+            // Overlay that appears when critical permissions are missing
+            if (isCriticalPermissionsMissing) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .padding(12.dp)
+                        .background(colorScheme.surface.copy(alpha = 0.9f))
+                        .clickable(enabled = false) { /* Disabled click */ },
+                    contentAlignment = Alignment.Center,
+
+
+                    ) {
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.RemoveModerator,
+                            contentDescription = null,
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 32.dp),
+                            text = "برای شروع، ابتدا دسترسی‌های مورد نیاز بالا را فعال کنید.",
+                            color = colorScheme.primary,
+                            fontSize = 16.sp,
+                            lineHeight = 36.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 
     // Show the protector info dialog when the icon is clicked
     if (showProtectorInfoDialog) {
-        ProtectorInfoDialog(
+        GuardsInfoDialog(
             onDismiss = { showProtectorInfoDialog = false }
         )
     }
 }
 
-
 @Composable
-fun ProtectorInfoDialog(
-    onDismiss: () -> Unit
-) {
-    AppAlertDialog(
-        title = "توضیحات محافظ‌ها",
-        icon = Icons.AutoMirrored.Outlined.HelpOutline,
-        content = {
-            Column {
-                Text(
-                    "محافظ پیامک:",
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    "• دسترسی مورد نیاز: دسترسی خواندن پیامک‌ها",
-                    style = typography.bodySmall,
-                )
-                Text(
-                    "• عملکرد: تشخیص پیامک‌های مشکوک و فیشینگ بانکی و هشدار به کاربر",
-                    style = typography.bodySmall,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    "محافظ دسترسی‌پذیری:",
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    "• دسترسی مورد نیاز: سرویس دسترسی‌پذیری (Accessibility)",
-                    style = typography.bodySmall,
-                )
-                Text(
-                    "• عملکرد: تشخیص صفحات فیشینگ، پیشگیری از دزدی اطلاعات حساس و هشدار به کاربر",
-                    style = typography.bodySmall,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    "محافظ نمایشی:",
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    "• دسترسی مورد نیاز: نمایش روی سایر برنامه‌ها",
-                    style = typography.bodySmall,
-                )
-                Text(
-                    "• عملکرد: نمایش هشدارهای فوری هنگام شناسایی خطر و محافظت در لحظه",
-                    style = typography.bodySmall,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    "محافظ نصب برنامه:",
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    "• دسترسی مورد نیاز: کار با بخش نصب برنامه‌ها (برای هشدار هنگام نصب برنامه‌های مشکوک)",
-                    style = typography.bodySmall,
-                )
-                Text(
-                    "• عملکرد: بررسی برنامه‌های در حال نصب و هشدار برای برنامه‌های مشکوک",
-                    style = typography.bodySmall,
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    "تمام دسترسی‌ها صرفا برای محافظت از شما در برابر تهدیدات امنیتی استفاده می‌شود. هیچ داده شخصی از دستگاه شما خارج نمی‌شود.",
-                    style = typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        },
-        confirmText = "متوجه شدم",
-        onConfirm = onDismiss,
-        dismissText = null,
-        onDismiss = { /* Do nothing */ }
-    )
-}
-
-@Composable
-fun PermissionGuideDialog(
-    permissionType: MainViewModel.PermissionType,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AppAlertDialog(
-        title = "راهنمای فعالسازی",
-        icon = Icons.AutoMirrored.Outlined.HelpOutline,
-        content = {
-            when (permissionType) {
-                MainViewModel.PermissionType.ACCESSIBILITY -> {
-                    Text(
-                        "• چرا نیاز است؟\nاین دسترسی (Accessibility) برای شناسایی خودکار پیامک‌ها و فعالیت‌های مشکوک در پس‌زمینه ضروری است.",
-                        style = typography.bodySmall,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "• مراحل فعال‌سازی:",
-                        style = typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    // More detailed steps based on device manufacturer
-                    val deviceManufacturer = Build.MANUFACTURER.lowercase()
-                    if (deviceManufacturer.contains("samsung")) {
-                        Text("1. وارد تنظیمات دستگاه شوید")
-                        Text("2. بخش «دسترسی‌پذیری» (Accessibility) را انتخاب کنید")
-                        Text("3. بخش «برنامه های نصب شده» یا «Downloaded Services» را انتخاب کنید")
-                        Text("4. گزینه «مطمئن باش» را پیدا کرده و آن را فعال کنید")
-                    } else {
-                        Text("1. وارد تنظیمات دستگاه شوید")
-                        Text("2. بخش «دسترسی‌پذیری» (Accessibility) را انتخاب کنید")
-                        Text("3. گزینه «مطمئن باش» را پیدا کرده و آن را فعال کنید")
-                    }
-                }
-
-                else -> Text("راهنمای فعالسازی", style = typography.bodyMedium)
-            }
-        },
-        onConfirm = onConfirm,
-        confirmText = "برو به تنظیمات",
-        dismissText = "لغو",
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
-fun PermissionRow(
-    label: String,
+fun ProtectionRow(
+    title: String,
+    enabledIcon: ImageVector = Icons.Outlined.VerifiedUser,
+    disabledIcon: ImageVector = Icons.Outlined.RemoveModerator,
     isGranted: Boolean,
     onActivateClick: () -> Unit = {},
 ) {
@@ -1035,68 +896,76 @@ fun PermissionRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-
         Icon(
-            imageVector = if (isGranted) Icons.Outlined.VerifiedUser else Icons.Outlined.RemoveModerator,
+            imageVector = if (isGranted) enabledIcon else disabledIcon,
             contentDescription = null,
             modifier = Modifier
                 .size(24.dp)
                 .padding(end = 2.dp),
-            tint = if (isGranted) Green else Red
+            tint = if (isGranted) colorScheme.primary else colorScheme.onError
 
         )
         Text(
 
-            text = label + ": غیرفعال".takeIf { !isGranted }.orEmpty(),
+            text = title, // + ": غیرفعال".takeIf { !isGranted }.orEmpty(),
             modifier = Modifier.weight(1f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Right,
-            color = if (isGranted) Green else Red
+            color = if (isGranted) colorScheme.primary else colorScheme.onError
 
         )
 
-        Box(
-            modifier = Modifier.width(76.dp),
-            contentAlignment = Alignment.Center,
-        ) {
 
-            if (!isGranted) {
-                Button(
-                    onClick = onActivateClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
 
-                ) {
-                    Text(text = "فعال‌سازی", fontSize = 12.sp)
-                }
-            } else {
-                Text(
-                    text = "فعال",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = Green,
+        if (!isGranted) {
+            Button(
+                onClick = onActivateClick,
+                modifier = Modifier
+                    .height(36.dp),
+//                        .wrapContentHeight(unbounded = true),
 
-                    )
+//                        .heightIn( max = 36.dp)
+//                    ,contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+
+            ) {
+                Text(text = "فعال‌سازی", fontSize = 12.sp)
             }
+
+
+//                    modifier = Modifier
+//                        .height(36.dp)
+//                        .padding(horizontal = 2.dp),
+//                    shape = RoundedCornerShape(8.dp),
+
+
+        } else {
+            Text(
+                text = "فعال",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = colorScheme.primary,
+
+                )
         }
     }
 
 
 }
 
+
 @Composable
-fun Stats(
-    suspiciousLinksDetected: Int,
-    suspiciousSmsDetected: Int,
-    suspiciousAppDetected: Int,
-) {
-    val stats = listOf(
-        "هشدار لینک مشکوک" to NumberUtils.formatNumber(suspiciousLinksDetected),
-        "هشدار پیامک مشکوک" to NumberUtils.formatNumber(suspiciousSmsDetected),
-        "هشدار اپلیکیشن مشکوک" to NumberUtils.formatNumber(suspiciousAppDetected),
-        "تعداد کل هشدارها" to NumberUtils.formatNumber(suspiciousLinksDetected + suspiciousSmsDetected + suspiciousAppDetected)
+fun Stats(stats: Stats) {
+
+    val userStats = listOf(
+        "هشدار لینک مشکوک" to NumberUtils.formatNumber(stats.suspiciousLinksDetected),
+        "هشدار پیامک مشکوک" to NumberUtils.formatNumber(stats.suspiciousSmsDetected),
+        "هشدار برنامه مشکوک" to NumberUtils.formatNumber(stats.suspiciousAppDetected),
+        "تعداد همه هشدارها" to NumberUtils.formatNumber(stats.suspiciousLinksDetected + stats.suspiciousSmsDetected + stats.suspiciousAppDetected),
+        "تشخیص اصالت درگاه" to NumberUtils.formatNumber(stats.verifiedGatewayDetected),
     )
 
     Column {
@@ -1104,15 +973,19 @@ fun Stats(
         AppCard(padding = 8.dp) {
 
             Column(modifier = Modifier.padding(16.dp)) {
-                stats.forEachIndexed { index, (label, value) ->
+                userStats.forEachIndexed { index, (label, value) ->
                     StatRow(
                         label = label,
                         value = value,
+                        isLabelBold = index == userStats.size - 1 || index == userStats.size - 2,
+                        icon = if (index == userStats.size - 1) Icons.Outlined.Security else if (index == userStats.size - 2) Icons.Outlined.GppGood else Icons.Outlined.Shield
                     )
 
                     // Only show divider if it's not the last item
-                    if (index != stats.size - 1) {
-                        RowDivider()
+                    if (index != userStats.size - 1) {
+                        Divider(
+                            thickness = 1.dp
+                        )
                     }
 
                 }
@@ -1125,24 +998,40 @@ fun Stats(
 @Composable
 fun StatRow(
     label: String,
+    icon: ImageVector?,
     value: String,
+    isLabelBold: Boolean = false
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(end = 4.dp),
+                tint = GreyMiddle
+
+            )
+
+        }
         Text(
             text = label,
             modifier = Modifier.weight(1f),
+            fontWeight = if (isLabelBold) FontWeight.Bold else FontWeight.Normal,
             fontSize = 13.sp,
         )
         Text(
             text = NumberUtils.toPersianNumbers(value),
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 16.dp),
+                .padding(start = 16.dp, end = 4.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Left
@@ -1166,8 +1055,7 @@ fun Tools(
         SectionTitle("ابزارها")
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             ToolCard(
@@ -1177,7 +1065,7 @@ fun Tools(
                 modifier = Modifier.weight(1f)
             )
             ToolCard(
-                text = "بررسی URL",
+                text = "بررسی لینک",
                 icon = Icons.Outlined.AdsClick,
                 onClick = onUrlScanClick,
                 modifier = Modifier.weight(1f)
@@ -1195,7 +1083,10 @@ fun Tools(
 
 @Composable
 fun ToolCard(
-    text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
 
@@ -1235,7 +1126,7 @@ fun ToolCard(
 
 
 @Composable
-fun DatabaseUpdateSection(
+fun UpdateSection(
     updateState: UpdateState, onUpdateDatabaseClick: () -> Unit
 ) {
     // Infinite rotation animation
@@ -1257,16 +1148,28 @@ fun DatabaseUpdateSection(
             // Display appropriate text based on update state
             Text(
                 text = when (updateState) {
-                    is UpdateState.Idle -> "آخرین بروزرسانی: ${updateState.lastUpdateTime}"
-                    is UpdateState.Updating -> "در حال بروزرسانی..."
-                    is UpdateState.Success -> "آخرین بروزرسانی: ${updateState.lastUpdateTime}"
-                    is UpdateState.Skipped -> "آخرین بروزرسانی: ${updateState.message}"
+                    is UpdateState.Idle -> stringResource(
+                        R.string.last_update_time,
+                        updateState.lastUpdateTime
+                    )
+
+                    is UpdateState.Updating -> "در حال به‌روزرسانی..."
+                    is UpdateState.Success -> stringResource(
+                        R.string.last_update_time,
+                        updateState.lastUpdateTime
+                    )
+
+                    is UpdateState.Skipped -> stringResource(
+                        R.string.last_update_time,
+                        updateState.message
+                    )
+
                     is UpdateState.Error -> "خطا! لطفا بعدا تلاش کنید."
 
                 }, modifier = Modifier.weight(1f),
                 fontSize = 13.sp,
                 color = when (updateState) {
-                    is UpdateState.Error -> Red
+                    is UpdateState.Error -> colorScheme.onError
                     else -> colorScheme.onSurface
                 }
             )
@@ -1279,7 +1182,7 @@ fun DatabaseUpdateSection(
                     }
                     Icon(
                         imageVector = Icons.Outlined.Update,
-                        contentDescription = "در حال بروزرسانی",
+                        contentDescription = "در حال به‌روزرسانی",
                         modifier = Modifier
                             .size(24.dp)
                             .graphicsLayer { rotationZ = rotation },
@@ -1291,7 +1194,7 @@ fun DatabaseUpdateSection(
                 is UpdateState.Success -> {
                     Icon(
                         imageVector = Icons.Outlined.Check,
-                        contentDescription = "بروزرسانی موفق",
+                        contentDescription = "به‌روزرسانی موفق",
                         modifier = Modifier.size(24.dp),
                         tint = colorScheme.primary
                     )
@@ -1303,7 +1206,7 @@ fun DatabaseUpdateSection(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Update,
-                            contentDescription = "بروزرسانی",
+                            contentDescription = "به‌روزرسانی",
                             modifier = Modifier.size(24.dp),
                             tint = colorScheme.primary
 
@@ -1317,20 +1220,20 @@ fun DatabaseUpdateSection(
 
 
 @Composable
-fun AboutAndFaq(
-    onAboutClick: () -> Unit,
-    onFaqClick: () -> Unit,
-    onPermissionsExplanationClick: () -> Unit,
-) {
+fun AboutAndFaqs(navController: NavController) {
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+
         ) {
             Button(
-                onClick = onAboutClick,
+                onClick = { navController.navigate(NavRoutes.ABOUT_SCREEN) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(1.dp),
@@ -1343,7 +1246,7 @@ fun AboutAndFaq(
                 )
             }
             Button(
-                onClick = onFaqClick,
+                onClick = { navController.navigate(NavRoutes.FAQ_SCREEN) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(1.dp),
@@ -1356,7 +1259,7 @@ fun AboutAndFaq(
                 )
             }
             Button(
-                onClick = onPermissionsExplanationClick,
+                onClick = { navController.navigate(NavRoutes.PERMISSION_SCREEN) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(1.dp),
@@ -1373,10 +1276,10 @@ fun AboutAndFaq(
 }
 
 @Composable
-fun SponsorCard(sponsorData: MainViewModel.SponsorData?) {
+fun LinkCard(linkData: Link?) {
     val context = LocalContext.current
 
-    val sponsorColor = sponsorData?.color?.let {
+    val linkColor = linkData?.color?.let {
         try {
             Color(it.toColorInt())
         } catch (e: IllegalArgumentException) {
@@ -1385,39 +1288,40 @@ fun SponsorCard(sponsorData: MainViewModel.SponsorData?) {
     } ?: colorScheme.onSurface
 
 
-    if (sponsorData != null) {
+    if (linkData != null) {
         Column(
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(4.dp)
+                .padding(16.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
                 ) {
-                    WebUtils.openUrl(context, sponsorData.link)
+                    WebUtils.openUrl(context, linkData.link)
                 },
 
             ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(16.dp)
             ) {
-                // logo
-                Image(
-                    painter = rememberAsyncImagePainter(sponsorData.logoUrl),
-                    contentDescription = "Sponsor Logo",
-                    modifier = Modifier.size(64.dp)
-                )
+                if (linkData.logo != null) {
+                    // logo
+                    Image(
+                        painter = rememberAsyncImagePainter(linkData.logo),
+                        contentDescription = "link Logo",
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
                 Column(
                     modifier = Modifier.padding(start = 16.dp)
                 ) {
                     Text(
-                        text = sponsorData.title,
+                        text = linkData.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = sponsorColor
+                        color = linkColor
                     )
-                    sponsorData.description?.let {
+                    linkData.description?.let {
                         if (it.isNotBlank()) {
                             Text(
                                 text = it,
@@ -1439,23 +1343,26 @@ fun BetaNotice() {
     val isPreRelease = appVersion.contains("alpha") || appVersion.contains("beta")
 
     if (isPreRelease) {
-        AppCard(
-            border = BorderStroke(1.dp, Color("#FFB74D".toColorInt())),
-            containerColor = Color("#FFF3E0".toColorInt()),
-            cornerRadius = 12.dp
+        AppCard {
 
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            AppCard(
+                containerColor = colorScheme.tertiaryContainer,
+                padding = 4.dp
+
             ) {
-                Text(
-                    text = "این نسخه آزمایشی برنامه است و ممکن است دارای ایرادات و اشکالاتی باشد. لطفا مشکلات را از طریق گزارش اشکال در صفحه درباره برنامه اطلاع دهید.",
-                    fontSize = 12.sp,
-                    color = Color("#795548".toColorInt()),
-                )
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "این نسخه آزمایشی برنامه است و ممکن است دارای ایرادات و اشکالاتی باشد. لطفا مشکلات را از طریق گزارش اشکال در صفحه درباره برنامه اطلاع دهید.",
+                        fontSize = 12.sp,
+                        color = colorScheme.onTertiaryContainer,
+                        textAlign = TextAlign.Center
+                    )
 
 
+                }
             }
         }
     }
@@ -1466,7 +1373,7 @@ fun AppVersion(navController: NavController) {
     Column(
         modifier = Modifier
             .wrapContentWidth()
-            .padding(bottom = 8.dp)
+            .padding(vertical = 8.dp)
             .clickable(
                 indication = null, interactionSource = remember { MutableInteractionSource() },
             ) { navController.navigate(NavRoutes.ABOUT_SCREEN) },
@@ -1481,35 +1388,168 @@ fun AppVersion(navController: NavController) {
 }
 
 
+@Preview(showBackground = true)
 @Composable
-fun UpdateDialog(
-    updateDialogState: MainViewModel.UpdateDialogState,
-    onDismiss: () -> Unit,
-) {
-    val context = LocalContext.current
+fun AppNamePreview() {
+    MotmaenBashTheme {
+        AppName(navController = rememberNavController())
+    }
+}
 
-    AppAlertDialog(
-        title = "نسخه جدید برنامه (${updateDialogState.latestVersionName})",
-        icon = Icons.Outlined.Update,
-        message = if (updateDialogState.forceUpdate) "برای ادامه استفاده از برنامه، لطفا به نسخه جدید به‌روزرسانی کنید."
-        else stringResource(R.string.app_update_message),
-        links = updateDialogState.links,
-        onConfirm = { WebUtils.openUrl(context, updateDialogState.links.first().second) },
-        onDismiss = onDismiss,
-        confirmText = if (updateDialogState.forceUpdate) "به‌روزرسانی" else null,
-        dismissText = if (updateDialogState.forceUpdate) null else "بعدا",
-    )
+@Preview(showBackground = true, name = "Required Permissions - All Granted")
+@Composable
+fun RequiredPermissionsSectionPreview_AllGranted() {
+    MotmaenBashTheme {
+        CriticalPermissionsSection(
+            notificationPermissionStatus = true,
+            overlayPermissionStatus = true,
+            onNotificationPermissionClick = {},
+            onOverlayPermissionClick = {},
+            onMoreInfoClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Required Permissions - Missing Permissions")
+@Composable
+fun RequiredPermissionsSectionPreview_MissingPermissions() {
+    MotmaenBashTheme {
+        val density = LocalDensity.current
+        CompositionLocalProvider(
+            LocalDensity provides Density(
+                density = density.density,
+                fontScale = 1f
+            )
+        ) {
+            CriticalPermissionsSection(
+                notificationPermissionStatus = false,
+                overlayPermissionStatus = false,
+                onNotificationPermissionClick = {},
+                onOverlayPermissionClick = {},
+                onMoreInfoClick = {}
+            )
+        }
+
+    }
+}
+
+@Preview(showBackground = true, name = "Required Permissions - Missing Permissions")
+@Composable
+fun RequiredPermissionsSectionPreview_MissingPermissions2() {
+    MotmaenBashTheme {
+        val density = LocalDensity.current
+        CompositionLocalProvider(
+            LocalDensity provides Density(
+                density = density.density,
+                fontScale = 1.6f
+            )
+        ) {
+            CriticalPermissionsSection(
+                notificationPermissionStatus = false,
+                overlayPermissionStatus = false,
+                onNotificationPermissionClick = {},
+                onOverlayPermissionClick = {},
+                onMoreInfoClick = {}
+            )
+        }
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProtectionStatusPreview() {
+    MotmaenBashTheme {
+        ProtectionStatus(
+            smsPermissionStatus = false,
+            onSmsPermissionClick = {},
+            accessibilitySettingStatus = false,
+            onAccessibilitySettingClick = {},
+            isCriticalPermissionsMissing = false
+
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProtectionStatusLockedPreview() {
+    MotmaenBashTheme {
+        ProtectionStatus(
+            smsPermissionStatus = false,
+            onSmsPermissionClick = {},
+            accessibilitySettingStatus = false,
+            onAccessibilitySettingClick = {},
+            isCriticalPermissionsMissing = true,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatsPreview() {
+    MotmaenBashTheme {
+        Stats(
+            suspiciousLinksDetected = 42,
+            suspiciousSmsDetected = 15,
+            suspiciousAppDetected = 7,
+            verifiedGatewayDetected = 89
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ToolsPreview() {
+    MotmaenBashTheme {
+        Tools(
+            onAppScanClick = {},
+            onUrlScanClick = {},
+            onReportByUserClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateSectionPreview() {
+    MotmaenBashTheme {
+        UpdateSection(
+            updateState = UpdateState.Success(lastUpdateTime = "۱۴۰۳/۰۵/۲۰"),
+            onUpdateDatabaseClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AboutAndFaqPreview() {
+    MotmaenBashTheme {
+        AboutAndFaqs(
+            navController = rememberNavController()
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AppVersionPreview() {
+    MotmaenBashTheme {
+        AppVersion(navController = rememberNavController())
+    }
 }
 
 
 @Preview(showBackground = true, name = "TipOfDay Preview")
 @Composable
 fun PreviewTipOfDaySection() {
-    TipOfDaySection(
-        tip = "با توجه به انتشار نسخه‌های جعلی همراه بانک و اینترنت بانک از سوی کلاهبردارها، اکیدا از جستجوی این خدمات در موتورهای جستجوی خودداری و از سایت اصلی بانک‌ها اقدام به دریافت برنامه‌ها یا خدمات مورد نظر نمایید.",
-        isRefreshing = false,
-        onRefreshClick = {}
-    )
+    MotmaenBashTheme {
+        TipOfDaySection(
+            tip = "با توجه به انتشار نسخه‌های جعلی همراه بانک و اینترنت بانک از سوی کلاهبردارها، اکیدا از جستجوی این خدمات در موتورهای جستجوی خودداری و از سایت اصلی بانک‌ها اقدام به دریافت برنامه‌ها یا خدمات مورد نظر نمایید.",
+            isRefreshing = false,
+            onRefreshClick = {}
+        )
+    }
 }
 
 

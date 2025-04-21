@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/alertCardView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80ffffff"
+    android:layoutDirection="rtl"
+    android:theme="@style/Theme.Material3.Light">
+    <!--    android:background="#80FF0000"-->
+    <!--    android:background="@android:color/transparent"-->
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="32dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:elevation="0dp"
+                    app:cardBackgroundColor="@color/red"
+                    app:shapeAppearanceOverlay="@style/BottomRoundedCard"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="2dp">
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:tint="@android:color/white"
+                            app:srcCompat="@drawable/ic_alert" />
+
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/alertBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:fontFamily="@font/vazirmatn"
+
+                            android:text="هشدار"
+                            android:textColor="@android:color/white"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/closeButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_close"
+                    android:tint="#888888" />
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alertTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/vazirmatn"
+                    android:padding="4dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/red"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="آدرس مشکوک!" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginVertical="4dp"
+                    android:background="#33D3D3D3" />
+
+
+                <!--                <com.google.android.material.textview.MaterialTextView-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginHorizontal="4dp"-->
+                <!--                    android:layout_marginVertical="12dp"-->
+                <!--                    android:fontFamily="@font/vazirmatn"-->
+                <!--                    android:text="آدرس اینترنتی:"-->
+                <!--                    android:textSize="13sp" />-->
+
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alertMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/vazirmatn"
+                    android:padding="8dp"
+                    android:textSize="13sp"
+                    tools:text="این آدرس در لیست سیاه قرار دارد.
+            این url ممکن است شما را به یک صفحه فیشینگ هدایت کند که هدف آن سرقت اطلاعات شخصی شماست. پیشنهاد می‌کنیم از کلیک کردن روی این لینک خودداری کنید.
+            این لینک ممکن است شما را به یک سایت غیرمطمئن هدایت کند که به طور عمدی سعی دارد اطلاعات شما را به سرقت ببرد یا شما را به دام بیاندازد.
+            پیشنهاد می‌کنیم لینک‌ها را از منابع معتبر باز کرده و همیشه آدرس‌ها را با دقت بررسی کنید.
+          " />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginVertical="4dp"
+                    android:background="#33D3D3D3" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardBackgroundColor="@color/background_light_gray"
+                    app:elevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="4dp"
+                        android:fontFamily="@font/vazirmatn"
+                        android:lines="1"
+                        android:padding="4dp"
+                        android:textAlignment="center"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="https://sample_domain.com/sample_path" />
+
+
+                </com.google.android.material.card.MaterialCardView>
+
+
+                <!--                <com.google.android.material.button.MaterialButton-->
+                <!--                    android:id="@+id/cancelButton"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="56dp"-->
+                <!--                    android:layout_marginHorizontal="4dp"-->
+                <!--                    android:fontFamily="@font/vazirmatn"-->
+                <!--                    android:text="متوجه شدم"-->
+                <!--                    android:textColor="@android:color/white"-->
+                <!--                    app:backgroundTint="@color/red"-->
+                <!--                    app:cornerRadius="12dp"-->
+                <!--                    app:iconTint="@android:color/white" />-->
+
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginVertical="4dp"
+                    android:background="#33D3D3D3" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alertHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/vazirmatn"
+                    android:padding="4dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/red"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="آدرس مشکوک!" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginVertical="4dp"
+                    android:background="#33D3D3D3" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="4dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/vazirmatn"
+                        android:text="شناسایی شده توسط"
+                        android:textColor="@color/grey_middle"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/vazirmatn"
+                        android:paddingHorizontal="3dp"
+                        android:text="سپر وب‌گردی"
+                        android:textColor="@color/grey_middle"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/vazirmatn"
+                        android:text="مطمئن باش"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
+
+
+    <!--    Alert.AlertType.URL_FLAGGED ->-->
+    <!--    "آدرس مشکوک!" to "این آدرس در لیست سیاه قرار دارد." +-->
+    <!--    "این URL ممکن است شما را به یک صفحه فیشینگ هدایت کند که هدف آن سرقت اطلاعات شخصی شماست. پیشنهاد می‌کنیم از کلیک کردن روی این لینک خودداری کنید." +-->
+    <!--    "این لینک ممکن است شما را به یک سایت غیرمطمئن هدایت کند که به طور عمدی سعی دارد اطلاعات شما را به سرقت ببرد یا شما را به دام بیاندازد." +-->
+    <!--    "پیشنهاد می‌کنیم لینک‌ها را از منابع معتبر باز کرده و همیشه آدرس‌ها را با دقت بررسی کنید."-->
+
+    <!--    Alert.AlertType.DOMAIN_FLAGGED ->-->
+    <!--    "دامنه مشکوک!" to "این دامنه در لیست سیاه قرار دارد." +-->
+    <!--    "" +-->
+    <!--    "این دامنه ممکن است برای فیشینگ و سرقت اطلاعات شما طراحی شده باشد. توصیه می‌کنیم از ورود به این سایت خودداری کرده و آن را به عنوان یک خطر امنیتی در نظر بگیرید." +-->
+    <!--    "" +-->
+    <!--    "سایت‌های فیشینگ ممکن است شبیه به سایت‌های اصلی باشند، اما هدف آن‌ها سرقت اطلاعات حساب‌های شخصی شماست. بهتر است آدرس URL را بررسی کرده و از باز کردن سایت‌های مشکوک خودداری کنید."-->
+
+
+    <!--    <?xml version="1.0" encoding="utf-8"?>-->
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent"-->
+    <!--    android:background="#80FF0000"-->
+    <!--    android:theme="@style/Theme.Material3.Light">-->
+
+
+    <!--    <com.google.android.material.card.MaterialCardView-->
+    <!--        android:id="@+id/alertCard"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        android:layout_margin="24dp"-->
+    <!--        app:cardBackgroundColor="@android:color/white"-->
+    <!--        app:cardElevation="0dp">-->
+
+    <!--        <LinearLayout-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_gravity="center"-->
+    <!--            android:background="@android:color/white"-->
+    <!--            android:orientation="vertical"-->
+    <!--            android:padding="24dp">-->
+
+    <!--            <androidx.appcompat.widget.AppCompatTextView-->
+    <!--                android:id="@+id/alertTitle"-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_marginBottom="16dp"-->
+    <!--                android:fontFamily="@font/vazirmatn"-->
+    <!--                android:text="هشدار!"-->
+    <!--                android:textColor="@android:color/holo_red_dark"-->
+    <!--                android:textSize="24sp" />-->
+
+    <!--            <androidx.appcompat.widget.AppCompatTextView-->
+    <!--                android:id="@+id/alertMessage"-->
+    <!--                android:layout_width="match_parent"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_marginBottom="24dp"-->
+
+    <!--                android:fontFamily="@font/vazirmatn"-->
+
+    <!--                android:text="هشدار!"-->
+    <!--                android:textSize="18sp" />-->
+
+
+    <!--            <com.google.android.material.button.MaterialButton-->
+    <!--                android:id="@+id/closeButton"-->
+    <!--                style="@style/Widget.Material3.Button"-->
+    <!--                android:layout_width="wrap_content"-->
+    <!--                android:layout_height="wrap_content"-->
+    <!--                android:layout_gravity="end"-->
+    <!--                android:fontFamily="@font/vazirmatn"-->
+    <!--                android:text="بستن" />-->
+    <!--        </LinearLayout>-->
+
+    <!--    </com.google.android.material.card.MaterialCardView>-->
+
+    <!--</FrameLayout>-->

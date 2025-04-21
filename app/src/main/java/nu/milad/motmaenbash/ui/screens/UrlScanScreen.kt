@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -102,7 +101,7 @@ fun UrlScanScreen(
     }
 
     AppBar(
-        title = stringResource(id = R.string.url_scan_activity_title),
+        title = stringResource(id = R.string.url_scan_screen_title),
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -118,7 +117,7 @@ fun UrlScanScreen(
                 text = "بررسی لینک و آدرس‌های اینترنتی",
                 style = typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding( bottom = 18.dp)
+                modifier = Modifier.padding(bottom = 18.dp)
             )
             OutlinedTextField(
                 singleLine = true,
@@ -127,7 +126,7 @@ fun UrlScanScreen(
                 ),
                 value = url,
                 onValueChange = {
-                    url = it
+                    url = it.trim()
                     viewModel.resetResult()
                 },
                 label = {

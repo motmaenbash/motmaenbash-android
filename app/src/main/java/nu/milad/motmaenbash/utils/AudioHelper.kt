@@ -11,7 +11,12 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import nu.milad.motmaenbash.R
+import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 
 /**
  * Handles sound playback for app alerts
@@ -19,6 +24,14 @@ import nu.milad.motmaenbash.R
 class AudioHelper(private val context: Context) {
     private var soundPool: SoundPool? = null
     private val soundMap = mutableMapOf<String, Int>() // Cache for loaded sounds
+    private var playSoundInSilentMode = true
+
+    // Settings
+    private val SOUND_TYPE_DING1 = "ding1"
+    private var soundName = "ding1"
+
+    // Coroutine scope for settings loading
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Constant to map sound names to resource IDs
     private val soundResources = mapOf(
@@ -33,7 +46,7 @@ class AudioHelper(private val context: Context) {
     companion object {
         private const val MAX_STREAMS = 2
         private const val SOUND_PRIORITY = 1 // Standard priority
-        private const val TAG = "AudioHelper"
+        private const val tag = "AudioHelper"
     }
 
 
@@ -41,6 +54,21 @@ class AudioHelper(private val context: Context) {
         initializeSoundPool()
         preloadSounds()
     }
+
+    private suspend fun loadSettings() {
+        try {
+            val preferences = context.dataStore.data.first()
+
+            soundName = preferences[SettingsViewModel.ALERT_SOUND] ?: SOUND_TYPE_DING1
+            playSoundInSilentMode = preferences[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE] ?: true
+            Log.d(tag, "Settings loaded: sound=$soundName, playSilent=$playSoundInSilentMode")
+        } catch (e: Exception) {
+            Log.e(tag, "Error loading sound settings", e)
+        }
+
+
+    }
+
 
     /**
      * Initializes the SoundPool with appropriate audio attributes.
@@ -62,31 +90,35 @@ class AudioHelper(private val context: Context) {
      * Preloads all defined sounds into the SoundPool.
      */
     private fun preloadSounds() {
-
         soundResources.forEach { (soundName, resourceId) ->
             val soundId = soundPool?.load(context, resourceId, SOUND_PRIORITY) ?: 0
             soundMap[soundName] = soundId
             if (soundId == 0) {
-                Log.e(TAG, "Failed to load sound: $soundName")
+                Log.e(tag, "Failed to load sound: $soundName")
             } else {
-                Log.d(TAG, "Sound queued for loading: $soundName")
+                Log.d(tag, "Sound queued for loading: $soundName")
             }
         }
 
         soundPool?.setOnLoadCompleteListener { _, sampleId, status ->
             val soundName = soundMap.entries.firstOrNull { it.value == sampleId }?.key ?: "unknown"
             if (status == 0) {
-                Log.d(TAG, "Sound loaded successfully: $soundName")
+                Log.d(tag, "Sound loaded successfully: $soundName")
             } else {
-                Log.e(TAG, "Failed to load sound: $soundName, status: $status")
+                Log.e(tag, "Failed to load sound: $soundName, status: $status")
             }
         }
     }
 
-    fun playSound(soundName: String, respectSilentMode: Boolean = true) {
+    suspend fun playDefaultSound() {
+        loadSettings()
+        playSound(soundName, playSoundInSilentMode)
+    }
+
+    fun playSound(soundName: String, forceSilentMode: Boolean = playSoundInSilentMode) {
         val soundId = soundMap[soundName] ?: 0
         if (soundId == 0) {
-            Log.e("SoundPlayer", "Sound not found: $soundName")
+            Log.e(tag, "Sound not found: $soundName")
             return
         }
 
@@ -94,32 +126,33 @@ class AudioHelper(private val context: Context) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val ringerMode = audioManager.ringerMode
 
+
         val shouldPlaySound = when {
             // In normal mode, always play
             ringerMode == AudioManager.RINGER_MODE_NORMAL -> true
 
-            // In silent/vibrate mode, play only if respectSilentMode is false (meaning play anyway)
-            !respectSilentMode -> true
+            // In silent/vibrate mode, play only if forceSilentMode is true (meaning play anyway)
+            forceSilentMode -> true
 
             // Otherwise don't play
             else -> false
         }
 
+
         if (!shouldPlaySound) {
-            Log.d("SoundPlayer", "Skip playing sound: device in silent mode")
+            Log.d(tag, "Skip playing sound: device in silent mode")
             return
         }
 
-
         // Play with high priority
         val streamId = soundPool?.play(soundId, 1.0f, 1.0f, 10, 0, 1.0f) ?: 0
-        Log.d("SoundPlayer", "Playing sound: $soundName, streamId: $streamId")
+        Log.d(tag, "Playing sound: $soundName, streamId: $streamId")
 
         if (streamId == 0) {
             // If playback failed, try reloading
             val resourceId = getSoundResourceId(soundName)
             if (resourceId != 0) {
-                Log.d("SoundPlayer", "Reloading and playing sound: $soundName")
+                Log.d(tag, "Reloading and playing sound: $soundName")
                 val newSoundId = soundPool?.load(context, resourceId, 1) ?: 0
                 soundMap[soundName] = newSoundId
 
@@ -127,16 +160,17 @@ class AudioHelper(private val context: Context) {
                 soundPool?.setOnLoadCompleteListener { pool, sampleId, status ->
                     if (status == 0 && sampleId == newSoundId) {
                         pool.play(sampleId, 1.0f, 1.0f, 10, 0, 1.0f)
-                        Log.d("SoundPlayer", "Playing after reload: $soundName")
+                        Log.d(tag, "Playing after reload: $soundName")
                     }
                 }
             }
         }
     }
-    
+
     private fun getSoundResourceId(soundName: String): Int {
         return soundResources[soundName] ?: 0
     }
+
 
     fun release() {
         soundPool?.release()
@@ -144,9 +178,7 @@ class AudioHelper(private val context: Context) {
         soundMap.clear()
     }
 
-
     fun vibrateDevice(context: Context) {
-
         // Initialize Vibrator
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager: VibratorManager =
@@ -162,5 +194,4 @@ class AudioHelper(private val context: Context) {
             @Suppress("DEPRECATION") (vibrator.vibrate(500))
         }
     }
-
 }

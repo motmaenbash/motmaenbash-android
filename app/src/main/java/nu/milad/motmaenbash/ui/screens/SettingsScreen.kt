@@ -124,7 +124,7 @@ fun SettingsScreen(
             )
         ),
         PreferenceCategoryModel(
-            title = "بروزرسانی پایگاه داده",
+            title = "به‌روزرسانی پایگاه داده",
             icon = Icons.Outlined.Refresh,
             preferences = listOf(
                 ListPreferenceItem(
@@ -178,7 +178,7 @@ fun SettingsScreen(
     )
 
     AppBar(
-        title = stringResource(id = R.string.settings_activity_title),
+        title = stringResource(id = R.string.settings_screen_title),
     ) { contentPadding ->
         LazyColumn(
             modifier = Modifier
