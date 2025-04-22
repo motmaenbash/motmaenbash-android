@@ -110,10 +110,12 @@ class AlertHandlerActivity : ComponentActivity() {
                 ?: throw IllegalStateException("Alert extra is required")
         }
 
+        if (alert.type != Alert.AlertType.SMS_NEUTRAL) {
             // Play sound and vibrate
             audioHelper.vibrateDevice(this@AlertHandlerActivity)
             lifecycleScope.launch {
                 audioHelper.playDefaultSound()
+            }
         }
 
         setContent {
@@ -348,7 +350,11 @@ fun AlertDialog(
                     }
                 }
 
+                if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
+                    Spacer(modifier = Modifier.height(18.dp))
+                } else {
                     AlertFooter(alert.type)
+                }
             }
         }
     }

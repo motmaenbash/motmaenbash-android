@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -57,8 +58,10 @@ import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -84,6 +87,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -115,7 +119,6 @@ import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
 import nu.milad.motmaenbash.ui.components.UpdateDialog
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.PermissionManager
 import nu.milad.motmaenbash.utils.ServiceUtils
@@ -632,38 +635,19 @@ fun CriticalPermissionsSection(
                         disabledIcon = Icons.Outlined.ErrorOutline
                     )
                     Divider()
-
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(
-                            onClick = onMoreInfoClick,
-                            modifier = Modifier
-                                .height(32.dp),
 
-
-                            ) {
-                            Icon(
-                                Icons.Outlined.Info,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = GreyMiddle
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Text(
-                                text = "اطلاعات بیشتر",
-                                style = typography.bodySmall,
-                                color = GreyMiddle,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
+                        MoreInfoButton(
+                            onClick = onMoreInfoClick
+                        )
                     }
+
+
                 }
             }
         }
@@ -807,32 +791,20 @@ fun ProtectionStatus(
                         Divider()
                     }
 
+
+
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(
+                        MoreInfoButton(
                             onClick = { showProtectorInfoDialog = true },
-                            modifier = Modifier.height(32.dp)
-                        ) {
-                            Icon(
-                                Icons.Outlined.Info,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = GreyMiddle
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Text(
-                                text = "اطلاعات بیشتر",
-                                style = typography.bodySmall,
-                                color = GreyMiddle,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
+                        )
                     }
+
+
                 }
             }
 
@@ -918,40 +890,78 @@ fun ProtectionRow(
         )
 
 
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .widthIn(min = 70.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
 
-        if (!isGranted) {
-            Button(
-                onClick = onActivateClick,
-                modifier = Modifier
-                    .height(36.dp),
-//                        .wrapContentHeight(unbounded = true),
 
-//                        .heightIn( max = 36.dp)
-//                    ,contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+            if (!isGranted) {
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    Button(
+                        onClick = onActivateClick,
+                        modifier = Modifier
+                            .heightIn(min = 36.dp),
 
-                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                contentPadding = PaddingValues(horizontal = 12.dp)
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+
+                    ) {
+                        Text(
+                            text = "فعال‌سازی",
+                            fontSize = 12.sp,
+                        )
+                    }
+                }
+
+
+            } else {
+                Text(
+                    text = "فعال",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.primary,
+
+                    )
+            }
+        }
+    }
+
+
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MoreInfoButton(
+    title: String = "اطلاعات بیشتر",
+    onClick: () -> Unit = {},
+) {
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        TextButton(
+            onClick = onClick,
+            modifier = Modifier
+                .heightIn(min = 32.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp),
 
             ) {
-                Text(text = "فعال‌سازی", fontSize = 12.sp)
-            }
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = GreyMiddle
+            )
+            Spacer(modifier = Modifier.width(4.dp))
 
-
-//                    modifier = Modifier
-//                        .height(36.dp)
-//                        .padding(horizontal = 2.dp),
-//                    shape = RoundedCornerShape(8.dp),
-
-
-        } else {
             Text(
-                text = "فعال",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = colorScheme.primary,
-
-                )
+                text = title,
+                color = GreyMiddle,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 
@@ -1435,28 +1445,6 @@ fun RequiredPermissionsSectionPreview_MissingPermissions() {
     }
 }
 
-@Preview(showBackground = true, name = "Required Permissions - Missing Permissions")
-@Composable
-fun RequiredPermissionsSectionPreview_MissingPermissions2() {
-    MotmaenBashTheme {
-        val density = LocalDensity.current
-        CompositionLocalProvider(
-            LocalDensity provides Density(
-                density = density.density,
-                fontScale = 1.6f
-            )
-        ) {
-            CriticalPermissionsSection(
-                notificationPermissionStatus = false,
-                overlayPermissionStatus = false,
-                onNotificationPermissionClick = {},
-                onOverlayPermissionClick = {},
-                onMoreInfoClick = {}
-            )
-        }
-
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -1470,6 +1458,29 @@ fun ProtectionStatusPreview() {
             isCriticalPermissionsMissing = false
 
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProtectionStatusLargeFontPreview() {
+    MotmaenBashTheme {
+        val density = LocalDensity.current
+        CompositionLocalProvider(
+            LocalDensity provides Density(
+                density = density.density,
+                fontScale = 1.6f
+            )
+        ) {
+            ProtectionStatus(
+                smsPermissionStatus = false,
+                onSmsPermissionClick = {},
+                accessibilitySettingStatus = false,
+                onAccessibilitySettingClick = {},
+                isCriticalPermissionsMissing = false
+
+            )
+        }
     }
 }
 
