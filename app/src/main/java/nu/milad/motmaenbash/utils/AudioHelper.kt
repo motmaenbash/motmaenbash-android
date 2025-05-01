@@ -24,11 +24,14 @@ import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 class AudioHelper(private val context: Context) {
     private var soundPool: SoundPool? = null
     private val soundMap = mutableMapOf<String, Int>() // Cache for loaded sounds
-    private var playSoundInSilentMode = true
+
 
     // Settings
-    private val SOUND_TYPE_DING1 = "ding1"
-    private var soundName = "ding1"
+    private var playSoundInSilentMode = true
+    private var playNeutralSmsSound = false
+    private var alertSoundName = "ding1"
+    private var neutralSmsSoundName = "ding2"
+
 
     // Coroutine scope for settings loading
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -46,7 +49,7 @@ class AudioHelper(private val context: Context) {
     companion object {
         private const val MAX_STREAMS = 2
         private const val SOUND_PRIORITY = 1 // Standard priority
-        private const val tag = "AudioHelper"
+        private const val TAG = "AudioHelper"
     }
 
 
@@ -59,11 +62,14 @@ class AudioHelper(private val context: Context) {
         try {
             val preferences = context.dataStore.data.first()
 
-            soundName = preferences[SettingsViewModel.ALERT_SOUND] ?: SOUND_TYPE_DING1
+            alertSoundName = preferences[SettingsViewModel.ALERT_SOUND] ?: alertSoundName
+            neutralSmsSoundName =
+                preferences[SettingsViewModel.NEUTRAL_SMS_SOUND] ?: neutralSmsSoundName
             playSoundInSilentMode = preferences[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE] ?: true
-            Log.d(tag, "Settings loaded: sound=$soundName, playSilent=$playSoundInSilentMode")
+            playNeutralSmsSound = preferences[SettingsViewModel.PLAY_NEUTRAL_SMS_SOUND] ?: true
+
         } catch (e: Exception) {
-            Log.e(tag, "Error loading sound settings", e)
+            Log.e(TAG, "Error loading sound settings", e)
         }
 
 
@@ -94,31 +100,34 @@ class AudioHelper(private val context: Context) {
             val soundId = soundPool?.load(context, resourceId, SOUND_PRIORITY) ?: 0
             soundMap[soundName] = soundId
             if (soundId == 0) {
-                Log.e(tag, "Failed to load sound: $soundName")
+                Log.e(TAG, "Failed to load sound: $soundName")
             } else {
-                Log.d(tag, "Sound queued for loading: $soundName")
+                Log.d(TAG, "Sound queued for loading: $soundName")
             }
         }
 
         soundPool?.setOnLoadCompleteListener { _, sampleId, status ->
             val soundName = soundMap.entries.firstOrNull { it.value == sampleId }?.key ?: "unknown"
             if (status == 0) {
-                Log.d(tag, "Sound loaded successfully: $soundName")
+                Log.d(TAG, "Sound loaded successfully: $soundName")
             } else {
-                Log.e(tag, "Failed to load sound: $soundName, status: $status")
+                Log.e(TAG, "Failed to load sound: $soundName, status: $status")
             }
         }
     }
 
-    suspend fun playDefaultSound() {
+
+    suspend fun playAlertSound() {
         loadSettings()
-        playSound(soundName, playSoundInSilentMode)
+        playSound(alertSoundName, playSoundInSilentMode)
+
     }
 
-    fun playSound(soundName: String, forceSilentMode: Boolean = playSoundInSilentMode) {
+
+    fun playSound(soundName: String, forceSilentMode: Boolean) {
         val soundId = soundMap[soundName] ?: 0
         if (soundId == 0) {
-            Log.e(tag, "Sound not found: $soundName")
+            Log.e(TAG, "Sound not found: $soundName")
             return
         }
 
@@ -140,19 +149,19 @@ class AudioHelper(private val context: Context) {
 
 
         if (!shouldPlaySound) {
-            Log.d(tag, "Skip playing sound: device in silent mode")
+            Log.d(TAG, "Skip playing sound: device in silent mode")
             return
         }
 
         // Play with high priority
         val streamId = soundPool?.play(soundId, 1.0f, 1.0f, 10, 0, 1.0f) ?: 0
-        Log.d(tag, "Playing sound: $soundName, streamId: $streamId")
+        Log.d(TAG, "Playing sound: $soundName, streamId: $streamId")
 
         if (streamId == 0) {
             // If playback failed, try reloading
             val resourceId = getSoundResourceId(soundName)
             if (resourceId != 0) {
-                Log.d(tag, "Reloading and playing sound: $soundName")
+                Log.d(TAG, "Reloading and playing sound: $soundName")
                 val newSoundId = soundPool?.load(context, resourceId, 1) ?: 0
                 soundMap[soundName] = newSoundId
 
@@ -160,7 +169,7 @@ class AudioHelper(private val context: Context) {
                 soundPool?.setOnLoadCompleteListener { pool, sampleId, status ->
                     if (status == 0 && sampleId == newSoundId) {
                         pool.play(sampleId, 1.0f, 1.0f, 10, 0, 1.0f)
-                        Log.d(tag, "Playing after reload: $soundName")
+                        Log.d(TAG, "Playing after reload: $soundName")
                     }
                 }
             }
@@ -194,4 +203,13 @@ class AudioHelper(private val context: Context) {
             @Suppress("DEPRECATION") (vibrator.vibrate(500))
         }
     }
+
+    /**
+     * Sound types for the application
+     */
+    enum class SoundType {
+        ALERT,
+        NEUTRAL_SMS
+    }
+
 }

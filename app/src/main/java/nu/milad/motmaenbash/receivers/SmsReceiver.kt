@@ -33,7 +33,13 @@ class SmsReceiver : BroadcastReceiver() {
 
         val bundle = intent.extras ?: return
 
-        val pdus = bundle.get("pdus") as? Array<ByteArray> ?: return
+
+        val pduObjects = bundle.getSerializable("pdus") ?: return
+        val pdus = when (pduObjects) {
+            is Array<*> -> pduObjects.filterIsInstance<ByteArray>().toTypedArray()
+            else -> return
+        }
+
 
         val fullMessageBody = StringBuilder()
         var sender: String? = null
@@ -76,9 +82,12 @@ class SmsReceiver : BroadcastReceiver() {
 
             }
 
+        } catch (e: NullPointerException) {
+            Log.e(TAG, "Null data in SMS processing", e)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Invalid SMS data format", e)
         } catch (e: Exception) {
-            e.printStackTrace()
-            Log.e(TAG, "Error processing SMS", e)
+            Log.e(TAG, "Unexpected error processing SMS", e)
         }
 
 
@@ -92,9 +101,7 @@ class SmsReceiver : BroadcastReceiver() {
         // Convert to lowercase and trim
         val messageText = removeShortWords(messageBody.lowercase().trim())
 
-
         if (messageText.isBlank()) {
-            Log.d(TAG, "Received empty SMS message.")
             return
         }
 
@@ -122,7 +129,7 @@ class SmsReceiver : BroadcastReceiver() {
             sender != null && dbHelper.isSenderFlagged(sender) ->
                 Alert.AlertType.SMS_SENDER_FLAGGED
 
-            // No flagged content detected
+            // Not flagged (Neutral sms)
             else -> Alert.AlertType.SMS_NEUTRAL
 
 

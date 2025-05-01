@@ -49,7 +49,7 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
 
             if (isSafe == false) {
                 audioHelper.vibrateDevice(context)
-                audioHelper.playDefaultSound()
+                audioHelper.playAlertSound()
             }
 
             _state.value = ScanState.Result(resultText, isSafe, urlToScan)

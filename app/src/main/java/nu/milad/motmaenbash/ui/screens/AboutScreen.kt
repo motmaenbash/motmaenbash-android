@@ -29,7 +29,6 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.CurrencyBitcoin
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,18 +54,16 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.consts.AppConstants
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.components.AppLogo
 import nu.milad.motmaenbash.ui.components.Divider
-import nu.milad.motmaenbash.ui.theme.ColorPrimary
+import nu.milad.motmaenbash.ui.components.DonationCard
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.utils.WebUtils
-import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
 
 @Composable
 fun AboutScreen() {
@@ -94,6 +91,11 @@ fun AboutScreen() {
             Spacer(modifier = Modifier.height(18.dp))
             SocialMediaLinks()
             Spacer(modifier = Modifier.height(18.dp))
+
+            DonationCard()
+
+            Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
+
             ActionButtons(context)
 
             Divider(verticalPadding = 12.dp)
@@ -108,6 +110,8 @@ fun AboutScreen() {
 
         }
     }
+
+
 }
 
 
@@ -123,7 +127,7 @@ fun AppInfo(navController: NavController) {
     )
 
     Text(
-        text = "برنامه تشخیص فیشینگ",
+        text = stringResource(id = R.string.app_slogan),
         color = colorScheme.onBackground,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
@@ -263,31 +267,10 @@ fun SocialMediaLinks() {
 }
 
 @Composable
-fun ActionButtons(context: Context) {
-    Button(
-        onClick = { openUrlInCustomTab(context, AppConstants.DONATE_URL) },
-        modifier = Modifier.wrapContentSize(),
-        colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.CurrencyBitcoin,
-            contentDescription = "Donate",
-            tint = Color.White
-        )
+fun ActionButtons(
+    context: Context,
+) {
 
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "حـمـایـت مـالـی",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-
-
-
-    Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
 
     Row(
         modifier = Modifier.wrapContentSize(),

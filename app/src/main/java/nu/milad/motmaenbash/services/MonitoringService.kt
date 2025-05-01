@@ -34,10 +34,8 @@ class MonitoringService : Service() {
     private val notificationMessages = listOf(
         " در حال محافظت توسط مطمئن باش ",
         "سپرهای فعال: نصب برنامه"  // Default value, will be updated during rotation
-
     )
-
-
+    
     private var currentMessageIndex = 0
 
     // Handler for updating notifications

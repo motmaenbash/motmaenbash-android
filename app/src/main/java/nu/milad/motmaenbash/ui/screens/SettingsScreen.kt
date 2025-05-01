@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -101,7 +102,6 @@ fun SettingsScreen(
                         .toList(),
                     currentValue = ((prefs[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE]
                         ?: viewModel.getDefaultBooleanValue(
-                            context,
                             SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE
                         )).toString()),
                     onValueSelected = { newValue ->
@@ -147,6 +147,8 @@ fun SettingsScreen(
                 )
             )
         ),
+
+
         PreferenceCategoryModel(
             title = "ظاهر",
             icon = Icons.Outlined.Menu,
@@ -174,8 +176,35 @@ fun SettingsScreen(
                     onInfoClick = { showFontInfoDialog = true }
                 )
             )
-        )
+        ),
+
+        PreferenceCategoryModel(
+            title = "پنجره دریافت پیامک",
+            icon = Icons.Outlined.Textsms,
+            preferences = listOf(
+                ListPreferenceItem(
+                    title = stringResource(id = R.string.setting_show_sms_dialog),
+                    entries = context.resources.getStringArray(R.array.play_sound_in_silent_mode)
+                        .toList(),
+                    values = context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
+                        .toList(),
+                    currentValue = (prefs[SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG]
+                        ?: viewModel.getDefaultBooleanValue(
+                            SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG
+                        )).toString(),
+                    onValueSelected = { newValue ->
+                        viewModel.saveBooleanPreference(
+                            SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG,
+                            newValue.toBoolean()
+                        )
+                    }
+                ),
+
+            )
+        ),
     )
+
+
 
     AppBar(
         title = stringResource(id = R.string.settings_screen_title),

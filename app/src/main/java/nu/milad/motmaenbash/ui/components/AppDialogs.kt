@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +84,41 @@ fun UpdateDialog(
         confirmText = if (updateDialogState.forceUpdate) "به‌روزرسانی" else null,
         dismissText = if (updateDialogState.forceUpdate) null else "بعدا",
     )
+}
+
+
+@Composable
+fun ChangelogDialog(
+    onDismiss: () -> Unit
+) {
+    val versionTitle = stringArrayResource(id = R.array.changelog_versions)[0]
+
+    AppAlertDialog(
+        title = "تغییرات نسخه جدید",
+
+        icon = Icons.Outlined.Update,
+
+        content = {
+
+
+            Text(
+                versionTitle,
+                style = typography.bodySmall,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary
+            )
+            Divider(verticalPadding = 6.dp)
+            Text(
+                text = stringArrayResource(id = R.array.changelog_changes)[0] + stringArrayResource(
+                    id = R.array.changelog_changes
+                )[0],
+                style = typography.bodySmall,
+            )
+        },
+        onDismiss = onDismiss,
+        dismissText = "بزن بریم",
+    )
+
 }
 
 /**
@@ -574,6 +610,19 @@ fun UpdateDialogForceUpdatePreview() {
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun ChangelogDialogPreview() {
+    MotmaenBashTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            ChangelogDialog(
+                onDismiss = {}
+            )
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable

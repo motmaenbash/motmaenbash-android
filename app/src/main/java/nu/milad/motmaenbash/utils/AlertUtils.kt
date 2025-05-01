@@ -6,15 +6,24 @@ import android.util.Log
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
-import nu.milad.motmaenbash.BuildConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_APP_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_SMS_DETECTED
 import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.ui.activities.AlertHandlerActivity
+import nu.milad.motmaenbash.viewmodels.SettingsViewModel
 
 
 object AlertUtils {
+
+
+    // Settings
+    private var playNeutralSmsSound = false
+    private var showNeutralSmsDialog = true
 
     fun showAlert(
         context: Context,
@@ -24,8 +33,29 @@ object AlertUtils {
         param2: String
     ) {
 
+
         // Increment statistics and log the event based on the alert type
         incrementStatAndLogEvent(context, alertType, param1, param2)
+
+        CoroutineScope(Dispatchers.Default).launch {
+
+            // Load settings
+            val preferences = context.dataStore.data.first()
+            playNeutralSmsSound = preferences[SettingsViewModel.PLAY_NEUTRAL_SMS_SOUND] ?: true
+            showNeutralSmsDialog = preferences[SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG] ?: true
+
+
+            // Exit if alert is neutral and dialog is off
+            if (alertType == Alert.AlertType.SMS_NEUTRAL && !showNeutralSmsDialog) return@launch
+
+            if (alertType != Alert.AlertType.SMS_NEUTRAL) {
+
+                // Play sound and vibrate
+                AudioHelper(context).apply {
+                    vibrateDevice(context)
+                    playAlertSound()
+                }
+            }
 
         val (alertTitle, alertSummary, alertContent) = getAlertContent(alertType)
 
@@ -44,9 +74,11 @@ object AlertUtils {
             putExtra(AlertHandlerActivity.EXTRA_ALERT, alert)
             // Ensure the alert activity is launched as a new task to prevent conflicts
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+
         }
         // Start the AlertHandlerActivity to display the alert
         context.startActivity(intent)
+    }
     }
 
     private fun incrementStatAndLogEvent(

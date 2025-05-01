@@ -22,3 +22,6 @@ local.properties
 /app/debug/
 /keystore.jks
 *.keystore
+
+# Sample Files
+/app/src/main/res/raw/data_plain.json

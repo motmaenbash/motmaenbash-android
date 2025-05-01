@@ -102,7 +102,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                     _suspiciousApps.value = suspiciousList
 
                                     audioHelper.vibrateDevice(context)
-                                    audioHelper.playDefaultSound()
+                                    audioHelper.playAlertSound()
                                 }
                                 app
                             } else null

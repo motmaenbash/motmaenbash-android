@@ -226,6 +226,25 @@ fun IntroScreen(viewModel: IntroViewModel = viewModel()) {
         viewModel.checkInitialPermissions()
     }
 
+    // Check if all permissions are granted but intro not marked as shown
+    LaunchedEffect(
+        overlayPermissionStatus,
+        notificationPermissionStatus,
+        smsPermissionStatus,
+        accessibilitySettingStatus
+    ) {
+        // If we have all permissions and we're at the intro step, we should move to main screen
+        if (currentStepIndex == 0 && currentStep == "intro" &&
+            overlayPermissionStatus &&
+            notificationPermissionStatus &&
+            smsPermissionStatus &&
+            accessibilitySettingStatus
+        ) {
+            // All permissions granted but intro not marked as shown, go directly to main
+            navigateToMainScreen()
+        }
+    }
+
     LaunchedEffect(
         overlayPermissionStatus,
         notificationPermissionStatus,

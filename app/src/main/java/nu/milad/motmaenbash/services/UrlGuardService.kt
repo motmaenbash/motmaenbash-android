@@ -187,7 +187,7 @@ class UrlGuardService : AccessibilityService() {
 
 
     private fun startOverlayVerificationBadgeService(url: String) {
-        val intent = Intent(this, OverlayVerificationBadgeService::class.java).apply {
+        val intent = Intent(this, VerifiedBadgeOverlayService::class.java).apply {
             putExtra("URL", UrlUtils.extractAndCacheDomain(domainCache, url))
         }
         startService(intent)
@@ -195,9 +195,9 @@ class UrlGuardService : AccessibilityService() {
 
     private fun stopOverlayVerificationBadgeService() {
         val overlayVerificationBadgeService =
-            isServiceRunning(OverlayVerificationBadgeService::class.java)
+            isServiceRunning(VerifiedBadgeOverlayService::class.java)
         if (overlayVerificationBadgeService) {
-            val serviceIntent = Intent(this, OverlayVerificationBadgeService::class.java)
+            val serviceIntent = Intent(this, VerifiedBadgeOverlayService::class.java)
             stopService(serviceIntent)
             Log.d(tag, "FloatingViewService stopped")
         }
@@ -206,8 +206,8 @@ class UrlGuardService : AccessibilityService() {
     private fun stopAllServices() {
         // Check and stop AlertOverlayService and FloatingViewService
         listOf(
-            OverlayVerificationBadgeService::class.java,
-            OverlayAlertService::class.java
+            VerifiedBadgeOverlayService::class.java,
+            AlertOverlayService::class.java
         ).forEach { serviceClass ->
             if (isServiceRunning(serviceClass)) {
                 val serviceIntent = Intent(this, serviceClass)
@@ -225,7 +225,7 @@ class UrlGuardService : AccessibilityService() {
     }
 
     private fun showSuspiciousUrlAlert(suspiciousUrl: SuspiciousUrl) {
-        OverlayAlertService.showAlert(
+        AlertOverlayService.showAlert(
             applicationContext,
             suspiciousUrl
         )

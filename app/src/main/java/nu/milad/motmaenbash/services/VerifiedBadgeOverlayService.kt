@@ -16,7 +16,7 @@ import androidx.core.view.isVisible
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.ui.activities.MainActivity
 
-class OverlayVerificationBadgeService : Service() {
+class VerifiedBadgeOverlayService : Service() {
     private var mWindowManager: WindowManager? = null
     private var mFloatingView: View? = null
 
@@ -27,8 +27,6 @@ class OverlayVerificationBadgeService : Service() {
     override fun onCreate() {
         super.onCreate()
         //Inflate the floating view layout we created
-
-
         mFloatingView =
             LayoutInflater.from(this).inflate(R.layout.overlay_verification_badge, null)
 
@@ -63,14 +61,6 @@ class OverlayVerificationBadgeService : Service() {
         mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         mWindowManager!!.addView(mFloatingView, params)
 
-        // Add the view to the window with animation
-//        val animation = AnimationUtils.loadAnimation(this, R.anim.slide_in_top)
-//        mFloatingView?.startAnimation(animation)
-
-//        mFloatingView?.postDelayed({
-//            val animation = AnimationUtils.loadAnimation(this, R.anim.slide_in_top)
-//            mFloatingView?.startAnimation(animation)
-//        }, 100)
 
         // Setup views and listeners
         val collapsedView = mFloatingView?.findViewById<View>(R.id.collapse_view)
@@ -100,7 +90,7 @@ class OverlayVerificationBadgeService : Service() {
 
         mFloatingView?.findViewById<ImageView>(R.id.help_button)?.setOnClickListener {
             //Open the application  click.
-            val intent = Intent(this@OverlayVerificationBadgeService, MainActivity::class.java)
+            val intent = Intent(this@VerifiedBadgeOverlayService, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
             //close the service and remove view from the view hierarchy

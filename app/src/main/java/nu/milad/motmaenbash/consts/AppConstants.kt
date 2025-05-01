@@ -35,7 +35,7 @@ object AppConstants {
     const val PREF_KEY_LAST_UPDATE_TIME = "last_database_update_time"
     const val PREF_KEY_FIRST_LAUNCH = "first_launch"
     const val PREF_KEY_INTRO_SHOWN = "intro_shown"
-
+    const val PREF_KEY_LAST_CHANGELOG_SHOW_VERSION = "last_changelog_show_version"
 
     const val DONATE_URL = "https://milad.nu/page/donate"
 
@@ -48,7 +48,7 @@ object AppConstants {
     const val BASE_URL = "https://github.com/miladnouri/motmaenbash-data/raw/main/data/"
     const val UPDATE_DATA_URL = BASE_URL + "data.json"
     const val UPDATE_TIPS_URL = BASE_URL + "tips.json"
-    const val UPDATE_SPONSOR_URL = BASE_URL + "sponsor.json"
+    const val UPDATE_LINKS_URL = BASE_URL + "links.json"
     const val UPDATE_APP_URL = BASE_URL + "version.json"
 
 

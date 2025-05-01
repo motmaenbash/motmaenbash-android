@@ -29,6 +29,9 @@ open class SettingsViewModel(
         val FONT = stringPreferencesKey("font")
         val PLAY_SOUND_IN_SILENT_MODE = booleanPreferencesKey("play_alert_sound_in_silent_mode")
         val ALERT_SOUND = stringPreferencesKey("alert_sound")
+        val SHOW_NEUTRAL_SMS_DIALOG = booleanPreferencesKey("show_neutral_sms_dialog")
+        val PLAY_NEUTRAL_SMS_SOUND = booleanPreferencesKey("play_neutral_sms_sound")
+        val NEUTRAL_SMS_SOUND = stringPreferencesKey("neutral_sms_sound")
     }
 
 
@@ -59,7 +62,7 @@ open class SettingsViewModel(
                 DATABASE_UPDATE_FREQ -> UpdateManager(getApplication()).scheduleDatabaseUpdate()
 
                 // Play sound feedback
-                ALERT_SOUND -> soundPlayer.playSound(value, true)
+                ALERT_SOUND, NEUTRAL_SMS_SOUND -> soundPlayer.playSound(value, true)
             }
 
         }
@@ -92,22 +95,23 @@ open class SettingsViewModel(
             ALERT_SOUND -> context.resources.getStringArray(R.array.alert_sound_values).first()
 
             // Select the second item from the array
-            DATABASE_UPDATE_FREQ -> context.resources.getStringArray(R.array.database_update_frequency_values)
-                .get(1)
+            DATABASE_UPDATE_FREQ -> context.resources.getStringArray(R.array.database_update_frequency_values)[1]
 
             THEME -> context.resources.getStringArray(R.array.theme_values).first()
 
             FONT -> context.resources.getStringArray(R.array.font_values).first()
+
+
             else -> ""
         }
     }
 
     // Get default boolean value
-    fun getDefaultBooleanValue(context: Context, key: Preferences.Key<Boolean>): Boolean {
+    fun getDefaultBooleanValue(key: Preferences.Key<Boolean>): Boolean {
         return when (key) {
-            PLAY_SOUND_IN_SILENT_MODE -> context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
-                .first().toBoolean()
-
+            PLAY_SOUND_IN_SILENT_MODE -> true
+            SHOW_NEUTRAL_SMS_DIALOG -> true
+            PLAY_NEUTRAL_SMS_SOUND -> false
             else -> false
         }
     }

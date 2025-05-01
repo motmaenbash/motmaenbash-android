@@ -100,13 +100,14 @@ class UpdateManager(
             val tipsResponse = URL(UPDATE_TIPS_URL).readText()
 
             // Combine data
-            val dataJsonObject = JSONObject(dataResponse).apply {
-                put("tips", JSONArray(tipsResponse))
+            val dataJsonArray = JSONArray(dataResponse).apply {
+                put(JSONArray(tipsResponse))
             }
+
 
             // Update local database
             dbHelper.clearDatabase()
-            dbHelper.populateDatabaseWithFetchedData(dataJsonObject)
+            dbHelper.populateDatabaseWithFetchedData(dataJsonArray)
 
             // Update timestamp and fetch additional data
             setLastUpdateTime(DateUtils.getCurrentTimeInMillis())
@@ -164,7 +165,7 @@ class UpdateManager(
             if (currentVersionCode < latestVersionCode) {
                 val latestVersionName = jsonObject.getString("latest_version_name")
                 val forceUpdateVersionCode = jsonObject.getInt("force_update_version_code")
-                val updateLinks = jsonObject.getJSONArray("update_links")
+                val updateLinks = jsonObject.getJSONArray("links")
 
                 val links = (0 until updateLinks.length()).map { i ->
                     updateLinks.getJSONObject(i).let {

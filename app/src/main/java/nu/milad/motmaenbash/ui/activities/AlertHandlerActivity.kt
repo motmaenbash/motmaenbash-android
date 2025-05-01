@@ -1,6 +1,6 @@
 package nu.milad.motmaenbash.ui.activities
 
-import android.content.ActivityNotFoundException
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -57,9 +57,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import coil.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.launch
+import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.models.Alert.Companion.SMS_ALERT_TYPES
 import nu.milad.motmaenbash.ui.components.AppCard
@@ -71,7 +70,6 @@ import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
-import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.PackageUtils
 
 class AlertHandlerActivity : ComponentActivity() {
@@ -82,9 +80,7 @@ class AlertHandlerActivity : ComponentActivity() {
 
 
     private lateinit var alert: Alert
-
-    private lateinit var audioHelper: AudioHelper
-
+    
     private val uninstallLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -99,7 +95,7 @@ class AlertHandlerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        audioHelper = AudioHelper(this)
+
 
         // Extract intent extras
         alert = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -110,13 +106,31 @@ class AlertHandlerActivity : ComponentActivity() {
                 ?: throw IllegalStateException("Alert extra is required")
         }
 
-        if (alert.type != Alert.AlertType.SMS_NEUTRAL) {
-            // Play sound and vibrate
-            audioHelper.vibrateDevice(this@AlertHandlerActivity)
-            lifecycleScope.launch {
-                audioHelper.playDefaultSound()
-            }
+
+        val taskLabel = when (alert.type) {
+            Alert.AlertType.SMS_NEUTRAL -> "پیام جدید"
+            else -> "هشدار!"
         }
+
+        val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ActivityManager.TaskDescription(taskLabel)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ActivityManager.TaskDescription(taskLabel, null, getColor(R.color.red))
+        } else {
+            @Suppress("DEPRECATION")
+            ActivityManager.TaskDescription(
+                taskLabel,
+                null,
+                resources.getColor(R.color.red)
+            )
+        }
+
+
+        setTaskDescription(
+            taskDescription
+        )
+
+
 
         setContent {
             MotmaenBashTheme {
@@ -146,9 +160,10 @@ class AlertHandlerActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        audioHelper.release()
+//        audioHelper.release()
     }
 }
+
 
 @Composable
 fun AlertDialog(
@@ -160,7 +175,7 @@ fun AlertDialog(
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
-            dismissOnBackPress = false,
+            dismissOnBackPress = true,
             dismissOnClickOutside = false
         )
     ) {
@@ -370,13 +385,17 @@ private fun SmsAlertContent(
     val messageText: String? = alert.param2
 
     Text(
-        text = "فرستنده: " + "\u200E" + sender,  // \u200E is the LTR mark
-        color = if(alert.type == Alert.AlertType.SMS_NEUTRAL) colorScheme.primary else colorScheme.onSurface,
+        text = buildAnnotatedString {
+            append("فرستنده: ")
+            withStyle(style = SpanStyle(color = if (alert.type == Alert.AlertType.SMS_NEUTRAL) colorScheme.primary else colorScheme.onSurface)) {
+                append("\u200E$sender") // Ensure proper LTR rendering for sender (\u200E is the LTR mark)
+            }
+        },
 
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
-            .fillMaxWidth()
+            .wrapContentSize()
             .then(
                 if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
                     Modifier.clickable {
@@ -410,7 +429,8 @@ private fun SmsAlertContent(
         ) {
             SelectionContainer {
                 Text(
-                    text = it.trim(),
+
+                    text = it.replace(Regex("\n{3,}"), "\n\n").trim(),
                     color = colorScheme.onSurface,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Start,

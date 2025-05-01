@@ -4,6 +4,7 @@
     <string name="accessibility_service_description">با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی کرده و همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وبگردی تا حد امکان افزایش یابد.
         \n\nBy enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways and alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.</string>
 
+    <string name="app_slogan">بررسی تهدیدهای دیجیتال</string>
 
     <string name="alert_dialog_activity_title">هشدار!</string>
     <string name="share_url_label">🕵️ بررسی لینک</string>
@@ -50,7 +51,7 @@
 
     <!--  Permission Descriptions  -->
     <string name="permission_receive_sms_description">برای شناسایی و هشدار در مورد پیامک‌های فیشینگ و کلاهبرداری، برنامه به این دسترسی نیاز دارد.</string>
-    <string name="permission_notification_description">این دسترسی امکان اجرای پایدار سرویس برنامه در پیش‌زمینه (Foreground) و نمایش اعلان مربوط به فعال بودن آن را رد اندروید ۸ و بالاتر فراهم می‌کند.</string>
+    <string name="permission_notification_description">این دسترسی امکان اجرای پایدار سرویس برنامه در پیش‌زمینه (Foreground) و نمایش اعلان مربوط به فعال بودن آن را در اندروید ۸ و بالاتر فراهم می‌کند.</string>
     <string name="permission_accessibility_description">برای شناسایی و هشدار درباره سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی و نمایش نماد درگاه پرداخت معتبر، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
     <string name="permission_accessibility_short_description">برای شناسایی سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
     <string name="permission_overlay_description">در صورت شناسایی هرگونه تهدید مانند پیامک، لینک یا برنامه مشکوک، برای نمایش پنجره هشدار حتی هنگام استفاده از سایر برنامه‌ها، برنامه به این دسترسی نیاز دارد.</string>
@@ -74,7 +75,7 @@
     <string name="setting_theme">انتخاب تم</string>
     <string name="light">حالت روشن</string>
     <string name="dark">حالت تاریک</string>
-    <string name="dim">حالت تاریک (Dim)</string>
+    <string name="dim">حالت تاریک ملایم</string>
     <string name="system_default">پیش‌فرض سیستم</string>
 
     <string name="setting_alert_sound">صدای هشدار</string>
@@ -95,6 +96,7 @@
     <string name="vazir">وزیر متن</string>
     <string name="sahel">ساحل</string>
 
+    <string name="setting_show_sms_dialog">نمایش پنجره دریافت پیامک جدید</string>
 
     <string name="setting_alert_silent_mode">پخش صدا در حالت سایلنت</string>
 
@@ -104,13 +106,11 @@
     <string name="shortcut_url_scan_label">اسکن URL</string>
     <string name="shortcut_report_label">ارسال گزارش</string>
 
-
     <!-- Bug Report -->
     <string name="report_bug_toast_message">اشکالات احتمالی را از طریق ایمیل به ما گزارش دهید</string>
     <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید…</string>
     <string name="send_email_chooser_title">ارسال ایمیل …</string>
     <string name="no_email_app_found">برنامه‌ای برای ارسال ایمیل یافت نشد.</string>
-
 
     <!-- App Update -->
     <string name="app_update_message">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. می‌توانید برنامه را به آخرین نسخه به‌روزرسانی کنید.</string>
@@ -124,4 +124,7 @@
     <string name="notification_overlay_required">نیازمند فعال‌سازی دسترسی</string>
     <string name="notification_active_shields">سپرهای فعال: %1$s</string>
 
+    <!--  Donation  -->
+    <string name="donation_title">حـمـایـت مـالـی</string>
+    <string name="donation_message">با حمایت مالی خود، به تداوم و توسعه مستمر این پروژه کمک کنید.</string>
 </resources>

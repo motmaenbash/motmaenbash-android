@@ -23,6 +23,7 @@ import nu.milad.motmaenbash.models.InfoItem
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.components.AppCard
+import nu.milad.motmaenbash.ui.components.DonationCard
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
 
@@ -69,6 +70,12 @@ fun InfoListScreen(page: String = Pages.FAQ) {
                     )
 
                 )
+            }
+
+            if (page == Pages.CHANGELOG) {
+                item {
+                    DonationCard()
+                }
             }
 
         }
@@ -139,3 +146,4 @@ fun ChangelogListScreenPreview() {
         }
     }
 }
+

@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -111,6 +110,7 @@ import nu.milad.motmaenbash.models.Stats
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AccessibilityPermissionDialog
 import nu.milad.motmaenbash.ui.components.AppCard
+import nu.milad.motmaenbash.ui.components.ChangelogDialog
 import nu.milad.motmaenbash.ui.components.CriticalPermissionsInfoDialog
 import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.components.GuardsInfoDialog
@@ -231,7 +231,8 @@ fun MainScreen(
         }
     }
 
-    var showChangelog by remember { mutableStateOf(true) }
+    //Changhelog
+    val showChangelogDialog by viewModel.showChangelogDialog.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.checkInitialPermissions()
@@ -277,6 +278,17 @@ fun MainScreen(
     }
 
 
+    if (showChangelogDialog) {
+        ChangelogDialog(
+            onDismiss = {
+                viewModel._showChangelogDialog.value = false
+                coroutineScope.launch {
+                    viewModel.setLastShownVersion()
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -291,8 +303,6 @@ fun MainScreen(
                 .systemBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-
 
 
             // Settings icon
@@ -316,7 +326,6 @@ fun MainScreen(
             TipOfDaySection(tip = tipOfTheDay, isRefreshing = isRefreshing, onRefreshClick = {
                 viewModel.refreshTipOfTheDay()
             })
-
 
 
             if (isCriticalPermissionsMissing) {
@@ -478,7 +487,8 @@ fun MainScreen(
 fun AppName(navController: NavController) {
     Column(
         modifier = Modifier.clickable(
-            indication = null, interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
         ) {
             navController.navigate(NavRoutes.ABOUT_SCREEN)
         },
@@ -491,7 +501,7 @@ fun AppName(navController: NavController) {
 
             )
         Text(
-            text = "برنامه تشخیص فیشینگ",
+            text = stringResource(id = R.string.app_slogan),
             color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
@@ -544,13 +554,14 @@ fun TipOfDaySection(
             IconButton(
                 onClick = onRefreshClick,
                 modifier = Modifier
-                    .wrapContentSize()
-                    .size(32.dp)
+                    .size(28.dp)
                     .align(Alignment.TopEnd)
-                    .padding(4.dp)
+                    .padding(2.dp)
                     .graphicsLayer {
                         rotationZ = if (isRefreshing) rotation else 0f
                     },
+
+
                 enabled = !isRefreshing,
             ) {
                 Icon(
@@ -558,6 +569,7 @@ fun TipOfDaySection(
                     contentDescription = "نمایش یک نکته دیگر",
                     modifier = Modifier
                         .fillMaxSize(),
+
                     tint = if (isRefreshing) colorScheme.onSurface.copy(alpha = 0.6f) else colorScheme.primary
                 )
             }
@@ -981,7 +993,7 @@ fun Stats(stats: Stats) {
     )
 
     Column {
-        SectionTitle("آمار")
+        SectionTitle("آمار شما")
         AppCard(padding = 8.dp) {
 
             Column(modifier = Modifier.padding(16.dp)) {
@@ -1294,7 +1306,7 @@ fun LinkCard(linkData: Link?) {
     val linkColor = linkData?.color?.let {
         try {
             Color(it.toColorInt())
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             colorScheme.onSurface
         }
     } ?: colorScheme.onSurface
@@ -1316,17 +1328,17 @@ fun LinkCard(linkData: Link?) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (linkData.logo != null) {
-                    // logo
+                if (!linkData.image.isNullOrEmpty()) {
+                    // link image
                     Image(
-                        painter = rememberAsyncImagePainter(linkData.logo),
+                        painter = rememberAsyncImagePainter(linkData.image),
                         contentDescription = "link Logo",
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(end = 12.dp)
                     )
                 }
-                Column(
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
+                Column {
                     Text(
                         text = linkData.title,
                         fontWeight = FontWeight.Bold,
@@ -1338,7 +1350,7 @@ fun LinkCard(linkData: Link?) {
                             Text(
                                 text = it,
                                 fontSize = 13.sp,
-                                color = Color.Gray
+                                color = GreyMiddle
                             )
                         }
                     }

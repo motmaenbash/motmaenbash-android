@@ -31,7 +31,7 @@ import nu.milad.motmaenbash.models.Stats
 import nu.milad.motmaenbash.utils.SmsUtils.generateNormalizedMessageHash
 import nu.milad.motmaenbash.utils.UrlUtils.extractDomain
 import nu.milad.motmaenbash.utils.UrlUtils.removeQueryStringAndFragment
-import org.json.JSONObject
+import org.json.JSONArray
 
 class DatabaseHelper(appContext: Context) :
     SQLiteOpenHelper(appContext, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -39,6 +39,14 @@ class DatabaseHelper(appContext: Context) :
 
     private val context = appContext
 
+    object DataIndex {
+        const val FLAGGED_URLS = 0
+        const val FLAGGED_SENDERS = 1
+        const val FLAGGED_MESSAGES = 2
+        const val FLAGGED_WORDS = 3
+        const val FLAGGED_APPS = 4
+        const val TIPS = 5
+    }
 
     override fun onCreate(db: SQLiteDatabase) {
         createTables(db)
@@ -206,14 +214,31 @@ class DatabaseHelper(appContext: Context) :
             try {
                 val inputStream = context.resources.openRawResource(R.raw.data)
                 val jsonData = inputStream.bufferedReader().use { it.readText() }
-                val jsonObject = JSONObject(jsonData)
+                val jsonArray = JSONArray(jsonData)
 
-                insertData(this, TABLE_FLAGGED_URLS, jsonObject)
-                insertData(this, TABLE_FLAGGED_SENDERS, jsonObject)
-                insertData(this, TABLE_FLAGGED_MESSAGES, jsonObject)
-                insertData(this, TABLE_FLAGGED_WORDS, jsonObject)
-                insertData(this, TABLE_FLAGGED_APPS, jsonObject)
-                insertData(this, TABLE_TIPS, jsonObject)
+                insertData(this, TABLE_FLAGGED_URLS, jsonArray.getJSONArray(DataIndex.FLAGGED_URLS))
+                insertData(
+                    this,
+                    TABLE_FLAGGED_SENDERS,
+                    jsonArray.getJSONArray(DataIndex.FLAGGED_SENDERS)
+                )
+                insertData(
+                    this,
+                    TABLE_FLAGGED_MESSAGES,
+                    jsonArray.getJSONArray(DataIndex.FLAGGED_MESSAGES)
+                )
+                insertData(
+                    this,
+                    TABLE_FLAGGED_WORDS,
+                    jsonArray.getJSONArray(DataIndex.FLAGGED_WORDS)
+                )
+                insertData(this, TABLE_FLAGGED_APPS, jsonArray.getJSONArray(DataIndex.FLAGGED_APPS))
+
+                // Tips
+                val tipsInputStream = context.resources.openRawResource(R.raw.tips)
+                val tipsText = tipsInputStream.bufferedReader().use { it.readText() }
+                val tipsArray = JSONArray(tipsText)
+                insertData(this, TABLE_TIPS, tipsArray)
 
 
             } catch (e: Exception) {
@@ -221,7 +246,7 @@ class DatabaseHelper(appContext: Context) :
                     "DatabaseHelper",
                     "Error prepopulating data: ${e.message}",
                     e
-                )  // Added logging
+                )
             } finally {
             }
         }
@@ -247,7 +272,7 @@ class DatabaseHelper(appContext: Context) :
     }
 
 
-    fun populateDatabaseWithFetchedData(jsonObject: JSONObject) {
+    fun populateDatabaseWithFetchedData(dataJsonArray: JSONArray) {
         val tables = arrayOf(
             TABLE_FLAGGED_URLS,
             TABLE_FLAGGED_SENDERS,
@@ -257,66 +282,87 @@ class DatabaseHelper(appContext: Context) :
             TABLE_TIPS
         )
 
-        tables.forEach { tableName ->
-            val jsonArray = jsonObject.optJSONArray(tableName)
+        tables.forEachIndexed { index, tableName ->
+            val jsonArray = dataJsonArray.getJSONArray(index)
             if (jsonArray != null && jsonArray.length() > 0) {
-                insertData(writableDatabase, tableName, jsonObject)
+                insertData(writableDatabase, tableName, jsonArray)
             }
         }
     }
 
     private fun insertData(
-        db: SQLiteDatabase?, tableName: String, jsonData: JSONObject
+        db: SQLiteDatabase?, tableName: String, jsonArray: JSONArray
     ) {
-        val jsonArray = jsonData.optJSONArray(tableName) ?: return
         db?.transaction {
             try {
                 for (i in 0 until jsonArray.length()) {
 
 
-                    val contentValues = ContentValues()
-
                     when (tableName) {
                         TABLE_FLAGGED_URLS -> {
                             val jsonObject = jsonArray.getJSONObject(i)
-                            contentValues.apply {
-                                put("hash", jsonObject.optString("hash"))
-                                put("threat_type", jsonObject.optInt("threat_type"))
-                                put("url_match", jsonObject.optInt("url_match"))
-                                put("alert_level", jsonObject.optInt("alert_level"))
+                            val threatType = jsonObject.optInt("threat_type")
+                            val urlMatch = jsonObject.optInt("url_match")
+                            val alertLevel = jsonObject.optInt("alert_level")
+                            val hashesArray = jsonObject.optJSONArray("hashes")
+                            if (hashesArray != null) {
+                                for (j in 0 until hashesArray.length()) {
+
+                                    val contentValues = ContentValues().apply {
+                                        put("hash", hashesArray.optString(j))
+                                        put("threat_type", threatType)
+                                        put("url_match", urlMatch)
+                                        put("alert_level", alertLevel)
                             }
+                                    insertWithOnConflict(
+                                        tableName,
+                                        null,
+                                        contentValues,
+                                        SQLiteDatabase.CONFLICT_IGNORE
+                                    )
+                                }
+                            }
+
                         }
 
 
                         TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
 
-                            contentValues.put("hash", jsonArray.getString(i))
+                            val contentValues = ContentValues().apply {
+                                put("hash", jsonArray.getString(i))
+                            }
+                            insertWithOnConflict(
+                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
+                            )
                         }
 
 
                         TABLE_TIPS -> {
-                            val tip = jsonArray.getString(i)
-                            contentValues.apply {
-                                put("tip", tip)
+                            val contentValues = ContentValues().apply {
+                                put("tip", jsonArray.getString(i))
                             }
+                            insertWithOnConflict(
+                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
+                            )
                         }
 
                         TABLE_FLAGGED_APPS -> {
                             val jsonObject = jsonArray.getJSONObject(i)
-                            contentValues.apply {
+                            val contentValues = ContentValues().apply {
                                 put("package_name", jsonObject.optString("package_name"))
 
                                 put("sha1", jsonObject.optString("sha1", ""))
                                 put("apk_sha1", jsonObject.optString("apk_sha1", ""))
                             }
+                            insertWithOnConflict(
+                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
+                            )
                         }
 
 
                     }
 
-                    this.insertWithOnConflict(
-                        tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
-                    )
+
                 }
             } finally {
             }
@@ -344,7 +390,8 @@ class DatabaseHelper(appContext: Context) :
 
     fun hasFlaggedWord(message: String): Boolean {
 
-        val words = message.split("\\s+".toRegex()).map { it.trim() }
+        // Split the message into words, trim them, and remove duplicates using a Set
+        val words = message.split("\\s+".toRegex()).map { it.trim() }.toSet()
 
         Log.d("DatabaseHelper", "Words: $words")
         // Generate hashes for each word

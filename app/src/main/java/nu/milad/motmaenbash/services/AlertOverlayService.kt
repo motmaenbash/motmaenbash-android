@@ -24,7 +24,7 @@ import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
 import nu.milad.motmaenbash.utils.AudioHelper
 import java.util.concurrent.atomic.AtomicLong
 
-class OverlayAlertService : Service() {
+class AlertOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private val overlayViews = mutableMapOf<Long, View>()
     private lateinit var audioHelper: AudioHelper
@@ -34,7 +34,7 @@ class OverlayAlertService : Service() {
         private const val tag = "AlertOverlayService"
 
         fun showAlert(context: Context, suspiciousUrl: SuspiciousUrl) {
-            val intent = Intent(context, OverlayAlertService::class.java).apply {
+            val intent = Intent(context, AlertOverlayService::class.java).apply {
                 putExtra("url", suspiciousUrl.url)
                 putExtra("threatType", suspiciousUrl.threatType?.name) // as String
                 putExtra("isSpecificUrl", suspiciousUrl.isSpecificUrl)
@@ -58,7 +58,7 @@ class OverlayAlertService : Service() {
 
             audioHelper.vibrateDevice(this)
             CoroutineScope(Dispatchers.Main).launch {
-                audioHelper.playDefaultSound()
+                audioHelper.playAlertSound()
             }
 
             if (windowManager == null) {
@@ -87,20 +87,6 @@ class OverlayAlertService : Service() {
             newOverlayView.findViewById<ImageView>(R.id.closeButton)?.setOnClickListener {
                 removeOverlay(alertId)
             }
-            //todo: delete
-//            newOverlayView.findViewById<Button>(R.id.cancelButton)?.setOnClickListener {
-//                removeOverlay(alertId)
-//            }
-
-
-            //todo: delete for release
-//            newOverlayView.findViewById<Button>(R.id.shareButton)?.setOnClickListener {
-//                // Get the card view (which we want to share, not the entire overlay)
-//                val cardView = newOverlayView.findViewById<View>(R.id.alertCardView)
-//                if (cardView != null) {
-//                    shareViewAsImage(cardView, url)
-//                }
-//            }
 
 
             // Create layout params for the overlay
@@ -127,56 +113,6 @@ class OverlayAlertService : Service() {
 
         return START_NOT_STICKY
     }
-
-    //todo: delete for release
-//    private fun shareViewAsImage(view: View, url: String) {
-//        try {
-//            // Create a bitmap with the same size as the view
-//            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-//
-//            // Draw the view into the bitmap
-//            val canvas = Canvas(bitmap)
-//            view.draw(canvas)
-//
-//            // Save the bitmap to a temporary file
-//            val cachePath = File(cacheDir, "images")
-//            cachePath.mkdirs()
-//
-//            val fileName = "shared_alert_${System.currentTimeMillis()}.png"
-//            val file = File(cachePath, fileName)
-//
-//            FileOutputStream(file).use { outputStream ->
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-//                outputStream.flush()
-//            }
-//
-//            // Get the content URI using FileProvider
-//            val contentUri = FileProvider.getUriForFile(
-//                this,
-//                "${packageName}.fileprovider",  // Make sure this matches your file provider authority
-//                file
-//            )
-//
-//            // Create a share intent
-//            val shareIntent = Intent().apply {
-//                action = Intent.ACTION_SEND
-//                putExtra(Intent.EXTRA_STREAM, contentUri)
-//                putExtra(Intent.EXTRA_TEXT, "هشدار امنیتی برای $url")
-//                type = "image/png"
-//                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//            }
-//
-//            // Create chooser intent with FLAG_ACTIVITY_NEW_TASK since we're calling from a service
-//            val chooserIntent = Intent.createChooser(shareIntent, "اشتراک گذاری هشدار").apply {
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            }
-//
-//            startActivity(chooserIntent)
-//
-//        } catch (e: Exception) {
-//            Log.e(tag, "Error sharing image", e)
-//        }
-//    }
 
 
     private fun removeOverlay(alertId: Long) {

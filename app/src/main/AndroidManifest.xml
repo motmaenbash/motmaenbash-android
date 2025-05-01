@@ -73,31 +73,23 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter android:label="@string/share_url_label">
-                <action android:name="android.intent.action.PROCESS_TEXT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-
+            <!-- For Share Text -->
             <intent-filter android:label="@string/share_url_label">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
+            <!-- For "Process Text" (highlighting text, then Share) -->
             <intent-filter android:label="@string/share_url_label">
-                <action android:name="android.intent.action.VIEW" />
-
+                <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:scheme="https" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
+
 
         </activity>
 
@@ -181,14 +173,13 @@
         </service>
 
         <service
-            android:name=".services.OverlayVerificationBadgeService"
+            android:name=".services.VerifiedBadgeOverlayService"
             android:enabled="true"
             android:exported="false" />
         <service
-            android:name=".services.OverlayAlertService"
+            android:name=".services.AlertOverlayService"
             android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.SYSTEM_ALERT_WINDOW" />
+            android:exported="false" />
 
 
         <service
