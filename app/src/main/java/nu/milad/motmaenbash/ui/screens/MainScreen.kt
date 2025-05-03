@@ -323,6 +323,9 @@ fun MainScreen(
 
             AppName(navController)
 
+
+            Spacer(Modifier.size(16.dp))
+
             TipOfDaySection(tip = tipOfTheDay, isRefreshing = isRefreshing, onRefreshClick = {
                 viewModel.refreshTipOfTheDay()
             })
@@ -533,48 +536,60 @@ fun TipOfDaySection(
         label = "Refresh Animation"
     )
 
-    Column {
-        SectionTitle("نکته روز")
 
-        Box(modifier = Modifier.padding(8.dp)) {
-            AppCard(padding = 0.dp) {
+    AppCard {
 
-                Text(
-                    text = tip ?: "در حال دریافت...",
-                    modifier = Modifier
-                        .padding(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 24.dp)
-                        .fillMaxWidth()
-                        .heightIn(min = 48.dp),
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Justify
-                )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 8.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "نکته روز",
+                color = colorScheme.primary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .weight(1f)
 
-            }
+            )
 
             IconButton(
                 onClick = onRefreshClick,
                 modifier = Modifier
-                    .size(28.dp)
-                    .align(Alignment.TopEnd)
-                    .padding(2.dp)
+                    .size(24.dp)
                     .graphicsLayer {
                         rotationZ = if (isRefreshing) rotation else 0f
                     },
-
-
-                enabled = !isRefreshing,
+                enabled = !isRefreshing
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Refresh,
                     contentDescription = "نمایش یک نکته دیگر",
-                    modifier = Modifier
-                        .fillMaxSize(),
-
-                    tint = if (isRefreshing) colorScheme.onSurface.copy(alpha = 0.6f) else colorScheme.primary
+                    modifier = Modifier.fillMaxSize(),
+                    tint = if (isRefreshing)
+                        colorScheme.onSurface.copy(alpha = 0.6f)
+                    else
+                        colorScheme.primary
                 )
             }
         }
+        Divider()
+
+        Text(
+            text = tip ?: "در حال دریافت...",
+            modifier = Modifier
+                .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+            fontSize = 13.sp,
+
+            )
+
     }
+
+
 }
 
 @Composable
@@ -1007,9 +1022,7 @@ fun Stats(stats: Stats) {
 
                     // Only show divider if it's not the last item
                     if (index != userStats.size - 1) {
-                        Divider(
-                            thickness = 1.dp
-                        )
+                        Divider()
                     }
 
                 }
