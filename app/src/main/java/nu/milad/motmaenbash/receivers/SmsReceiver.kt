@@ -142,7 +142,7 @@ class SmsReceiver : BroadcastReceiver() {
                 alertType = it,
                 alertLevel = if (it == Alert.AlertType.SMS_SENDER_FLAGGED) Alert.AlertLevel.WARNING else if (it == Alert.AlertType.SMS_NEUTRAL) Alert.AlertLevel.NEUTRAL else Alert.AlertLevel.ALERT,
                 param1 = sender!!,
-                param2 = messageText
+                param2 = messageBody
             )
 
         }
