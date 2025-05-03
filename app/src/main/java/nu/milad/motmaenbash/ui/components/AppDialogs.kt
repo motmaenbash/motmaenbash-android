@@ -95,12 +95,8 @@ fun ChangelogDialog(
 
     AppAlertDialog(
         title = "تغییرات نسخه جدید",
-
         icon = Icons.Outlined.Update,
-
         content = {
-
-
             Text(
                 versionTitle,
                 style = typography.bodySmall,
@@ -109,9 +105,7 @@ fun ChangelogDialog(
             )
             Divider(verticalPadding = 6.dp)
             Text(
-                text = stringArrayResource(id = R.array.changelog_changes)[0] + stringArrayResource(
-                    id = R.array.changelog_changes
-                )[0],
+                text = stringArrayResource(id = R.array.changelog_changes)[0],
                 style = typography.bodySmall,
             )
         },
