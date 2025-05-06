@@ -4,28 +4,50 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.withTimeout
 import nu.milad.motmaenbash.utils.UpdateManager
 
 
-class DatabaseUpdateWorker(context: Context, params: WorkerParameters) :
-    CoroutineWorker(context, params) {
+class DatabaseUpdateWorker(
+    context: Context, params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    companion object {
+        private const val TAG = "DatabaseUpdateWorker"
+        private const val TIMEOUT_MINUTES = 3 * 60 * 1_000L // 3-minute timeout
+    }
+
     override suspend fun doWork(): Result {
-        Log.d("DatabaseUpdateWorker", "Worker: Database update started.")
         val updateManager = UpdateManager(applicationContext)
+
         return try {
-            val isUpdateSuccessful = updateManager.executeDataUpdate(isManualUpdate = false)
+            withTimeout(TIMEOUT_MINUTES) {
+                val isUpdateSuccessful = updateManager.executeDataUpdate(isManualUpdate = false)
+                when {
+                    isUpdateSuccessful -> {
+                        Log.d(TAG, "Database update completed successfully.")
+                        Result.success()
+                    }
 
-            if (isUpdateSuccessful) {
-                Log.d("DatabaseUpdateWorker", "Worker: Database update completed successfully.")
-                Result.success()
-            } else {
-                Log.d("DatabaseUpdateWorker", "Worker: Database update failed.")
-                Result.retry()
+                    runAttemptCount < 2 -> {
+                        Log.d(TAG, "Retry attempt: $runAttemptCount")
+                        Result.retry()
+                    }
+
+                    else -> {
+                        Log.e(TAG, "Database update failed after multiple attempts")
+                        Result.failure()
+                    }
+
+                }
             }
-
         } catch (e: Exception) {
-            Log.e("DatabaseUpdateWorker", "Worker: Error updating database", e)
-            Result.retry()
+            Log.e(TAG, "Error updating database", e)
+            if (runAttemptCount < 2) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
         }
     }
 }
