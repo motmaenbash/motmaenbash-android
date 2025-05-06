@@ -170,7 +170,8 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
                 val link = getRandomLink()
                 link?.let {
                     _linkData.value = Link(
-                        title = it.getString("title"),
+                        type = it.optInt("type", 1),
+                        title = it.optString("title", ""),
                         description = it.optString("description", ""),
                         image = it.optString("image", ""),
                         link = it.getString("link"),

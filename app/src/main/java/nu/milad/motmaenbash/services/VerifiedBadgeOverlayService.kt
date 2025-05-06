@@ -27,6 +27,8 @@ class VerifiedBadgeOverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         //Inflate the floating view layout we created
+
+
         mFloatingView =
             LayoutInflater.from(this).inflate(R.layout.overlay_verification_badge, null)
 
@@ -60,7 +62,7 @@ class VerifiedBadgeOverlayService : Service() {
         //Add the view to the window
         mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         mWindowManager!!.addView(mFloatingView, params)
-
+        
 
         // Setup views and listeners
         val collapsedView = mFloatingView?.findViewById<View>(R.id.collapse_view)

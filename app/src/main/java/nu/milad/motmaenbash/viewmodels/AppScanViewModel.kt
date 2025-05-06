@@ -59,7 +59,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                 _lastScanTime.value = NumberUtils.toPersianNumbers(scanUtils.getLastScanTimeAgo())
                 _scanStatusMessage.value =
                     "تعداد برنامه: ${NumberUtils.toPersianNumbers(nonSystemAppsSize.toString())}"
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _lastScanTime.value = "هنوز اسکنی انجام نشده"
             }
         }
@@ -130,7 +130,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                         _scanStatusMessage.value = "خطا در حین اسکن"
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Handle potential exceptions from scanUtils in preview context
                 _scanState.value = ScanState.COMPLETED_WITH_ERRORS
                 _scanStatusMessage.value = "خطا در حین اسکن"

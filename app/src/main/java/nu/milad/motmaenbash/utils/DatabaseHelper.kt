@@ -487,7 +487,7 @@ class DatabaseHelper(appContext: Context) :
         }
         // Then check for specific URL match (url_match = 1)
         val urlQuery =
-            "SELECT type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 1 LIMIT 1"
+            "SELECT threat_type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 1 LIMIT 1"
         readableDatabase.rawQuery(urlQuery, arrayOf(urlHash)).use { cursor ->
             if (cursor.moveToFirst()) {
                 val typeValue = cursor.getInt(0)

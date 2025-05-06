@@ -109,25 +109,14 @@ object UrlUtils {
         processedUrl = processedUrl.trimEnd('/')
 
         return processedUrl
-
-
     }
 
     fun analyzeUrl(
         url: String,
-        domainCache: LruCache<String, String>? = null,
         databaseHelper: DatabaseHelper
     ): UrlAnalysisResult {
         try {
             val normalizedUrl = removeUrlPrefixes(url.trim().lowercase())
-
-            // Use the domain cache if provided
-            val domain = if (domainCache != null) {
-                extractAndCacheDomain(domainCache, normalizedUrl)
-            } else {
-                extractDomain(normalizedUrl)
-            }
-
 
             return when {
                 isShaparakSubdomain(normalizedUrl) -> UrlAnalysisResult.SafeUrl(normalizedUrl)
@@ -146,6 +135,4 @@ object UrlUtils {
             return UrlAnalysisResult.NeutralUrl
         }
     }
-
-
 }

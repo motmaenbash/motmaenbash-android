@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AdsClick
@@ -76,9 +78,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -1316,20 +1320,11 @@ fun AboutAndFaqs(navController: NavController) {
 fun LinkCard(linkData: Link?) {
     val context = LocalContext.current
 
-    val linkColor = linkData?.color?.let {
-        try {
-            Color(it.toColorInt())
-        } catch (_: IllegalArgumentException) {
-            colorScheme.onSurface
-        }
-    } ?: colorScheme.onSurface
-
-
     if (linkData != null) {
         Column(
             modifier = Modifier
                 .wrapContentWidth()
-                .padding(16.dp)
+                .padding(vertical = 16.dp, horizontal = 8.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
@@ -1338,37 +1333,59 @@ fun LinkCard(linkData: Link?) {
                 },
 
             ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!linkData.image.isNullOrEmpty()) {
-                    // link image
-                    Image(
-                        painter = rememberAsyncImagePainter(linkData.image),
-                        contentDescription = "link Logo",
-                        modifier = Modifier
-                            .size(64.dp)
-                            .padding(end = 12.dp)
-                    )
-                }
-                Column {
-                    Text(
-                        text = linkData.title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = linkColor
-                    )
-                    linkData.description?.let {
-                        if (it.isNotBlank()) {
-                            Text(
-                                text = it,
-                                fontSize = 13.sp,
-                                color = GreyMiddle
-                            )
+
+            if (linkData.type == 1) {
+                val linkColor = linkData.color?.let {
+                    try {
+                        Color(it.toColorInt())
+                    } catch (_: IllegalArgumentException) {
+                        colorScheme.onSurface
+                    }
+                } ?: colorScheme.onSurface
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (!linkData.image.isNullOrEmpty()) {
+                        // link image
+                        Image(
+                            painter = rememberAsyncImagePainter(linkData.image),
+                            contentDescription = "link image",
+                            modifier = Modifier
+                                .size(64.dp)
+                                .padding(end = 12.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = linkData.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = linkColor
+                        )
+                        linkData.description?.let {
+                            if (it.isNotBlank()) {
+                                Text(
+                                    text = it,
+                                    fontSize = 13.sp,
+                                    color = GreyMiddle
+                                )
+                            }
                         }
                     }
                 }
+            } else if (linkData.type == 2) {
+                Image(
+                    painter = rememberAsyncImagePainter(linkData.image),
+                    contentDescription = "banner",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(4f)
+                        .clip(RoundedCornerShape(12.dp))
+                )
             }
+
         }
     }
 }

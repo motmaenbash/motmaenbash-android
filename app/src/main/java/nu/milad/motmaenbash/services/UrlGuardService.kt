@@ -26,15 +26,18 @@ import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.SuspiciousUrl
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.UrlUtils
+import nu.milad.motmaenbash.utils.UrlUtils.extractAndCacheDomain
 import org.json.JSONObject
 
 
 class UrlGuardService : AccessibilityService() {
 
-    private val urlProcessingTimestamps = HashMap<String, Long>()
     private lateinit var databaseHelper: DatabaseHelper
     private val tag = "UrlDetectionService"
     private val domainCache = LruCache<String, String>(100)
+    private var lastProcessedUrlInfo: Triple<String, String, Long>? = null
+    val throttleInterval = 2 * 60 * 1000L //2 Minutes
+    private var lastProcessedUrl: String? = null
 
     sealed class UrlAnalysisResult {
         object NeutralUrl : UrlAnalysisResult()
@@ -110,22 +113,22 @@ class UrlGuardService : AccessibilityService() {
         }
 
 
+
+
+
         val capturedUrl = captureUrl(parentNodeInfo, browserConfig) ?: return
 
-
         // Throttle URL analysis
-        val currentEventTime = event.eventTime
+        val currentTime = System.currentTimeMillis()
         val urlSignature = "$packageName:$capturedUrl"
-        val lastProcessTime = urlProcessingTimestamps[urlSignature] ?: 0L
-        val throttleInterval = 1500L
+        val capturedDomain = extractAndCacheDomain(domainCache, capturedUrl)
+        val domainSignature = "$packageName:$capturedDomain"
 
-
-        if (currentEventTime - lastProcessTime > throttleInterval) {
-            urlProcessingTimestamps[urlSignature] = currentEventTime
+        // Check if this URL is different from the last processed one or if enough time has passed
+        val shouldProcessUrl = isEligibleForProcessing(urlSignature, domainSignature, currentTime)
 
             val result = UrlUtils.analyzeUrl(
                 url = capturedUrl,
-                domainCache = domainCache,
                 databaseHelper = databaseHelper
             )
 
@@ -134,24 +137,41 @@ class UrlGuardService : AccessibilityService() {
                     startOverlayVerificationBadgeService(result.url)
 
                     databaseHelper.incrementUserStat(STAT_VERIFIED_GATEWAY)
-
                     logAnalyticsAsync(
                         "Motmaenbash_alert",
                         mapOf("alert_type" to STAT_VERIFIED_GATEWAY)
                     )
-
                 }
 
                 is SuspiciousUrl -> {
+                if (shouldProcessUrl) {
+
+                    // Check if this is a domain-level flag (not specific URL)
+                    val isDomainFlagged = !result.isSpecificUrl
+                    // Check if we should show alert based on lastProcessedUrlInfo
+                    val shouldShowAlert = isEligibleForProcessing(
+                        urlSignature,
+                        domainSignature,
+                        currentTime,
+                        isDomainFlagged
+                    )
+
+                    if (shouldShowAlert) {
                     showSuspiciousUrlAlert(result)
                 }
+                }
+            }
+
 
                 is UrlAnalysisResult.NeutralUrl -> {
                     stopAllServices()
                 }
             }
-        }
 
+        if (shouldProcessUrl) {
+            // Store this URL info as the last processed URL
+            lastProcessedUrlInfo = Triple(urlSignature, domainSignature, currentTime)
+        }
 
         // Safely recycle node info
         parentNodeInfo.safeRecycleNodeInfo()
@@ -159,6 +179,29 @@ class UrlGuardService : AccessibilityService() {
 
     }
 
+    private fun isEligibleForProcessing(
+        urlSignature: String,
+        domainSignature: String,
+        currentTime: Long,
+        isDomainFlagged: Boolean = false
+    ): Boolean {
+        // If lastProcessedUrlInfo is null, return true
+        if (lastProcessedUrlInfo == null) return true
+
+        val (lastUrl, lastDomain, timestamp) = lastProcessedUrlInfo!!
+        val timeThresholdMet = currentTime - timestamp > throttleInterval
+
+
+        // For general URL processing
+        if (!isDomainFlagged) {
+            return lastUrl != urlSignature || timeThresholdMet
+        }
+        // For domain-level flagged alerts
+        else {
+            val domainChanged = lastDomain != domainSignature
+            return domainChanged || timeThresholdMet
+        }
+    }
 
     // This method uses the address bar ID to find the URL
     private fun captureUrl(info: AccessibilityNodeInfo, config: BrowserConfig): String? {
@@ -167,7 +210,6 @@ class UrlGuardService : AccessibilityService() {
         val nodes = info.findAccessibilityNodeInfosByViewId(config.addressBarId)
         // Return null if no nodes found
         val addressBarNodeInfo = nodes?.firstOrNull() ?: return null
-
 
         try {
             // Skip if address bar is focused
@@ -345,7 +387,7 @@ class AnalyticsWorker(context: Context, params: WorkerParameters) : Worker(conte
                 }
             }
             return Result.success()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return Result.failure()
         }
     }

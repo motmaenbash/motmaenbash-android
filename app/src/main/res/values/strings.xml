@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Motmaen Bash</string>
     <string name="app_name_fa">مطمئن باش</string>
-    <string name="accessibility_service_description">با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی کرده و همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وبگردی تا حد امکان افزایش یابد.
+    <string name="accessibility_service_description">با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی کرده و همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وب‌گردی تا حد امکان افزایش یابد.
         \n\nBy enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways and alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.</string>
 
     <string name="app_slogan">بررسی تهدیدهای دیجیتال</string>
@@ -126,5 +126,5 @@
 
     <!--  Donation  -->
     <string name="donation_title">حـمـایـت مـالـی</string>
-    <string name="donation_message">با حمایت مالی خود، به تداوم و توسعه مستمر این پروژه کمک کنید.</string>
+    <string name="donation_message">با حمایت مالی (دونیت)، می‌توانید به توسعه و بهبود مستمر این پروژه کمک کنید.</string>
 </resources>

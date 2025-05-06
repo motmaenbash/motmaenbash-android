@@ -22,6 +22,7 @@ import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.Suspiciou
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
 import nu.milad.motmaenbash.utils.AudioHelper
+import nu.milad.motmaenbash.utils.UrlUtils
 import java.util.concurrent.atomic.AtomicLong
 
 class AlertOverlayService : Service() {
@@ -35,7 +36,12 @@ class AlertOverlayService : Service() {
 
         fun showAlert(context: Context, suspiciousUrl: SuspiciousUrl) {
             val intent = Intent(context, AlertOverlayService::class.java).apply {
-                putExtra("url", suspiciousUrl.url)
+                putExtra(
+                    "url",
+                    if (suspiciousUrl.isSpecificUrl) suspiciousUrl.url else UrlUtils.extractDomain(
+                        suspiciousUrl.url
+                    )
+                )
                 putExtra("threatType", suspiciousUrl.threatType?.name) // as String
                 putExtra("isSpecificUrl", suspiciousUrl.isSpecificUrl)
             }
