@@ -235,7 +235,7 @@ fun MainScreen(
         }
     }
 
-    //Changhelog
+    //Changelog
     val showChangelogDialog by viewModel.showChangelogDialog.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -430,7 +430,6 @@ fun MainScreen(
                 LinkCard(linkData = it)
             }
 
-            // TODO: Remove beta notice after final release
             BetaNotice()
 
             Divider()
