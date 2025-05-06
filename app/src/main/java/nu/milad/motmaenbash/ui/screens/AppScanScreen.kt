@@ -299,7 +299,7 @@ fun AnimatedAppIcon(app: App) {
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
+            animation = tween(1_000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
     )

@@ -1,10 +1,13 @@
 <resources>
-    <string name="app_name">Motmaen Bash</string>
+    <string name="app_name">MotmaenBash</string>
     <string name="app_name_fa">مطمئن باش</string>
-    <string name="accessibility_service_description">با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی کرده و همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وب‌گردی تا حد امکان افزایش یابد.
-        \n\nBy enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways and alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.</string>
 
-    <string name="app_slogan">بررسی تهدیدهای دیجیتال</string>
+    <!-- Slogan and ticker texts -->
+    <string name="app_slogan">سپر امنیت دیجیتال شما</string>
+    <string name="app_slogan_ticker1">شناسایی پیامک‌های مشکوک</string>
+    <string name="app_slogan_ticker2">هشدار نصب برنامه‌های مخرب</string>
+    <string name="app_slogan_ticker3">هشدار سایت‌های کلاهبرداری</string>
+    <string name="app_slogan_ticker4">پیشگیری از حملات فیشینگ</string>
 
     <string name="alert_dialog_activity_title">هشدار!</string>
     <string name="share_url_label">🕵️ بررسی لینک</string>
@@ -127,4 +130,16 @@
     <!--  Donation  -->
     <string name="donation_title">حـمـایـت مـالـی</string>
     <string name="donation_message">با حمایت مالی (دونیت)، می‌توانید به توسعه و بهبود مستمر این پروژه کمک کنید.</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_description">
+    با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی می‌کند. همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وب‌گردی افزایش یابد.
+    \n\n
+    By enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways. It also alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.
+    </string>
+    <string name="accessibility_service_summary">
+        سرویس دسترسی‌پذیری برنامه مطمئن باش، جهت تحلیل لینک‌های مرورگر و هشدار در صورت شناسایی موارد مشکوک
+        \n
+        Analyzes browser links and warns about suspicious content
+    </string>
 </resources>

@@ -120,6 +120,7 @@ import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.components.GuardsInfoDialog
 import nu.milad.motmaenbash.ui.components.NotificationPermissionDialog
 import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
+import nu.milad.motmaenbash.ui.components.TickerText
 import nu.milad.motmaenbash.ui.components.UpdateDialog
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
@@ -524,8 +525,15 @@ fun AppName(navController: NavController) {
             style = typography.headlineLarge,
 
             )
-        Text(
-            text = stringResource(id = R.string.app_slogan),
+
+        TickerText(
+            texts = listOf(
+                stringResource(id = R.string.app_slogan),
+                stringResource(id = R.string.app_slogan_ticker1),
+                stringResource(id = R.string.app_slogan_ticker2),
+                stringResource(id = R.string.app_slogan_ticker3),
+                stringResource(id = R.string.app_slogan_ticker4)
+            ),
             color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,

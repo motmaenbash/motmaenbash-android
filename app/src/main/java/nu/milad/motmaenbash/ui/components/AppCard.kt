@@ -36,9 +36,7 @@ fun AppCard(
 
         ),
         border = border,
-
-
-        ) {
+    ) {
         content()
     }
 }

@@ -410,7 +410,7 @@ fun OverlayPermissionDialog() {
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Motmaen Bash",
+                        text = stringResource(id = R.string.app_name),
                         color = colorScheme.onSurface,
                         fontSize = 13.sp
                     )

@@ -37,11 +37,6 @@ class FirebaseMessagingService : FirebaseMessagingService() {
         private const val KEY_BODY = "body"
     }
 
-
-//todo: delete
-
-// cQckhoRGTBCt-34tTuJp3z:APA91bFO6o9jxzX5sf2eQYXf0VFJs0LsXw7lFSu2xcZWK8G6pU9bMbIg-tANwFiQihQ7SKy0-l7Hh6Vqurq-Es7bAril18L0xLFM4Md8WkitGhcy8qSVqZw
-
     override fun onCreate() {
         super.onCreate()
         NotificationUtils.createMainNotificationChannel(this)

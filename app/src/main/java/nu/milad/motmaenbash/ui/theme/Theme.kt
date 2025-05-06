@@ -43,6 +43,7 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color(0xFFFF5252)
 )
 
+
 private val DimColorScheme = darkColorScheme(
     primary = ColorPrimary,
     secondary = Grey,
@@ -61,6 +62,7 @@ private val DimColorScheme = darkColorScheme(
     errorContainer = Color(0x0DFF6B6B),
     onError = Color(0xFFFF6B6B)
 )
+
 
 private val LightColorScheme = lightColorScheme(
     primary = ColorPrimary,
@@ -138,7 +140,7 @@ fun MotmaenBashTheme(
         LocalLayoutDirection provides LayoutDirection.Rtl,
 
 
-    ) {
+        ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = selectedTypography,
@@ -146,3 +148,4 @@ fun MotmaenBashTheme(
         )
     }
 }
+

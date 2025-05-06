@@ -60,6 +60,7 @@ import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.components.AppLogo
 import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.components.DonationCard
+import nu.milad.motmaenbash.ui.components.TickerText
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.theme.Red
@@ -114,18 +115,22 @@ fun AboutScreen() {
 
 }
 
-
 @Composable
 fun AppInfo(navController: NavController) {
 
     val context = LocalContext.current
 
-    Text(
-        text = stringResource(id = R.string.app_name_fa),
-        style = typography.headlineLarge,
+    TickerText(
+        texts = listOf(
+            stringResource(id = R.string.app_name_fa),
+            stringResource(id = R.string.app_name)
+        ),
         color = colorScheme.primary,
+        fontSize = 30.sp,
+        fontWeight = FontWeight.Black,
+        animationDuration = 2_000,
+        transitionDuration = 500
     )
-
     Text(
         text = stringResource(id = R.string.app_slogan),
         color = colorScheme.onBackground,
