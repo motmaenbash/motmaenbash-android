@@ -242,11 +242,29 @@ fun MainScreen(
         viewModel.checkInitialPermissions()
     }
 
+
+    LaunchedEffect(overlayPermissionStatus) {
+        if (overlayPermissionStatus) {
+            // Permission was granted, update notification
+            permissionManager.updateNotificationAfterPermissionChange(context)
+        }
+    }
+
+    LaunchedEffect(accessibilitySettingStatus) {
+        if (accessibilitySettingStatus) {
+            // Permission was granted, update notification
+            permissionManager.updateNotificationAfterPermissionChange(context)
+        }
+    }
+
     LaunchedEffect(smsPermissionState.status.isGranted) {
 
         when {
             smsPermissionState.status.isGranted -> {
                 showSmsPermissionDeniedDialog = false
+
+                // Update notification to reflect the new permission
+                permissionManager.updateNotificationAfterPermissionChange(context)
             }
 
             !smsPermissionState.status.isGranted &&

@@ -35,7 +35,7 @@ class MonitoringService : Service() {
         " در حال محافظت توسط مطمئن باش ",
         "سپرهای فعال: نصب برنامه"  // Default value, will be updated during rotation
     )
-    
+
     private var currentMessageIndex = 0
 
     // Handler for updating notifications
@@ -45,12 +45,21 @@ class MonitoringService : Service() {
     companion object {
         private const val FOREGROUND_NOTIFICATION_ID = 1
 
-        //todo: update for release
-        private const val UPDATE_INTERVAL = 60000L
+        private const val UPDATE_INTERVAL = 15 * 60 * 1_000L // 15 minutes
+
+        // Action to force update the notification immediately
+        const val ACTION_UPDATE_NOTIFICATION = "nu.milad.motmaenbash.ACTION_UPDATE_NOTIFICATION"
     }
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Check if this is a request to update the notification
+        if (intent?.action == ACTION_UPDATE_NOTIFICATION) {
+            // Force an immediate notification update
+            updateNotification()
+            return START_STICKY
+        }
+
         // Create notification and start foreground immediately
         if (::serviceNotification.isInitialized) {
             startForeground(FOREGROUND_NOTIFICATION_ID, serviceNotification)
@@ -165,29 +174,30 @@ class MonitoringService : Service() {
 
     /**
      * Update notification text with the next message
+     * This method is both called periodically and can be triggered manually
      */
     private fun updateNotification() {
-
         // Check overlay permission and set notification messages
         val permissionManager = PermissionManager(this)
-        // Rotate to the next message
-        currentMessageIndex = (currentMessageIndex + 1) % notificationMessages.size
 
+        // For forced updates, prioritize showing active guards
+        val shouldShowActiveGuards = currentMessageIndex == notificationMessages.size - 1
 
-        // Get the notification text - if it's the last item, update with current active guards
+        // Get the notification text
         val notificationText = if (!permissionManager.checkPermission(PermissionType.OVERLAY)) {
-            "نیازمند فعال سازی دسترسی overlay"
-        } else if (currentMessageIndex == notificationMessages.size - 1) {
-            // When we reach the last message (active guards), update it with current information
+            "نیاز به فعال‌سازی دسترسی نمایش روی برنامه‌ها"
+        } else if (shouldShowActiveGuards) {
+            // Show current active guards
             getActiveGuardsMessage()
         } else {
             notificationMessages[currentMessageIndex]
         }
 
+        // Increment message index for next time (for periodic updates)
+        currentMessageIndex = (currentMessageIndex + 1) % notificationMessages.size
 
         // Update existing notification with new text
         notificationBuilder.setContentText(notificationText)
-
 
         // Update notification
         val notificationManager =

@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.delay
 import nu.milad.motmaenbash.consts.PermissionType
+import nu.milad.motmaenbash.services.MonitoringService
 import nu.milad.motmaenbash.services.UrlGuardService
 import nu.milad.motmaenbash.ui.activities.PermissionTutorialActivity
 
@@ -157,4 +158,15 @@ class PermissionManager(private val context: Context) {
         context.startActivity(intent)
     }
 
+    /**
+     * Extension function for PermissionManager to trigger notification updates
+     * This can be called whenever a permission status changes
+     */
+    fun updateNotificationAfterPermissionChange(context: Context) {
+        // Force an immediate update of the notification
+        val intent = Intent(context, MonitoringService::class.java).apply {
+            action = MonitoringService.ACTION_UPDATE_NOTIFICATION
+        }
+        context.startService(intent)
+    }
 }
