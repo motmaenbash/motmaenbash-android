@@ -37,7 +37,6 @@ class UrlGuardService : AccessibilityService() {
     private val domainCache = LruCache<String, String>(100)
     private var lastProcessedUrlInfo: Triple<String, String, Long>? = null
     val throttleInterval = 2 * 60 * 1000L //2 Minutes
-    private var lastProcessedUrl: String? = null
 
     sealed class UrlAnalysisResult {
         object NeutralUrl : UrlAnalysisResult()
@@ -45,7 +44,7 @@ class UrlGuardService : AccessibilityService() {
         data class SuspiciousUrl(
             val url: String,
             val threatType: Alert.ThreatType? = null,
-            val isSpecificUrl: Boolean = false
+            val urlMatch: Int = 1
         ) : UrlAnalysisResult()
     }
 
@@ -94,6 +93,7 @@ class UrlGuardService : AccessibilityService() {
             if (isSwitchingFromBrowser || isBrowserClosed(event.packageName.toString())) {
                 Log.d(tag, "Browser closed or switched away from, stopping services")
                 stopOverlayVerificationBadgeService()
+                lastProcessedUrlInfo = null
                 return
             }
         }
@@ -143,11 +143,12 @@ class UrlGuardService : AccessibilityService() {
                     )
                 }
 
+
                 is SuspiciousUrl -> {
                 if (shouldProcessUrl) {
 
                     // Check if this is a domain-level flag (not specific URL)
-                    val isDomainFlagged = !result.isSpecificUrl
+                    val isDomainFlagged = result.urlMatch == 1
                     // Check if we should show alert based on lastProcessedUrlInfo
                     val shouldShowAlert = isEligibleForProcessing(
                         urlSignature,
@@ -230,7 +231,7 @@ class UrlGuardService : AccessibilityService() {
 
     private fun startOverlayVerificationBadgeService(url: String) {
         val intent = Intent(this, VerifiedBadgeOverlayService::class.java).apply {
-            putExtra("URL", UrlUtils.extractAndCacheDomain(domainCache, url))
+            putExtra("URL", extractAndCacheDomain(domainCache, url))
         }
         startService(intent)
     }
@@ -257,6 +258,7 @@ class UrlGuardService : AccessibilityService() {
                 Log.d(tag, "${serviceClass.simpleName} stopped")
             }
         }
+
     }
 
     // Helper method to check if a service is running
@@ -287,18 +289,31 @@ class UrlGuardService : AccessibilityService() {
         }
     }
 
+
     private fun isBrowserClosed(packageName: String?): Boolean {
         if (packageName.isNullOrBlank()) return true
 
         val am = getSystemService(ACTIVITY_SERVICE) as? ActivityManager ?: return true
         return try {
-
             val runningTasks = am.getRunningTasks(1)
-            runningTasks.firstOrNull()?.topActivity?.packageName != packageName
+            val isInRunningTasks = runningTasks.any { task ->
+                task.topActivity?.packageName == packageName ||
+                        task.baseActivity?.packageName == packageName
+            }
+
+            // Also check running services for the package
+            val runningServices = am.getRunningServices(Integer.MAX_VALUE)
+            val hasRunningServices = runningServices.any { service ->
+                service.service.packageName == packageName
+            }
+
+            // Browser is considered closed only if it's not in running tasks AND has no running services
+            !isInRunningTasks && !hasRunningServices
 
         } catch (e: Exception) {
             Log.e(tag, "Error checking browser status", e)
-            true
+            // When in doubt, assume browser is still running to avoid false positives
+            false
         }
     }
 

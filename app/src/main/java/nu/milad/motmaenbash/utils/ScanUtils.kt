@@ -38,7 +38,7 @@ class ScanUtils(private val context: Context) {
 
     fun isAppSuspicious(app: App): Boolean {
 
-        return dbHelper.isAppFlagged(app.packageName, app.sha1, app.apkSha1)
+        return dbHelper.isAppFlagged(app.packageName, app.apkHash, app.sighHash)
     }
 
 

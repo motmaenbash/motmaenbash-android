@@ -1,82 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:alpha="0.85"
-    android:background="@drawable/floating_widget_bg"
+    android:alpha="0.9"
     android:fitsSystemWindows="false"
     android:layoutDirection="rtl"
-    tools:ignore="UselessParent">
-
-    <!--View while view is collapsed-->
-    <RelativeLayout
-        android:id="@+id/collapse_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/black"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:visibility="gone"
-        tools:visibility="gone">
-
-        <!--Icon of floating widget -->
-        <ImageView
-            android:id="@+id/collapsed_iv"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_check"
-            tools:ignore="ContentDescription" />
-
-        <!--Close button-->
-        <ImageView
-            android:id="@+id/close_btn"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="40dp"
-            android:src="@drawable/ic_close"
-            tools:ignore="ContentDescription" />
-    </RelativeLayout>
+    android:orientation="vertical">
 
     <View
         android:id="@+id/dark"
         android:layout_width="match_parent"
         android:layout_height="38dp"
-        android:alpha="1"
         android:background="@color/green_dark" />
 
-    <!--View while view is expanded-->
     <LinearLayout
-        android:id="@+id/expanded_container"
         android:layout_width="match_parent"
-
         android:layout_height="wrap_content"
-        android:layout_below="@id/dark"
+        android:background="@drawable/floating_widget_bg"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp"
-        android:visibility="visible"
-        tools:visibility="visible">
+        android:paddingVertical="4dp">
 
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_check"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="2dp"
+            android:src="@drawable/ic_checked_shield"
             app:tint="@android:color/white" />
 
-        <nu.milad.motmaenbash.widgets.VazirTextView
+        <TextView
+            android:id="@+id/status_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
+            android:fontFamily="@font/vazirmatn_semi_bold"
             android:gravity="center"
             android:text="درگاه پرداخت معتبر"
             android:textColor="@android:color/white"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
 
         <nu.milad.motmaenbash.widgets.VazirTextView
@@ -85,31 +50,23 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            android:gravity="center"
+            android:fontFamily="@font/vazirmatn_light"
+            android:textAlignment="textStart"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             tools:text="shaparak.ir" />
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/close_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/close_button_bg"
+            android:contentDescription="بستن نوار وضعیت مطمئن باش"
+            android:padding="2dp"
+            android:src="@drawable/ic_close"
+            app:tint="@android:color/white" />
 
-            <ImageView
-                android:id="@+id/close_button"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_close" />
-
-            <ImageView
-                android:id="@+id/help_button"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_below="@id/close_button"
-                android:src="@drawable/ic_help" />
-
-
-        </RelativeLayout>
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

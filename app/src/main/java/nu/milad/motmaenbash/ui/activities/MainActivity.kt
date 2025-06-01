@@ -116,6 +116,7 @@ private suspend fun handleIntent(intent: Intent?, context: Context): String {
 
     val isIntroShown = dataStore.data.firstOrNull()?.get(
         booleanPreferencesKey(PREF_KEY_INTRO_SHOWN)
+
     ) ?: false
 
     if (!isIntroShown) {

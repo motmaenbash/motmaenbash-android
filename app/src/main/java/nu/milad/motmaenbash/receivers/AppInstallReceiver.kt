@@ -9,6 +9,7 @@ import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.PackageUtils
 
+
 class AppInstallReceiver : BroadcastReceiver() {
 
     companion object {
@@ -50,7 +51,7 @@ class AppInstallReceiver : BroadcastReceiver() {
         val dbHelper = DatabaseHelper(context)
         val appInfo = PackageUtils.getAppInfo(context, packageName)
 
-        val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.sha1, appInfo.sha1)
+        val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.apkHash, appInfo.sighHash)
 
         if (isAppFlagged) {
             // App found suspicious in the database, alert the user
@@ -64,4 +65,5 @@ class AppInstallReceiver : BroadcastReceiver() {
 
         }
     }
+
 }

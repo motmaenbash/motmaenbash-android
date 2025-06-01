@@ -156,7 +156,8 @@ fun UrlScanScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "بررسی", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    text = "بررسی",
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
             }
 
@@ -189,21 +190,37 @@ fun UrlScanScreen(
                                     else -> GreyDark
                                 }
                             )
+
+                            val textColor = when (currentState.isSafe) {
+                                true -> Green
+                                false -> Red
+                                else -> GreyDark
+                            }
+
                             Text(
-                                text = "${currentState.message}\n${currentState.url}",
+                                text = currentState.message,
                                 style = typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = when (currentState.isSafe) {
-                                    true -> Green
-                                    false -> Red
-                                    else -> GreyDark
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
+                                color = textColor,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp),
+                                textAlign = TextAlign.Center,
+
+                                )
+
+                            Text(
+                                text = currentState.url,
+                                fontWeight = FontWeight.Bold,
+                                color = textColor,
+                                textAlign = TextAlign.Center,
+                                style = typography.bodyMedium.copy(
+                                    textDirection = TextDirection.Ltr
+                                )
                             )
                         }
                     }
                 }
+
 
                 else -> {
                 }
@@ -220,7 +237,7 @@ fun UrlScanScreenPreviewMalicious() {
         stateFlow.value = UrlScanViewModel.ScanState.Result(
             message = "این آدرس به عنوان یک آدرس مشکوک شناسایی شده است.",
             isSafe = false,
-            url = "https://malicious-site.com"
+            url = "https://malicious-site.com/"
         )
     }
 
@@ -254,7 +271,7 @@ fun UrlScanScreenPreviewSafe() {
         MotmaenBashTheme {
             UrlScanScreen(
                 viewModel = viewModel,
-                initialUrl = "https://shaparak.ir"
+                initialUrl = "https://shaparak.ir/"
             )
         }
     }
@@ -266,7 +283,7 @@ fun UrlScanScreenPreviewUnknown() {
     val viewModel = UrlScanViewModel(object : Application() {}).apply {
         val stateFlow = _state
         stateFlow.value = UrlScanViewModel.ScanState.Result(
-            message = "این آدرس در پایگاه داده ما موجود نیست. لطفا احتیاط کنید.",
+            "در پایگاه داده برنامه مطمئن باش، اطلاعاتی درباره این آدرس اینترنتی موجود نیست. اگر از آن مطمئن هستید، می‌توانید ادامه دهید، اما در صورت تردید، احتیاط کنید.",
             isSafe = null,
             url = "https://unknown-site.com"
         )
@@ -278,7 +295,7 @@ fun UrlScanScreenPreviewUnknown() {
         MotmaenBashTheme {
             UrlScanScreen(
                 viewModel = viewModel,
-                initialUrl = "https://unknown-site.com"
+                initialUrl = "https://unknown-site.com/"
             )
         }
     }

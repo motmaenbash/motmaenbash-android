@@ -5,7 +5,7 @@ object AppConstants {
 
     // Database Constants
     const val DATABASE_NAME = "motmaenbash.db"
-    const val DATABASE_VERSION = 1
+    const val DATABASE_VERSION = 2
 
     // Table names
     const val TABLE_FLAGGED_URLS = "flagged_urls"
@@ -42,7 +42,6 @@ object AppConstants {
 
     const val USER_REPORT_FORM_URL =
         "https://docs.google.com/forms/d/e/1FAIpQLSfzb1ueey6qQZdQb9tRm_Z7Mh3o8k_ZYysOv6AqTiQx39ahNg/viewform"
-
 
     // URL Endpoints
     const val BASE_URL = "https://github.com/miladnouri/motmaenbash-data/raw/main/data/"

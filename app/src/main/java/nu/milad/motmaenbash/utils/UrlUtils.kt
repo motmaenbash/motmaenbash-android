@@ -121,11 +121,11 @@ object UrlUtils {
             return when {
                 isShaparakSubdomain(normalizedUrl) -> UrlAnalysisResult.SafeUrl(normalizedUrl)
                 else -> {
-                    val (isFlagged, threatType, isUrlMatch) = databaseHelper.isUrlFlagged(
+                    val (isFlagged, threatType, urlMatch) = databaseHelper.isUrlFlagged(
                         normalizedUrl
                     )
                     if (isFlagged) {
-                        SuspiciousUrl(normalizedUrl, threatType, isUrlMatch)
+                        SuspiciousUrl(normalizedUrl, threatType, urlMatch)
                     } else {
                         UrlAnalysisResult.NeutralUrl
                     }

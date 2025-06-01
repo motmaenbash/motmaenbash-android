@@ -3,7 +3,6 @@ package nu.milad.motmaenbash.viewmodels
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.viewModelScope
@@ -83,8 +82,7 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
                 _isRefreshing.emit(true) // Set loading state
                 delay(400) // Small delay to show loading indicator
                 _tipOfTheDay.emit(dbHelper.getRandomTip()) // Fetch and set tip
-            } catch (e: Exception) {
-                Log.e("TipBug", "Error fetching tip", e)
+            } catch (_: Exception) {
             } finally {
                 _isRefreshing.emit(false) // Reset loading state
             }
@@ -105,8 +103,7 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
             try {
                 _stats.value = dbHelper.getUserStats()
 
-            } catch (e: Exception) {
-                Log.e("StatsBug", "Error loading stats", e)
+            } catch (_: Exception) {
             }
         }
     }
@@ -140,7 +137,6 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
 
 
             } catch (e: Exception) {
-                Log.e("UpdateBug", "Error updating database", e)
                 _updateState.value = UpdateState.Error(e.message ?: "خطای نامشخص")
             }
         }
@@ -151,8 +147,7 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
             try {
                 val updateState = updateManager.checkAppUpdate()
                 _updateDialogState.value = updateState
-            } catch (e: Exception) {
-                Log.e("UpdateBug", "Error checking for app updates", e)
+            } catch (_: Exception) {
             }
         }
     }
@@ -178,13 +173,13 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
                         color = it.optString("color", "")
                     )
                 }
-            } catch (e: Exception) {
-                Log.e("LinkBug", "Error loading link", e)
+            } catch (_: Exception) {
             }
         }
     }
 
     private fun getRandomLink(): JSONObject? {
+
         return try {
             val linksJsonString = sharedPreferences.getString("links", null) ?: return null
             val linksJsonArray = JSONArray(linksJsonString)
@@ -192,8 +187,7 @@ class MainViewModel(private val context: Application) : BasePermissionViewModel(
                 val randomIndex = Random().nextInt(linksJsonArray.length())
                 linksJsonArray.getJSONObject(randomIndex)
             } else null
-        } catch (e: Exception) {
-            Log.e("LinkBug", "Error getting random link", e)
+        } catch (_: Exception) {
             null
         }
     }

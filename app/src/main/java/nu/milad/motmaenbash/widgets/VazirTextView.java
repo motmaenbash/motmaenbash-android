@@ -5,7 +5,9 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.res.ResourcesCompat;
 
+import nu.milad.motmaenbash.R;
 import nu.milad.motmaenbash.utils.UiUtils;
 
 
@@ -30,7 +32,11 @@ public class VazirTextView extends AppCompatTextView {
     }
 
     public void setFont() {
-        setTypeface(UiUtils.getTypeFace(getContext()),
-                Typeface.NORMAL);
+        Typeface typeface = ResourcesCompat.getFont(getContext(), R.font.vazirmatn);
+        if (typeface != null) {
+            setTypeface(typeface);
+        } else {
+            setTypeface(UiUtils.getTypeFace(getContext()), Typeface.NORMAL);
+        }
     }
 }

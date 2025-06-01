@@ -35,15 +35,16 @@ class AlertOverlayService : Service() {
         private const val tag = "AlertOverlayService"
 
         fun showAlert(context: Context, suspiciousUrl: SuspiciousUrl) {
+            
             val intent = Intent(context, AlertOverlayService::class.java).apply {
                 putExtra(
                     "url",
-                    if (suspiciousUrl.isSpecificUrl) suspiciousUrl.url else UrlUtils.extractDomain(
+                    if (suspiciousUrl.urlMatch == 2) suspiciousUrl.url else UrlUtils.extractDomain(
                         suspiciousUrl.url
                     )
                 )
                 putExtra("threatType", suspiciousUrl.threatType?.name) // as String
-                putExtra("isSpecificUrl", suspiciousUrl.isSpecificUrl)
+                putExtra("isSpecificUrl", suspiciousUrl.urlMatch == 2)
             }
             context.startService(intent)
         }

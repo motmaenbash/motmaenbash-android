@@ -104,10 +104,8 @@ class UpdateManager(
                 put(JSONArray(tipsResponse))
             }
 
-
-            // Update local database
-            dbHelper.clearDatabase()
-            dbHelper.populateDatabaseWithFetchedData(dataJsonArray)
+            // Update database
+            dbHelper.replaceDatabaseWithFetchedData(dataJsonArray)
 
             // Update timestamp and fetch additional data
             setLastUpdateTime(DateUtils.getCurrentTimeInMillis())

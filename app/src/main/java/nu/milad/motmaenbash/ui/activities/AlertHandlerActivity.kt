@@ -469,6 +469,8 @@ private fun AppAlertContent(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f)
@@ -477,23 +479,22 @@ private fun AppAlertContent(
                         Text(
                             text = it,
                             color = colorScheme.onSurface,
-                            fontSize = 14.sp,
+                            fontSize = 15.sp,
                             textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
 
                     Text(
-                        text = packageName,
+                        text = "نام بسته: $packageName",
                         color = colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-
                 Spacer(modifier = Modifier.width(8.dp))
-
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = it.loadIcon(context.packageManager)
@@ -504,6 +505,7 @@ private fun AppAlertContent(
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
+
             }
         }
     }

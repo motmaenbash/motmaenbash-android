@@ -24,3 +24,5 @@
 -assumenosideeffects class android.util.Log {
     public static *;
 }
+
+-keep class androidx.datastore.preferences.** { *; }

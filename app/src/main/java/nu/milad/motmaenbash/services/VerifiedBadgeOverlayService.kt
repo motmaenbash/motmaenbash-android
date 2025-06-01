@@ -1,10 +1,13 @@
 package nu.milad.motmaenbash.services
 
+import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -12,13 +15,16 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.view.isVisible
 import nu.milad.motmaenbash.R
-import nu.milad.motmaenbash.ui.activities.MainActivity
 
 class VerifiedBadgeOverlayService : Service() {
     private var mWindowManager: WindowManager? = null
     private var mFloatingView: View? = null
+    private var statusTextView: TextView? = null
+    private var handler: Handler? = null
+    private var textSwitchRunnable: Runnable? = null
+    private var currentTextIndex = 0
+    private val statusTexts = arrayOf("درگاه پرداخت معتبر", "مطمئن باش!")
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -26,140 +32,85 @@ class VerifiedBadgeOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        //Inflate the floating view layout we created
-
 
         mFloatingView =
-            LayoutInflater.from(this).inflate(R.layout.overlay_verification_badge, null)
+            LayoutInflater.from(this).inflate(R.layout.overlay_verification_badge, null, false)
 
+
+        // Calculate screen width and desired margins
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val marginInPx = (12 * displayMetrics.density).toInt()
 
         // Set up WindowManager LayoutParams
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            screenWidth - (marginInPx * 2),
             WindowManager.LayoutParams.WRAP_CONTENT,
-
-            // Determine the layout flag based on Android version
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             } else {
                 WindowManager.LayoutParams.TYPE_PHONE
             },
-
-
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
-
         )
 
-
-        //Specify the view position
-        params.gravity = Gravity.TOP or Gravity.CENTER
+        // Specify the view position - center horizontally with margins
+        params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
         params.x = 0
         params.y = 0
 
-        //Add the view to the window
+        // Add the view to the window
         mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         mWindowManager!!.addView(mFloatingView, params)
-        
 
-        // Setup views and listeners
-        val collapsedView = mFloatingView?.findViewById<View>(R.id.collapse_view)
-        val expandedView = mFloatingView?.findViewById<View>(R.id.expanded_container)
+        // Initialize status text view and start animation
+        statusTextView = mFloatingView?.findViewById(R.id.status_text_view)
+        startTextAnimation()
 
-
-        //Set the close button
-        val closeButtonCollapsed = mFloatingView?.findViewById<View>(R.id.close_btn) as ImageView
-        val closeDark = mFloatingView?.findViewById<View>(R.id.dark) as View
-
-
-        mFloatingView?.findViewById<ImageView>(R.id.close_btn)?.setOnClickListener {
-            //close the service and remove the from from the window
-            stopSelf()
-        }
-
-        //Set the close button
+        // Set up close button listener
         mFloatingView?.findViewById<ImageView>(R.id.close_button)?.setOnClickListener {
-            collapsedView?.visibility = View.VISIBLE
-            expandedView?.visibility = View.GONE
-        }
-
-        closeDark.setOnClickListener {
             stopSelf()
         }
 
 
-        mFloatingView?.findViewById<ImageView>(R.id.help_button)?.setOnClickListener {
-            //Open the application  click.
-            val intent = Intent(this@VerifiedBadgeOverlayService, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            //close the service and remove view from the view hierarchy
-            stopSelf()
-        }
-
-        //Drag and move floating view using user's touch action.
-        mFloatingView?.findViewById<View>(R.id.root_container)
-            ?.setOnTouchListener(object : View.OnTouchListener {
-
+        // Set up drag functionality
+        mFloatingView?.findViewById<View>(R.id.root_container)?.setOnTouchListener(
+            object : View.OnTouchListener {
                 private var initialX = 0
                 private var initialY = 0
                 private var initialTouchX = 0f
                 private var initialTouchY = 0f
 
-
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
                     when (event.action) {
                         MotionEvent.ACTION_DOWN -> {
-                            //remember the initial position.
                             initialX = params.x
                             initialY = params.y
-
-                            //get the touch location
                             initialTouchX = event.rawX
                             initialTouchY = event.rawY
                             return true
                         }
 
-                        MotionEvent.ACTION_UP -> {
-                            val xDiff = (event.rawX - initialTouchX).toInt()
-                            val yDiff = (event.rawY - initialTouchY).toInt()
-
-
-                            //The check for Xdiff <10 && YDiff< 10 because sometime elements moves a little while clicking.
-                            //So that is click event.
-                            if (xDiff < 10 && yDiff < 10) {
-                                if (isViewCollapsed) {
-                                    //When user clicks on the image view of the collapsed layout,
-                                    //visibility of the collapsed layout will be changed to "View.GONE"
-                                    //and expanded view will become visible.
-                                    collapsedView?.visibility = View.VISIBLE
-                                    expandedView?.visibility = View.GONE
-                                }
-                            }
+                        MotionEvent.ACTION_MOVE -> {
+                            params.x = initialX + (event.rawX - initialTouchX).toInt()
+                            params.y = initialY + (event.rawY - initialTouchY).toInt()
+                            mWindowManager!!.updateViewLayout(mFloatingView, params)
                             return true
                         }
 
-                        MotionEvent.ACTION_MOVE -> {
-                            //Calculate the X and Y coordinates of the view.
-                            params.x = initialX + (event.rawX - initialTouchX).toInt()
-                            params.y = initialY + (event.rawY - initialTouchY).toInt()
-
-
-                            //Update the layout with new X & Y coordinate
-                            mWindowManager!!.updateViewLayout(mFloatingView, params)
+                        MotionEvent.ACTION_UP -> {
                             return true
                         }
                     }
                     return false
                 }
             })
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Get the URL from the Intent
         val url = intent?.getStringExtra("URL")
         if (url != null) {
             val urlTextView = mFloatingView?.findViewById<TextView>(R.id.url_text_view)
@@ -168,22 +119,62 @@ class VerifiedBadgeOverlayService : Service() {
         return START_NOT_STICKY
     }
 
-    private val isViewCollapsed: Boolean
-        /**
-         * Detect if the floating view is collapsed or expanded.
-         *
-         * @return true if the floating view is collapsed.
-         */
-        get() = mFloatingView == null || mFloatingView!!.findViewById<View>(R.id.collapse_view).isVisible
+    private fun startTextAnimation() {
+        handler = Handler(Looper.getMainLooper())
+        textSwitchRunnable = object : Runnable {
+            override fun run() {
+                switchTextWithFade()
+                handler?.postDelayed(this, 3000) // Switch every 3 seconds
+            }
+        }
+        handler?.postDelayed(textSwitchRunnable!!, 3000)
+    }
 
+    private fun switchTextWithFade() {
+        statusTextView?.let { textView ->
+            // Fade out animation
+            val fadeOut = ValueAnimator.ofFloat(1f, 0f)
+            fadeOut.duration = 300
+            fadeOut.addUpdateListener { animation ->
+                textView.alpha = animation.animatedValue as Float
+            }
+
+            fadeOut.addListener(object : android.animation.Animator.AnimatorListener {
+                override fun onAnimationStart(animation: android.animation.Animator) {}
+                override fun onAnimationCancel(animation: android.animation.Animator) {}
+                override fun onAnimationRepeat(animation: android.animation.Animator) {}
+
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    // Change text
+                    currentTextIndex = (currentTextIndex + 1) % statusTexts.size
+                    textView.text = statusTexts[currentTextIndex]
+
+                    // Fade in animation
+                    val fadeIn = ValueAnimator.ofFloat(0f, 1f)
+                    fadeIn.duration = 300
+                    fadeIn.addUpdateListener { anim ->
+                        textView.alpha = anim.animatedValue as Float
+                    }
+                    fadeIn.start()
+                }
+            })
+
+            fadeOut.start()
+        }
+    }
+
+    private fun stopTextAnimation() {
+        textSwitchRunnable?.let { handler?.removeCallbacks(it) }
+        handler = null
+        textSwitchRunnable = null
+    }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopTextAnimation()
         if (mFloatingView != null) {
             mWindowManager?.removeViewImmediate(mFloatingView)
             mFloatingView = null
         }
     }
-
-
 }

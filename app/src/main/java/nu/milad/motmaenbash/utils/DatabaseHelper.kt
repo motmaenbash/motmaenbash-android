@@ -91,9 +91,9 @@ class DatabaseHelper(appContext: Context) :
             """
                 CREATE TABLE $TABLE_FLAGGED_URLS (
                     hash TEXT NOT NULL UNIQUE,
-                    threat_type INTEGER NOT NULL CHECK(threat_type IN ($threatTypeValues)), -- ${Alert.ThreatType.PHISHING.value}: phishing, ${Alert.ThreatType.SCAM.value}: scam, ${Alert.ThreatType.PONZI.value}: ponzi
-                    url_match INTEGER NOT NULL CHECK(url_match IN (0, 1)), -- 0: domain, 1: specific url
-                    alert_level INTEGER NOT NULL CHECK(alert_level IN ($alertLevelValues))) -- '${Alert.AlertLevel.ALERT.value}:alert', '${Alert.AlertLevel.WARNING.value}:warning', '${Alert.AlertLevel.INFO.value}:info'
+                    type INTEGER NOT NULL CHECK(type IN ($threatTypeValues)), -- ${Alert.ThreatType.PHISHING.value}: phishing, ${Alert.ThreatType.SCAM.value}: scam, ${Alert.ThreatType.PONZI.value}: ponzi
+                    match INTEGER NOT NULL CHECK(match IN (1, 2)), -- 1: domain, 2: specific url
+                    level INTEGER NOT NULL CHECK(level IN ($alertLevelValues))) -- '${Alert.AlertLevel.ALERT.value}:alert', '${Alert.AlertLevel.WARNING.value}:warning', '${Alert.AlertLevel.INFO.value}:info'
 
             """
         )
@@ -116,7 +116,6 @@ class DatabaseHelper(appContext: Context) :
         db.execSQL(
             """
                 CREATE TABLE $TABLE_FLAGGED_MESSAGES (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     hash TEXT NOT NULL UNIQUE
                 );
             """
@@ -141,23 +140,21 @@ class DatabaseHelper(appContext: Context) :
         db.execSQL(
             """
                 CREATE TABLE $TABLE_FLAGGED_APPS (
-                    package_name TEXT NOT NULL UNIQUE,
-                    sha1 TEXT UNIQUE,
-                    apk_sha1 TEXT UNIQUE
+
+                    hash TEXT NOT NULL UNIQUE,
+                    type INTEGER NOT NULL CHECK(type IN (1, 2, 3)) -- 1: Package, 2: APK, 3: Sign
                 );
             """
         )
         // Creating index
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_package_name ON $TABLE_FLAGGED_APPS(package_name);")
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_sha1 ON $TABLE_FLAGGED_APPS(sha1);")
-        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_apk_sha1 ON $TABLE_FLAGGED_APPS(apk_sha1);")
+        db.execSQL("CREATE INDEX IF NOT EXISTS index_flagged_apps_hash ON $TABLE_FLAGGED_APPS(hash);")
 
         // Creating tips table if not exists
         db.execSQL(
             """
                 CREATE TABLE IF NOT EXISTS $TABLE_TIPS (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    tip TEXT NOT NULL
+                    tip TEXT NOT NULL UNIQUE
                 );
             """
         )
@@ -291,87 +288,129 @@ class DatabaseHelper(appContext: Context) :
     }
 
     private fun insertData(
-        db: SQLiteDatabase?, tableName: String, jsonArray: JSONArray
+        db: SQLiteDatabase?,
+        tableName: String,
+        jsonArray: JSONArray
     ) {
-        db?.transaction {
+        db?.let {
+            var insertValues = ContentValues()
+
             try {
                 for (i in 0 until jsonArray.length()) {
-
+                    it.transaction {
 
                     when (tableName) {
-                        TABLE_FLAGGED_URLS -> {
-                            val jsonObject = jsonArray.getJSONObject(i)
-                            val threatType = jsonObject.optInt("threat_type")
-                            val urlMatch = jsonObject.optInt("url_match")
-                            val alertLevel = jsonObject.optInt("alert_level")
-                            val hashesArray = jsonObject.optJSONArray("hashes")
-                            if (hashesArray != null) {
-                                for (j in 0 until hashesArray.length()) {
 
-                                    val contentValues = ContentValues().apply {
-                                        put("hash", hashesArray.optString(j))
-                                        put("threat_type", threatType)
-                                        put("url_match", urlMatch)
-                                        put("alert_level", alertLevel)
-                            }
+                            TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
+                                val hash = jsonArray.getString(i)
+                                if (hash.startsWith("-")) {
+                                    // Delete record
+                                    val originalHash = hash.substring(1)
+                                    delete(tableName, "hash = ? LIMIT 1", arrayOf(originalHash))
+                                } else {
+                                    // Insert new record
+                                    insertValues.clear()
+                                    insertValues.put("hash", hash)
+
                                     insertWithOnConflict(
                                         tableName,
                                         null,
-                                        contentValues,
+                                        insertValues,
                                         SQLiteDatabase.CONFLICT_IGNORE
                                     )
                                 }
                             }
 
-                        }
+                            TABLE_FLAGGED_URLS -> {
+                                val jsonObject = jsonArray.getJSONObject(i)
+                                val threatType = jsonObject.getInt("type")
+                                val urlMatch = jsonObject.getInt("match")
+                                val alertLevel = jsonObject.getInt("level")
+                                val hashesArray = jsonObject.getJSONArray("hashes")
 
+                                for (j in 0 until hashesArray.length()) {
+                                    val hash = hashesArray.getString(j)
+                                    if (hash.startsWith("-")) {
+                                        // Delete record
+                                        val originalHash = hash.substring(1)
+                                        delete(tableName, "hash = ?", arrayOf(originalHash))
+                                    } else {
+                                        // Insert new record
+                                        insertValues.clear()
+                                        insertValues.put("hash", hash)
+                                        insertValues.put("type", threatType)
+                                        insertValues.put("match", urlMatch)
+                                        insertValues.put("level", alertLevel)
 
-                        TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
-
-                            val contentValues = ContentValues().apply {
-                                put("hash", jsonArray.getString(i))
-                            }
                             insertWithOnConflict(
-                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
+                                            tableName,
+                                            null,
+                                            insertValues,
+                                            SQLiteDatabase.CONFLICT_IGNORE
                             )
-                        }
 
+                                    }
 
-                        TABLE_TIPS -> {
-                            val contentValues = ContentValues().apply {
-                                put("tip", jsonArray.getString(i))
                             }
-                            insertWithOnConflict(
-                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
-                            )
+
                         }
+
 
                         TABLE_FLAGGED_APPS -> {
                             val jsonObject = jsonArray.getJSONObject(i)
-                            val contentValues = ContentValues().apply {
-                                put("package_name", jsonObject.optString("package_name"))
+                                val type = jsonObject.getInt("type")
+                                val hashesArray = jsonObject.getJSONArray("hashes")
+                                for (j in 0 until hashesArray.length()) {
+                                    val hash = hashesArray.getString(j)
+                                    if (hash.startsWith("-")) {
+                                        // Delete record
+                                        val originalHash = hash.substring(1)
+                                        delete(tableName, "hash = ?", arrayOf(originalHash))
+                                    } else {
+                                        // Insert new record
+                                        insertValues.clear()
+                                        insertValues.put("hash", hash)
+                                        insertValues.put("type", type)
 
-                                put("sha1", jsonObject.optString("sha1", ""))
-                                put("apk_sha1", jsonObject.optString("apk_sha1", ""))
+                                    insertWithOnConflict(
+                                        tableName,
+                                        null,
+                                            insertValues,
+                                        SQLiteDatabase.CONFLICT_IGNORE
+                                    )
+                                }
+
                             }
-                            insertWithOnConflict(
-                                tableName, null, contentValues, SQLiteDatabase.CONFLICT_IGNORE
-                            )
+
+
                         }
 
+                            TABLE_TIPS -> {
+                                insertValues.clear()
+                                insertValues.put("tip", jsonArray.getString(i))
 
+                                // Insert new record
+                                insertWithOnConflict(
+                                    tableName, null, insertValues, SQLiteDatabase.CONFLICT_IGNORE
+                                )
                     }
 
+                }
+            }
 
                 }
-            } finally {
+            } catch (_: Exception) {
             }
         }
     }
 
-    fun isAppFlagged(packageName: String, sha1: String, apkSha1: String): Boolean {
-        val selection = "package_name = ? OR sha1 = ? OR apk_sha1 = ?"
-        val selectionArgs = arrayOf(packageName, sha1, apkSha1)
+
+    fun isAppFlagged(packageName: String, apkHash: String, signHash: String): Boolean {
+        val packageHash = HashUtils.generateSHA256(packageName.lowercase())
+        val selection =
+            "(hash = ? AND type = 1) OR (hash = ? AND type = 2) OR (hash = ? AND type = 3)"
+
+        val selectionArgs = arrayOf(packageHash, apkHash, signHash)
         val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
 
         return isFlagged
@@ -450,9 +489,8 @@ class DatabaseHelper(appContext: Context) :
         val fullUrlPlaceholders = fullUrlHashes.joinToString(",") { "?" }
         val domainPlaceholders = domainHashes.joinToString(",") { "?" }
 
-
         val query =
-            "SELECT COUNT(*) FROM $TABLE_FLAGGED_URLS WHERE ($COLUMN_HASH IN($fullUrlPlaceholders) AND url_match = 1) OR ($COLUMN_HASH IN($domainPlaceholders) AND url_match = 0) LIMIT 1"
+            "SELECT COUNT(*) FROM $TABLE_FLAGGED_URLS WHERE ($COLUMN_HASH IN($fullUrlPlaceholders) AND match = 2) OR ($COLUMN_HASH IN($domainPlaceholders) AND match = 1) LIMIT 1"
 
 
         readableDatabase.rawQuery(query, (fullUrlHashes + domainHashes).toTypedArray())
@@ -465,8 +503,8 @@ class DatabaseHelper(appContext: Context) :
         return false
     }
 
-    // This function returns a triple: (isFlagged, threatType, isUrlMatch)
-    fun isUrlFlagged(url: String): Triple<Boolean, Alert.ThreatType?, Boolean> {
+    // This function returns a triple: (isFlagged, threatType, match)
+    fun isUrlFlagged(url: String): Triple<Boolean, Alert.ThreatType?, Int> {
 
         var cleanedUrl = UrlUtils.removeUrlPrefixes(url).lowercase()
         cleanedUrl = removeQueryStringAndFragment(cleanedUrl)
@@ -476,26 +514,27 @@ class DatabaseHelper(appContext: Context) :
         val domainHash = HashUtils.generateSHA256(domain)
 
 
-        // First check for domain match (url_match = 0)
+        // First check for domain
         val domainQuery =
-            "SELECT threat_type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 0 LIMIT 1"
+            "SELECT type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND `match` = 1 LIMIT 1"
         readableDatabase.rawQuery(domainQuery, arrayOf(domainHash)).use { cursor ->
             if (cursor.moveToFirst()) {
                 val typeValue = cursor.getInt(0)
-                return Triple(true, Alert.ThreatType.fromInt(typeValue), false)
+                return Triple(true, Alert.ThreatType.fromInt(typeValue), 1)
             }
         }
-        // Then check for specific URL match (url_match = 1)
+        // Then check for specific URL
         val urlQuery =
-            "SELECT threat_type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND url_match = 1 LIMIT 1"
+            "SELECT type FROM $TABLE_FLAGGED_URLS WHERE $COLUMN_HASH = ? AND `match` = 2 LIMIT 1"
         readableDatabase.rawQuery(urlQuery, arrayOf(urlHash)).use { cursor ->
             if (cursor.moveToFirst()) {
                 val typeValue = cursor.getInt(0)
-                return Triple(true, Alert.ThreatType.fromInt(typeValue), true)
+                return Triple(true, Alert.ThreatType.fromInt(typeValue), 2)
             }
         }
 
-        return Triple(false, null, false)
+
+        return Triple(false, null, 1)
     }
 
     private fun countData(tableName: String, selection: String, selectionArgs: Array<String>): Int {
@@ -547,34 +586,43 @@ class DatabaseHelper(appContext: Context) :
     }
 
     fun incrementUserStat(statKey: String) {
-        val db = writableDatabase
         val updateQuery = "UPDATE $TABLE_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
-        db.execSQL(updateQuery, arrayOf(statKey))
+        writableDatabase.execSQL(updateQuery, arrayOf(statKey))
     }
 
     fun logUpdateHistory(updateType: Int) {
-        val db = writableDatabase
         val values = ContentValues().apply {
             put("type", updateType)
             put("timestamp", System.currentTimeMillis())
         }
-        db.insert(TABLE_UPDATE_HISTORY, null, values)
+        writableDatabase.insert(TABLE_UPDATE_HISTORY, null, values)
     }
 
     fun logAlertHistory(alertType: Alert.AlertType, param1: String?, param2: String?) {
-        val db = writableDatabase
         val values = ContentValues().apply {
             put("type", alertType.value)
             put("timestamp", System.currentTimeMillis())
             put("param1", param1)
             put("param2", param2)
         }
-        db.insert(TABLE_ALERT_HISTORY, null, values)
+        writableDatabase.insert(TABLE_ALERT_HISTORY, null, values)
     }
 
-    fun clearDatabase() {
-        val db = writableDatabase
+    fun replaceDatabaseWithFetchedData(dataJsonArray: JSONArray) {
+        writableDatabase.transaction {
         try {
+                // Clear existing data within the transaction
+                clearDatabaseTable(TABLE_TIPS)
+                // Populate data
+                populateDatabaseWithFetchedData(dataJsonArray)
+            } catch (e: Exception) {
+                Log.e("DatabaseHelper", "Transaction failed: ${e.message}", e)
+                throw e // Roll back transaction
+            }
+        }
+    }
+
+    private fun clearAllDatabaseTables() {
             val tables = arrayOf(
                 TABLE_FLAGGED_URLS,
                 TABLE_FLAGGED_SENDERS,
@@ -585,16 +633,17 @@ class DatabaseHelper(appContext: Context) :
             )
 
             tables.forEach { tableName ->
-                db.execSQL("DELETE FROM $tableName")
+            writableDatabase.execSQL("DELETE FROM $tableName")
                 // Reset auto-increment ID
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '$tableName'")
+            writableDatabase.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '$tableName'")
 
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            db.close()
         }
+
+    private fun clearDatabaseTable(tableName: String) {
+        writableDatabase.execSQL("DELETE FROM $tableName")
+        // Reset auto-increment ID
+        writableDatabase.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '$tableName'")
     }
 
 

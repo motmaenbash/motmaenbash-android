@@ -7,16 +7,19 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import nu.milad.motmaenbash.models.App
-import nu.milad.motmaenbash.utils.HashUtils.calculateSHA1FromBytes
-import nu.milad.motmaenbash.utils.HashUtils.calculateSHA1FromFile
+import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256FromFile
+import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256HexFromBytes
+import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256HexFromFile
 import java.io.File
 
+/**
+ * Utility class for retrieving and processing package information.
+ */
 object PackageUtils {
-
     private const val TAG = "PackageUtils"
-
 
     /**
      * Retrieves information about the specified app package.
@@ -29,105 +32,147 @@ object PackageUtils {
 
         val pm: PackageManager = context.packageManager
 
-            val packageInfo: PackageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                pm.getPackageInfo(
-                    packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_PERMISSIONS or PackageManager.GET_ACTIVITIES or PackageManager.GET_SERVICES or PackageManager.GET_RECEIVERS or PackageManager.GET_PROVIDERS
-                )
-            } else {
-                pm.getPackageInfo(
-                    packageName,
-                    PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS or PackageManager.GET_ACTIVITIES or PackageManager.GET_SERVICES or PackageManager.GET_RECEIVERS or PackageManager.GET_PROVIDERS
-                )
-            }
+        // Get appropriate flags based on API level
+        val packageFlags = getPackageInfoFlags()
+
+        try {
+
+            val packageInfo: PackageInfo = pm.getPackageInfo(packageName, packageFlags)
 
 
-            // Retrieve other app information
+            // Get basic app information
             val appName = packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
                 ?: "Unknown App Name"
-
-
             val appIcon = pm.getApplicationIcon(packageName)
 
             val versionName = packageInfo.versionName ?: "Unknown"
 
-            val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                packageInfo.longVersionCode
-            } else {
-                packageInfo.versionCode.toLong()
-            }
+            val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
             val firstInstallTime = packageInfo.firstInstallTime
             val lastUpdateTime = packageInfo.lastUpdateTime
             val permissions = packageInfo.requestedPermissions ?: arrayOf()
 
+            // Get signing information
+            val signSha256 = getSignatureSha256(packageInfo)
 
-            // Retrieve ApplicationInfo for additional details
             val applicationInfo: ApplicationInfo =
-                pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+                packageInfo.applicationInfo ?: pm.getApplicationInfo(
+                    packageName,
+                    PackageManager.GET_META_DATA
+                )
 
-            val developerName = applicationInfo.metaData?.getString("developer_name")
-            Log.d(TAG, "Developer Name: $developerName")
-
-
-        val metaData = applicationInfo.metaData
-
-        if (metaData != null) {
-            for (key in metaData.keySet()) {
-                val value = metaData[key]
-                Log.d(TAG, "MetaData Key: $key, Value: $value")
-            }
-        } else {
-            Log.d(TAG, "No XML MetaData found.")
-        }
-
-
-            // Calculate SHA-1 hash of the app's signatures
-
-
-            // Retrieve the signing information safely based on API level
-            val sha1 = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                // On API level 28 and above, use signingInfo
-
-            packageInfo.signingInfo?.let { signingInfo ->
-                (signingInfo.apkContentsSigners
-                    ?: signingInfo.signingCertificateHistory).firstOrNull()
-                    ?.let { calculateSHA1FromBytes(it.toByteArray()) } ?: "No SHA1 found"
-            } ?: "No SHA1 found"
-            } else {
-                // On devices below API level 28, use the legacy signatures
-            packageInfo.signatures?.firstOrNull()?.let { signature ->
-                calculateSHA1FromBytes(signature.toByteArray())
-            } ?: "No SHA1 found"
-            }
-
-
-            // Calculate SHA-1 hash of the APK file
+            // Calculate APK file hashes
             val sourceApk = File(applicationInfo.sourceDir)
-            val apksha1 = calculateSHA1FromFile(sourceApk)
+            val apksha256 = calculateSHA256HexFromFile(sourceApk)
+
+            // Get installation source
+            val installSource = getInstallationSource(context, packageName)
 
 
-        return App(
+            return App(
                 appName,
                 packageName,
                 appIcon,
                 versionCode,
-                sha1,
-                apksha1,
+                apksha256,
+                signSha256,
                 versionName,
                 firstInstallTime,
                 lastUpdateTime,
-            permissions.toList()
+                permissions.toList()
             )
+
+
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e(TAG, "Package not found: $packageName", e)
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error retrieving app info for $packageName", e)
+            throw e
+        }
+
 
     }
 
+    /**
+     * Returns the appropriate flags for PackageManager.getPackageInfo based on API level
+     */
+    private fun getPackageInfoFlags(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            PackageManager.GET_SIGNING_CERTIFICATES or
+                    PackageManager.GET_PERMISSIONS or
+                    PackageManager.GET_ACTIVITIES or
+                    PackageManager.GET_SERVICES or
+                    PackageManager.GET_RECEIVERS or
+                    PackageManager.GET_PROVIDERS
+        } else {
+            @Suppress("DEPRECATION")
+            PackageManager.GET_SIGNATURES or
+                    PackageManager.GET_PERMISSIONS or
+                    PackageManager.GET_ACTIVITIES or
+                    PackageManager.GET_SERVICES or
+                    PackageManager.GET_RECEIVERS or
+                    PackageManager.GET_PROVIDERS
+        }
+    }
+
+    /**
+     * Gets SHA256 signature hash based on API level
+     */
+    private fun getSignatureSha256(packageInfo: PackageInfo): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // On API level 28 and above, use signingInfo
+            packageInfo.signingInfo?.let { signingInfo ->
+                (signingInfo.apkContentsSigners
+                    ?: signingInfo.signingCertificateHistory).firstOrNull()
+                    ?.let { calculateSHA256HexFromBytes(it.toByteArray()) } ?: "No SHA256 found"
+            } ?: "No SHA256 found"
+        } else {
+            // On devices below API level 28, use the legacy signatures
+            @Suppress("DEPRECATION")
+            packageInfo.signatures?.firstOrNull()?.let { signature ->
+                calculateSHA256HexFromBytes(signature.toByteArray())
+            } ?: "No SHA256 found"
+
+        }
+    }
+
+    /**
+     * Gets the installation source of the app
+     */
+    private fun getInstallationSource(context: Context, packageName: String): String {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val installSourceInfo = context.packageManager.getInstallSourceInfo(packageName)
+                val installingPackageName = installSourceInfo.installingPackageName ?: "Unknown"
+                val initiatingPackageName = installSourceInfo.initiatingPackageName ?: "Unknown"
+                val originatingPackageName = installSourceInfo.originatingPackageName ?: "Unknown"
+
+                "Installing: $installingPackageName, Initiating: $initiatingPackageName, Originating: $originatingPackageName"
+            } else {
+                @Suppress("DEPRECATION")
+                val installer =
+                    context.packageManager.getInstallerPackageName(packageName) ?: "Unknown"
+
+                "Installer: $installer"
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting installation source for $packageName", e)
+            "Error determining source: ${e.message}"
+        }
+    }
+
+    /**
+     * Creates an intent to uninstall the specified app
+     *
+     * @param packageName The package name of the app to uninstall
+     * @return Intent configured for uninstallation
+     */
     fun uninstallApp(packageName: String): Intent {
         return Intent(Intent.ACTION_DELETE).apply {
             data = "package:$packageName".toUri()
             putExtra(Intent.EXTRA_RETURN_RESULT, true)
         }
     }
-
-
 }
