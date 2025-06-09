@@ -104,7 +104,15 @@ We welcome contributions from the community. To contribute:
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the Apache License 2.0.  
+You may freely use, modify, and distribute the source code, but **the use of the name or logo
+“MotmaenBash” / “Motmaen Bash” is strictly prohibited** in any form.  
+See the [LICENSE](LICENSE) file for full details.
+
+این پروژه تحت مجوز Apache 2.0 منتشر شده است.  
+استفاده، تغییر یا توزیع کد منبع آزاد است، اما **استفاده از نام یا لوگوی «مطمئن باش» (MotmaenBash /
+Motmaen Bash) به‌طور کامل ممنوع است**.  
+برای جزئیات کامل به فایل [LICENSE](LICENSE) مراجعه کنید.
 
 ## Related Repositories
 

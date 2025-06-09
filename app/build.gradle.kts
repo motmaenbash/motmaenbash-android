@@ -17,7 +17,7 @@ android {
         applicationId = "nu.milad.motmaenbash"
         minSdk = 21
         targetSdk = 36
-        versionCode = 6
+        versionCode = 7
         versionName = "1.0.2-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -44,7 +44,7 @@ android {
         }
         debug {
 //            applicationIdSuffix = ".debug"
-       
+
         }
     }
     compileOptions {
