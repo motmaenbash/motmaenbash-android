@@ -7,5 +7,5 @@
     android:description="@string/accessibility_service_description"
     android:packageNames="com.android.chrome,org.mozilla.firefox,com.microsoft.emmx,com.opera.browser"
     android:isAccessibilityTool="false"
-    android:settingsActivity="nu.milad.motmaenbash,ui.activities.MainActivity"
+    android:settingsActivity="nu.milad.motmaenbash.ui.activities.MainActivity"
     android:summary="@string/accessibility_service_summary" />
