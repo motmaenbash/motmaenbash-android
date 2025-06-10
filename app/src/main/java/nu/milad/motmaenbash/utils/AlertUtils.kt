@@ -202,7 +202,7 @@ object AlertUtils {
 
                     Alert.ThreatType.SCAM -> Triple(
                         subTitle,
-                        "این این $domainOrUrlText برای کلاهبرداری گزارش شده است.",
+                        "این $domainOrUrlText برای کلاهبرداری گزارش شده است.",
                         "براساس گزارش کاربرها، این $domainOrUrlText برای کلاهبرداری استفاده می‌شود و می‌تواند به ضرر مالی شما منجر شود. توصیه می‌شود از ورود به این سایت خودداری کنید."
                     )
 
