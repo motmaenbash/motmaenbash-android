@@ -93,7 +93,6 @@ class UrlGuardService : AccessibilityService() {
             if (isSwitchingFromBrowser || isBrowserClosed(event.packageName.toString())) {
                 Log.d(tag, "Browser closed or switched away from, stopping services")
                 stopOverlayVerificationBadgeService()
-                lastProcessedUrlInfo = null
                 return
             }
         }
@@ -111,7 +110,6 @@ class UrlGuardService : AccessibilityService() {
             stopOverlayVerificationBadgeService()
             return
         }
-
 
         val capturedUrl = captureUrl(parentNodeInfo, browserConfig) ?: return
 

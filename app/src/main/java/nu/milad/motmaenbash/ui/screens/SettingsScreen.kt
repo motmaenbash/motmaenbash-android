@@ -96,9 +96,9 @@ fun SettingsScreen(
             preferences = listOf(
                 ListPreferenceItem(
                     title = stringResource(id = R.string.setting_alert_silent_mode),
-                    entries = context.resources.getStringArray(R.array.play_sound_in_silent_mode)
+                    entries = context.resources.getStringArray(R.array.yes_or_no_values)
                         .toList(),
-                    values = context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
+                    values = context.resources.getStringArray(R.array.yes_or_no_values)
                         .toList(),
                     currentValue = ((prefs[SettingsViewModel.PLAY_SOUND_IN_SILENT_MODE]
                         ?: viewModel.getDefaultBooleanValue(
@@ -184,9 +184,9 @@ fun SettingsScreen(
             preferences = listOf(
                 ListPreferenceItem(
                     title = stringResource(id = R.string.setting_show_sms_dialog),
-                    entries = context.resources.getStringArray(R.array.play_sound_in_silent_mode)
+                    entries = context.resources.getStringArray(R.array.yes_or_no)
                         .toList(),
-                    values = context.resources.getStringArray(R.array.play_sound_in_silent_mode_values)
+                    values = context.resources.getStringArray(R.array.yes_or_no_values)
                         .toList(),
                     currentValue = (prefs[SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG]
                         ?: viewModel.getDefaultBooleanValue(
@@ -241,12 +241,11 @@ fun SettingsScreen(
                     }
                 }
 
-                // Add spacer between categories (except after the last one)
-                if (index < preferenceCategories.size - 1) {
+                // Add spacer between categories
                     item {
                         Spacer(modifier = Modifier.height(32.dp))
                     }
-                }
+
             }
         }
     }

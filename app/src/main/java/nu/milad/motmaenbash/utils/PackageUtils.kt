@@ -39,14 +39,12 @@ object PackageUtils {
 
             val packageInfo: PackageInfo = pm.getPackageInfo(packageName, packageFlags)
 
-
             // Get basic app information
             val appName = packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
                 ?: "Unknown App Name"
             val appIcon = pm.getApplicationIcon(packageName)
 
             val versionName = packageInfo.versionName ?: "Unknown"
-
             val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
             val firstInstallTime = packageInfo.firstInstallTime
@@ -64,7 +62,7 @@ object PackageUtils {
 
             // Calculate APK file hashes
             val sourceApk = File(applicationInfo.sourceDir)
-            val apksha256 = calculateSHA256HexFromFile(sourceApk)
+            val apkSha256 = calculateSHA256HexFromFile(sourceApk)
 
             // Get installation source
             val installSource = getInstallationSource(context, packageName)
@@ -75,14 +73,13 @@ object PackageUtils {
                 packageName,
                 appIcon,
                 versionCode,
-                apksha256,
+                apkSha256,
                 signSha256,
                 versionName,
                 firstInstallTime,
                 lastUpdateTime,
                 permissions.toList()
             )
-
 
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Package not found: $packageName", e)
@@ -91,8 +88,6 @@ object PackageUtils {
             Log.e(TAG, "Error retrieving app info for $packageName", e)
             throw e
         }
-
-
     }
 
     /**

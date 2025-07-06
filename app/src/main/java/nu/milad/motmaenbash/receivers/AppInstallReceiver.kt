@@ -9,7 +9,6 @@ import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.PackageUtils
 
-
 class AppInstallReceiver : BroadcastReceiver() {
 
     companion object {
@@ -19,7 +18,6 @@ class AppInstallReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         Log.d(TAG, "Received action: ${intent.action}")
-
 
         val packageName = intent.data?.schemeSpecificPart ?: return
 
@@ -46,7 +44,7 @@ class AppInstallReceiver : BroadcastReceiver() {
     }
 
     private fun checkAppAgainstDatabase(context: Context, packageName: String) {
-        Log.d(TAG, "Checking app: $packageName")
+        Log.d(TAG, "Starting security check for app: $packageName")
 
         val dbHelper = DatabaseHelper(context)
         val appInfo = PackageUtils.getAppInfo(context, packageName)
@@ -65,5 +63,4 @@ class AppInstallReceiver : BroadcastReceiver() {
 
         }
     }
-
 }
