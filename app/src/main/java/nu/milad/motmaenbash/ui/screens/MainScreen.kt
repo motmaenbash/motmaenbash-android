@@ -1434,12 +1434,11 @@ fun BetaNotice() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "این نسخه آزمایشی برنامه است و ممکن است دارای ایرادات و اشکالاتی باشد. لطفا مشکلات را از طریق گزارش اشکال در صفحه درباره برنامه اطلاع دهید.",
+                        text = "نسخه‌های اول برنامه ممکن است دارای ایرادات و اشکالاتی باشد. لطفا مشکلات را از طریق گزارش اشکال در صفحه درباره برنامه اطلاع دهید.",
                         fontSize = 12.sp,
                         color = colorScheme.onTertiaryContainer,
                         textAlign = TextAlign.Center
                     )
-
 
                 }
             }
