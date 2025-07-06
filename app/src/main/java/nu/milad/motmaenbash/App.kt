@@ -11,7 +11,7 @@ import nu.milad.motmaenbash.utils.UpdateManager
 
 
 class App : Application() {
-    
+
     override fun onCreate() {
         super.onCreate()
         // Launch initialization in a background coroutine
