@@ -6,7 +6,6 @@ plugins {
     id("com.google.firebase.firebase-perf")
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
-
 }
 
 android {
@@ -17,8 +16,8 @@ android {
         applicationId = "nu.milad.motmaenbash"
         minSdk = 21
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.2-beta"
+        versionCode = 8
+        versionName = "1.0.3-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -44,19 +43,15 @@ android {
         }
         debug {
 //            applicationIdSuffix = ".debug"
-
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
 
     }
 
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
@@ -65,13 +60,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    kotlin {
+        jvmToolchain(8)
+    }
 }
 
 dependencies {
-
-
     implementation(libs.material)
-
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui.graphics)
@@ -80,13 +76,10 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.androidx.work.runtime.ktx)
 
-
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.inappmessaging.display)
-    //
     releaseImplementation(libs.firebase.crashlytics)
     implementation(libs.firebase.perf)
 
@@ -98,12 +91,11 @@ dependencies {
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
+
     // Compose dependencies
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
-
     implementation(libs.ui)
-
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)

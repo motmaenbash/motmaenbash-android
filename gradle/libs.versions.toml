@@ -1,20 +1,20 @@
 [versions]
 activity = "1.10.1"
 lifecycle = "2.9.1"
-composeUi = "1.8.2"
+composeUi = "1.8.3"
 material3 = "1.3.2"
-composeBom = "2025.06.00"
-kotlin = "2.1.10"
+composeBom = "2025.06.01"
+kotlin = "2.2.0"
 datastore = "1.1.7"
 material = "1.12.0"
 materialIconsExtended = "1.7.8"
-workRuntime = "2.10.1"
-navigationCompose = "2.9.0"
+workRuntime = "2.10.2"
+navigationCompose = "2.9.1"
 accompanistPermissions = "0.37.3"
-agp = "8.10.1"
+agp = "8.11.0"
 browser = "1.8.0"
 coilCompose = "2.7.0"
-firebaseBom = "33.14.0"
+firebaseBom = "33.16.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -32,7 +32,6 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
-firebase-inappmessaging-display = { module = "com.google.firebase:firebase-inappmessaging-display" }
 firebase-perf = { module = "com.google.firebase:firebase-perf" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "composeUi" }

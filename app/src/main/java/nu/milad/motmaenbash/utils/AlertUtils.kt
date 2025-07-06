@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_APP_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_SMS_DETECTED
@@ -116,15 +117,15 @@ object AlertUtils {
             statKeys.forEach { key ->
                 // Increment each relevant statistic
                 dbHelper.incrementUserStat(key)
+
                 if (!BuildConfig.DEBUG) {
                 val firebaseAnalytics = Firebase.analytics
                 firebaseAnalytics.logEvent("Motmaenbash_alert") {
                     param("alert_type", key)
                 }
             }
-
-
             }
+            
             // Log the alert history in the database
             dbHelper.logAlertHistory(alertType, param1, param2)
 

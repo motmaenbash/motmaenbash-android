@@ -68,7 +68,7 @@ important information, please visit our [FAQ page](https://motmaenbash.ir/faqs.h
 
 If you find MotmaenBash useful, You can support it by donate:
 
-💝 [Make a donation](https://milad.nu/page/donate)
+💝 [Make a donation](https://motmaenbash.ir/donate.html)
 
 حمایت شما باعث تداوم این پروژه و بروزرسانی مداوم آن خواهد شد 💝
 

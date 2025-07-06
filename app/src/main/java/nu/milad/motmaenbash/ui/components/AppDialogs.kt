@@ -525,18 +525,6 @@ fun CriticalPermissionsInfoDialog(onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.height(12.dp))
 
 
-//                todo: delete
-//                Text(
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                        "این دو دسترسی برای عملکرد کامل برنامه ضروری هستند و بدون آنها، توانایی برنامه در محافظت از دستگاه شما به طور قابل توجهی کاهش می‌یابد."
-//                    } else {
-//                        "دسترسی 'نمایش روی برنامه‌های دیگر' برای عملکرد کامل برنامه ضروری است. دسترسی نمایش اعالن برای نسخه اندروید شما الزامی نیست، اما برای دریافت هشدارها توصیه می‌شود."
-//                    },
-//                    style = typography.bodySmall,
-//                    fontWeight = FontWeight.Bold,
-//                )
-
-
             }
         },
         confirmText = "متوجه شدم",

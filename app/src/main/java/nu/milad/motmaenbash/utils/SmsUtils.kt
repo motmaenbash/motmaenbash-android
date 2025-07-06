@@ -60,7 +60,7 @@ object SmsUtils {
      * @param message The raw SMS message string.
      * @return The normalized message string.
      */
-    private fun normalizeMessage(message: String): String {
+    fun normalizeMessage(message: String): String {
         var cleanedMessage = message
 
 

@@ -113,9 +113,6 @@ class UrlGuardService : AccessibilityService() {
         }
 
 
-
-
-
         val capturedUrl = captureUrl(parentNodeInfo, browserConfig) ?: return
 
         // Throttle URL analysis
@@ -127,24 +124,24 @@ class UrlGuardService : AccessibilityService() {
         // Check if this URL is different from the last processed one or if enough time has passed
         val shouldProcessUrl = isEligibleForProcessing(urlSignature, domainSignature, currentTime)
 
-            val result = UrlUtils.analyzeUrl(
-                url = capturedUrl,
-                databaseHelper = databaseHelper
-            )
+        val result = UrlUtils.analyzeUrl(
+            url = capturedUrl,
+            databaseHelper = databaseHelper
+        )
 
-            when (result) {
-                is UrlAnalysisResult.SafeUrl -> {
-                    startOverlayVerificationBadgeService(result.url)
+        when (result) {
+            is UrlAnalysisResult.SafeUrl -> {
+                startOverlayVerificationBadgeService(result.url)
 
-                    databaseHelper.incrementUserStat(STAT_VERIFIED_GATEWAY)
-                    logAnalyticsAsync(
-                        "Motmaenbash_alert",
-                        mapOf("alert_type" to STAT_VERIFIED_GATEWAY)
-                    )
-                }
+                databaseHelper.incrementUserStat(STAT_VERIFIED_GATEWAY)
+                logAnalyticsAsync(
+                    "Motmaenbash_alert",
+                    mapOf("alert_type" to STAT_VERIFIED_GATEWAY)
+                )
+            }
 
 
-                is SuspiciousUrl -> {
+            is SuspiciousUrl -> {
                 if (shouldProcessUrl) {
 
                     // Check if this is a domain-level flag (not specific URL)
@@ -158,16 +155,16 @@ class UrlGuardService : AccessibilityService() {
                     )
 
                     if (shouldShowAlert) {
-                    showSuspiciousUrlAlert(result)
-                }
+                        showSuspiciousUrlAlert(result)
+                    }
                 }
             }
 
 
-                is UrlAnalysisResult.NeutralUrl -> {
-                    stopAllServices()
-                }
+            is UrlAnalysisResult.NeutralUrl -> {
+                stopAllServices()
             }
+        }
 
         if (shouldProcessUrl) {
             // Store this URL info as the last processed URL

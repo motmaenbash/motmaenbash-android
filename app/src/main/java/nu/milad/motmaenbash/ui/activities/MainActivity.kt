@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_INTRO_SHOWN
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.consts.Pages
-import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.ui.screens.AboutScreen
 import nu.milad.motmaenbash.ui.screens.AppScanScreen
 import nu.milad.motmaenbash.ui.screens.InfoListScreen
@@ -32,7 +31,6 @@ import nu.milad.motmaenbash.ui.screens.SettingsScreen
 import nu.milad.motmaenbash.ui.screens.UrlScanScreen
 import nu.milad.motmaenbash.ui.screens.UserReportScreen
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.ServiceUtils
 import nu.milad.motmaenbash.utils.dataStore
 

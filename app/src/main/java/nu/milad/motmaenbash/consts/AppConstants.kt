@@ -37,7 +37,7 @@ object AppConstants {
     const val PREF_KEY_INTRO_SHOWN = "intro_shown"
     const val PREF_KEY_LAST_CHANGELOG_SHOW_VERSION = "last_changelog_show_version"
 
-    const val DONATE_URL = "https://milad.nu/page/donate"
+    const val DONATE_URL = "https://motmaenbash.ir/donate.html"
 
 
     const val USER_REPORT_FORM_URL =

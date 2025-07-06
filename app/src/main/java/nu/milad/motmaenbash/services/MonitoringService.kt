@@ -137,7 +137,6 @@ class MonitoringService : Service() {
         )
             .setContentTitle(getString(R.string.app_name))
             .setContentText(notificationMessages[currentMessageIndex])
-//            .setContentText(" در حال محافظت توسط مطمئن باش ")
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setSound(null)
@@ -145,8 +144,6 @@ class MonitoringService : Service() {
             .setOngoing(true)
             .setSilent(true)
             .setContentIntent(pendingIntent)
-        // Add an action to open app settings (optional)
-        // .addAction(actionToOpenAppSettings())
 
         // Build initial notification
         serviceNotification = notificationBuilder.build()
