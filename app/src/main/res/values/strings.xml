@@ -111,7 +111,7 @@
 
     <!-- Bug Report -->
     <string name="report_bug_toast_message">اشکالات احتمالی را از طریق ایمیل به ما گزارش دهید</string>
-    <string name="bug_report_placeholder">لطفا توضیج مربوط به گزارش اشکال را اینجا بنویسید…</string>
+    <string name="bug_report_placeholder">لطفا توضیح مربوط به گزارش اشکال را اینجا بنویسید…</string>
     <string name="send_email_chooser_title">ارسال ایمیل …</string>
     <string name="no_email_app_found">برنامه‌ای برای ارسال ایمیل یافت نشد.</string>
 
