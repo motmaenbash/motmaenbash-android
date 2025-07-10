@@ -85,7 +85,7 @@ class AlertHandlerActivity : ComponentActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            Toast.makeText(this, "برنام '${alert.param2}' با موفقیت حذف شد", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "برنامه '${alert.param2}' با موفقیت حذف شد", Toast.LENGTH_SHORT)
                 .show()
             finishAndRemoveTask()
         } else {
