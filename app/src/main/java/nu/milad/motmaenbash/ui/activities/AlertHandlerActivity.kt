@@ -96,64 +96,70 @@ class AlertHandlerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        try {
+            // Extract intent extras with safer approach
+            alert = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent?.getParcelableExtra(EXTRA_ALERT, Alert::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent?.getParcelableExtra(EXTRA_ALERT) as? Alert
+            }
+            
+            if (alert == null) {
+                Log.e("AlertHandlerActivity", "Failed to get Alert extra from intent")
+                Toast.makeText(this, "خطا در نمایش هشدار", Toast.LENGTH_SHORT).show()
+                finishAndRemoveTask()
+                return
+            }
+            
+            val taskLabel = when (alert.type) {
+                Alert.AlertType.SMS_NEUTRAL -> "پیام جدید"
+                else -> "هشدار!"
+            }
 
-        // Extract intent extras
-        alert = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_ALERT, Alert::class.java)
-                ?: throw IllegalStateException("Alert extra is required")
-        } else {
-            (intent.getParcelableExtra(EXTRA_ALERT) as? Alert)
-                ?: throw IllegalStateException("Alert extra is required")
-        }
-
-
-        val taskLabel = when (alert.type) {
-            Alert.AlertType.SMS_NEUTRAL -> "پیام جدید"
-            else -> "هشدار!"
-        }
-
-        val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityManager.TaskDescription(taskLabel)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ActivityManager.TaskDescription(taskLabel, null, getColor(R.color.red))
-        } else {
-            @Suppress("DEPRECATION")
-            ActivityManager.TaskDescription(
-                taskLabel,
-                null,
-                resources.getColor(R.color.red)
-            )
-        }
-
-
-        setTaskDescription(
-            taskDescription
-        )
-
-
-
-        setContent {
-            MotmaenBashTheme {
-                AlertDialog(
-                    alert = Alert(
-                        type = alert.type,
-                        level = alert.level,
-                        title = alert.title,
-                        summary = alert.summary,
-                        content = alert.content,
-                        param1 = alert.param1,
-                        param2 = alert.param2
-                    ),
-
-                    onDismiss = { finishAndRemoveTask() },
-                    onUninstall = {
-                        PackageUtils.uninstallApp(alert.param1).let {
-                            uninstallLauncher.launch(it)
-                        }
-                    },
-                    context = this@AlertHandlerActivity
+            val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ActivityManager.TaskDescription(taskLabel)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ActivityManager.TaskDescription(taskLabel, null, getColor(R.color.red))
+            } else {
+                @Suppress("DEPRECATION")
+                ActivityManager.TaskDescription(
+                    taskLabel,
+                    null,
+                    resources.getColor(R.color.red)
                 )
             }
+
+            setTaskDescription(taskDescription)
+
+            setContent {
+                MotmaenBashTheme {
+                    AlertDialog(
+                        alert = Alert(
+                            type = alert.type,
+                            level = alert.level,
+                            title = alert.title,
+                            summary = alert.summary,
+                            content = alert.content,
+                            param1 = alert.param1,
+                            param2 = alert.param2
+                        ),
+
+                        onDismiss = { finishAndRemoveTask() },
+                        onUninstall = {
+                            PackageUtils.uninstallApp(alert.param1).let {
+                                uninstallLauncher.launch(it)
+                            }
+                        },
+                        context = this@AlertHandlerActivity
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("AlertHandlerActivity", "Error processing alert: ${e.message}")
+            e.printStackTrace()
+            Toast.makeText(this, "خطا در نمایش هشدار", Toast.LENGTH_SHORT).show()
+            finishAndRemoveTask()
         }
     }
 
