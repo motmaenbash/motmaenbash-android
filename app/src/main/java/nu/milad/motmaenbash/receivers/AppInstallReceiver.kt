@@ -8,6 +8,7 @@ import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.PackageUtils
+import android.content.pm.PackageManager
 
 class AppInstallReceiver : BroadcastReceiver() {
 
@@ -46,21 +47,28 @@ class AppInstallReceiver : BroadcastReceiver() {
     private fun checkAppAgainstDatabase(context: Context, packageName: String) {
         Log.d(TAG, "Starting security check for app: $packageName")
 
-        val dbHelper = DatabaseHelper(context)
-        val appInfo = PackageUtils.getAppInfo(context, packageName)
+        try {
+            val dbHelper = DatabaseHelper(context)
+            val appInfo = PackageUtils.getAppInfo(context, packageName)
 
-        val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.apkHash, appInfo.sighHash)
+            val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.apkHash, appInfo.sighHash)
 
-        if (isAppFlagged) {
-            // App found suspicious in the database, alert the user
-            AlertUtils.showAlert(
-                context = context,
-                alertType = Alert.AlertType.APP_FLAGGED,
-                alertLevel = Alert.AlertLevel.ALERT,
-                param1 = packageName,
-                param2 = appInfo.appName,
-            )
-
+            if (isAppFlagged) {
+                // App found suspicious in the database, alert the user
+                AlertUtils.showAlert(
+                    context = context,
+                    alertType = Alert.AlertType.APP_FLAGGED,
+                    alertLevel = Alert.AlertLevel.ALERT,
+                    param1 = packageName,
+                    param2 = appInfo.appName,
+                )
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            // Package was broadcast but is no longer available or accessible
+            Log.w(TAG, "Package not found during security check: $packageName", e)
+            // No need to alert the user as the package isn't accessible
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking app against database: $packageName", e)
         }
     }
 }
