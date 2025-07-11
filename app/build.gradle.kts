@@ -1,11 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.google.firebase.firebase-perf")
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.performance)
     alias(libs.plugins.compose.compiler)
-    id("kotlin-parcelize")
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
