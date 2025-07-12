@@ -15,6 +15,9 @@ agp = "8.11.0"
 browser = "1.8.0"
 coilCompose = "2.7.0"
 firebaseBom = "33.16.0"
+google-services = "4.4.3"
+firebase-crashlytics = "3.0.4"
+firebase-performance = "1.4.2"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -44,3 +47,7 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
+firebase-performance = { id = "com.google.firebase.firebase-perf", version.ref = "firebase-performance" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
