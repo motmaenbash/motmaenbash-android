@@ -7,9 +7,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.lifecycle.lifecycleScope
@@ -49,8 +53,14 @@ class MainActivity : ComponentActivity() {
             setContent {
                 MotmaenBashTheme {
                     val navController = rememberNavController()
-                    CompositionLocalProvider(LocalNavController provides navController) {
-                        AppNavigation(startDestination)
+                    Surface(
+                        color = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CompositionLocalProvider(LocalNavController provides navController) {
+                            AppNavigation(startDestination)
+                        }
                     }
                 }
 
