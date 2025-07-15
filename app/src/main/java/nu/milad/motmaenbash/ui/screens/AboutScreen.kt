@@ -176,7 +176,7 @@ fun AppInfo(navController: NavController) {
 
 
         Text(
-            text = "طراحی و توسعه توسط میلاد نوری",
+            text = "طراحی و توسعه توسط محمدحسین نوروزی",
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp
         )

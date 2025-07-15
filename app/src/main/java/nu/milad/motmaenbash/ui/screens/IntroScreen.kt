@@ -631,7 +631,7 @@ fun DeveloperCredit() {
     ) {
 
         Text(
-            "طراحی و توسعه توسط میلاد نوری",
+            "طراحی و توسعه توسط محمدحسین نوروزی",
             style = typography.bodySmall,
             color = GreyMiddle,
 
