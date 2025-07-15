@@ -14,9 +14,9 @@ class IntroViewModel(private val context: Application) :
     }
 
     // Mark intro as shown (completed)
-    suspend fun markIntroAsShown() {
+    suspend fun setHasSeenIntro() {
         context.dataStore.edit { preferences ->
-            preferences[booleanPreferencesKey(AppConstants.PREF_KEY_INTRO_SHOWN)] = true
+            preferences[booleanPreferencesKey(AppConstants.PREF_KEY_HAS_SEEN_INTRO)] = true
         }
     }
 
