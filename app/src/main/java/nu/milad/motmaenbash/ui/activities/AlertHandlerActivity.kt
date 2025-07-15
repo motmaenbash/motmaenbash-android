@@ -179,19 +179,18 @@ fun AlertDialog(
             dismissOnClickOutside = false
         )
     ) {
-        //todo:
         val alertColor = when (alert.level) {
-            Alert.AlertLevel.WARNING -> Orange
+            Alert.AlertLevel.WARNING -> YellowDark
             Alert.AlertLevel.ALERT -> Red
             Alert.AlertLevel.NEUTRAL -> GreyDark
-            Alert.AlertLevel.INFO -> TODO()
+            Alert.AlertLevel.INFO -> GreyDark
         }
-//todo:
+
         val alertLevelLabel = when (alert.level) {
             Alert.AlertLevel.WARNING -> "اخطار"
             Alert.AlertLevel.ALERT -> "هشدار"
             Alert.AlertLevel.NEUTRAL -> null
-            Alert.AlertLevel.INFO -> null
+            Alert.AlertLevel.INFO -> "اطلاعیه"
         }
         val hint = AlertUtils.getAlertHint(alert.type)
         val scrollState = rememberScrollState()
@@ -307,7 +306,6 @@ fun AlertDialog(
                     }
 
                     Divider(verticalPadding = 4.dp)
-                    Log.d("zzzz", alert.param1 + " -  " + alert.param2)
                     // Content based on alert type
                     when (alert.type) {
                         in SMS_ALERT_TYPES -> {
@@ -316,7 +314,6 @@ fun AlertDialog(
 
                         Alert.AlertType.APP_FLAGGED -> {
                             AppAlertContent(context, alert.param1, alert.param2)
-
                         }
 
                         else -> {

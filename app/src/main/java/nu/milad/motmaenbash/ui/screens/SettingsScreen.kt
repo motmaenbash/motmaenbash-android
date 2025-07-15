@@ -96,7 +96,7 @@ fun SettingsScreen(
             preferences = listOf(
                 ListPreferenceItem(
                     title = stringResource(id = R.string.setting_alert_silent_mode),
-                    entries = context.resources.getStringArray(R.array.yes_or_no_values)
+                    entries = context.resources.getStringArray(R.array.yes_or_no)
                         .toList(),
                     values = context.resources.getStringArray(R.array.yes_or_no_values)
                         .toList(),
@@ -200,7 +200,7 @@ fun SettingsScreen(
                     }
                 ),
 
-            )
+                )
         ),
     )
 
@@ -242,9 +242,9 @@ fun SettingsScreen(
                 }
 
                 // Add spacer between categories
-                    item {
-                        Spacer(modifier = Modifier.height(32.dp))
-                    }
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
 
             }
         }

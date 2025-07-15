@@ -283,12 +283,12 @@ class UpdateManager(
         // Always update in debug mode or if never updated
         if (BuildConfig.DEBUG || lastUpdateTime == 0L) return true
 
-        val hoursSinceUpdate = TimeUnit.MILLISECONDS.toHours(
+        val minutesSinceUpdate = TimeUnit.MILLISECONDS.toMinutes(
             DateUtils.getCurrentTimeInMillis() - lastUpdateTime
         )
 
-        // Only update if more than 1 hours have passed
-        return if (hoursSinceUpdate < 1) {
+        // Only update if more than 15 minutes have passed
+        return if (minutesSinceUpdate < 15) {
             Toast.makeText(
                 context, "پایگاه داده کمتر از ۱ ساعت پیش به‌روزرسانی شده است", Toast.LENGTH_SHORT
             ).show()

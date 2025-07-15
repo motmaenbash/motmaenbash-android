@@ -19,7 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_INTRO_SHOWN
+import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_HAS_SEEN_INTRO
 import nu.milad.motmaenbash.consts.NavRoutes
 import nu.milad.motmaenbash.consts.Pages
 import nu.milad.motmaenbash.ui.screens.AboutScreen
@@ -113,7 +113,7 @@ private suspend fun handleIntent(intent: Intent?, context: Context): String {
     val dataStore = context.dataStore
 
     val isIntroShown = dataStore.data.firstOrNull()?.get(
-        booleanPreferencesKey(PREF_KEY_INTRO_SHOWN)
+        booleanPreferencesKey(PREF_KEY_HAS_SEEN_INTRO)
 
     ) ?: false
 

@@ -33,7 +33,6 @@ fun AppCard(
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor
-
         ),
         border = border,
     ) {
