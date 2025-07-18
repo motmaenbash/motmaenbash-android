@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.R
@@ -68,6 +69,7 @@ sealed class PreferenceItem
 
 data class ListPreferenceItem(
     val title: String,
+    val description: String? = null,
     val entries: List<String>,
     val values: List<String>,
     val currentValue: String,
@@ -124,7 +126,7 @@ fun SettingsScreen(
             )
         ),
         PreferenceCategoryModel(
-            title = "به‌روزرسانی پایگاه داده",
+            title = "به‌روزرسانی پایگاه داده برنامه",
             icon = Icons.Outlined.Refresh,
             preferences = listOf(
                 ListPreferenceItem(
@@ -147,7 +149,6 @@ fun SettingsScreen(
                 )
             )
         ),
-
 
         PreferenceCategoryModel(
             title = "ظاهر",
@@ -184,6 +185,7 @@ fun SettingsScreen(
             preferences = listOf(
                 ListPreferenceItem(
                     title = stringResource(id = R.string.setting_show_sms_dialog),
+                    description = "این گزینه فقط نمایش پنجره پیامک‌های معمولی و بدون مشکل را کنترل می‌کند. هشدار پیامک‌های مشکوک همیشه نمایش داده می‌شود.",
                     entries = context.resources.getStringArray(R.array.yes_or_no)
                         .toList(),
                     values = context.resources.getStringArray(R.array.yes_or_no_values)
@@ -199,12 +201,9 @@ fun SettingsScreen(
                         )
                     }
                 ),
-
-                )
+            )
         ),
     )
-
-
 
     AppBar(
         title = stringResource(id = R.string.settings_screen_title),
@@ -226,6 +225,7 @@ fun SettingsScreen(
                         is ListPreferenceItem -> {
                             ListPreference(
                                 title = preference.title,
+                                description = preference.description,
                                 entries = preference.entries,
                                 values = preference.values,
                                 currentValue = preference.currentValue,
@@ -245,7 +245,6 @@ fun SettingsScreen(
                 item {
                     Spacer(modifier = Modifier.height(32.dp))
                 }
-
             }
         }
     }
@@ -288,6 +287,7 @@ fun PreferenceCategoryHeader(title: String, icon: ImageVector) {
 @Composable
 fun ListPreference(
     title: String,
+    description: String? = null,
     entries: List<String>,
     values: List<String>,
     currentValue: String,
@@ -373,6 +373,18 @@ fun ListPreference(
                 )
             }
         }
+    }
+
+    description?.let { desc ->
+        Text(
+            text = desc,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, top = 4.dp),
+            style = typography.bodySmall,
+            fontSize = 13.sp,
+            color = colorScheme.onSurfaceVariant
+        )
     }
 }
 

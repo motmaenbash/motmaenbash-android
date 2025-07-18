@@ -110,7 +110,7 @@ open class SettingsViewModel(
     fun getDefaultBooleanValue(key: Preferences.Key<Boolean>): Boolean {
         return when (key) {
             PLAY_SOUND_IN_SILENT_MODE -> true
-            SHOW_NEUTRAL_SMS_DIALOG -> true
+            SHOW_NEUTRAL_SMS_DIALOG -> false
             PLAY_NEUTRAL_SMS_SOUND -> false
             else -> false
         }
