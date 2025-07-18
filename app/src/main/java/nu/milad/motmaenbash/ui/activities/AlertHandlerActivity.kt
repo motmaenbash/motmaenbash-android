@@ -446,7 +446,7 @@ private fun SmsAlertContent(
 private fun AppAlertContent(
     context: Context,
     packageName: String,
-    appName: String?,
+    appName: String?
 ) {
     val appInfo = runCatching {
         context.packageManager.getApplicationInfo(packageName, 0)

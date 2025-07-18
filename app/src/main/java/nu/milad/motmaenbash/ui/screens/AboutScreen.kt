@@ -234,8 +234,7 @@ fun SocialMediaLinks() {
         "کانال تلگرام" to "https://t.me/MiladNouriChannel",
         "توییتر" to "https://twitter.com/MilaDnu",
         "کانال یوتوب" to "https://youtube.com/MilaDnu",
-        "اینستاگرام" to "https://instagram.com/milad_nouri",
-        "وب‌سایت" to "https://milad.nu"
+        "اینستاگرام" to "https://instagram.com/milad_nouri"
     )
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
 
