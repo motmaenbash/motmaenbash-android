@@ -292,9 +292,7 @@ object PackageUtils {
         Manifest.permission.READ_SMS to "خواندن پیامک‌ها",
         Manifest.permission.RECEIVE_SMS to "دریافت پیامک",
         Manifest.permission.READ_CONTACTS to "دسترسی به مخاطب‌ها",
-        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "خدمات دسترسی"
-//                Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به صفحه و کلیک خودکار"
-
+        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به صفحه"
     )
 
 
