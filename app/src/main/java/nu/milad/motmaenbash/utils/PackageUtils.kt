@@ -1,5 +1,6 @@
 package nu.milad.motmaenbash.utils
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -10,7 +11,6 @@ import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import nu.milad.motmaenbash.models.App
-import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256FromFile
 import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256HexFromBytes
 import nu.milad.motmaenbash.utils.HashUtils.calculateSHA256HexFromFile
 import java.io.File
@@ -41,7 +41,7 @@ object PackageUtils {
 
             // Get basic app information
             val appName = packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
-                ?: "Unknown App Name"
+                ?: "Unknown"
             val appIcon = pm.getApplicationIcon(packageName)
 
             val versionName = packageInfo.versionName ?: "Unknown"
@@ -76,6 +76,7 @@ object PackageUtils {
                 apkSha256,
                 signSha256,
                 versionName,
+                installSource,
                 firstInstallTime,
                 lastUpdateTime,
                 permissions.toList()
@@ -89,6 +90,7 @@ object PackageUtils {
             throw e
         }
     }
+
 
     /**
      * Returns the appropriate flags for PackageManager.getPackageInfo based on API level
@@ -139,25 +141,35 @@ object PackageUtils {
     private fun getInstallationSource(context: Context, packageName: String): String {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val installSourceInfo = context.packageManager.getInstallSourceInfo(packageName)
-                val installingPackageName = installSourceInfo.installingPackageName ?: "Unknown"
-                val initiatingPackageName = installSourceInfo.initiatingPackageName ?: "Unknown"
-                val originatingPackageName = installSourceInfo.originatingPackageName ?: "Unknown"
-
-                "Installing: $installingPackageName, Initiating: $initiatingPackageName, Originating: $originatingPackageName"
+                context.packageManager.getInstallSourceInfo(packageName)
+                    .installingPackageName ?: "Unknown"
             } else {
                 @Suppress("DEPRECATION")
-                val installer =
                     context.packageManager.getInstallerPackageName(packageName) ?: "Unknown"
-
-                "Installer: $installer"
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting installation source for $packageName", e)
-            "Error determining source: ${e.message}"
+            "Unknown"
         }
     }
 
+    /**
+     * Checks if the app is installed from a trusted source
+     *
+     * @param installSource The installer package name
+     * @return true if installed from a known trusted market
+     */
+    fun isFromTrustedSource(installSource: String?): Boolean {
+        if (installSource.isNullOrBlank()) {
+            Log.d(TAG, "Install source is null or blank")
+            return false
+        }
+        val installer = installSource.trim()
+        val isTrusted = TRUSTED_MARKETS.contains(installer)
+
+        Log.d(TAG, "Install source: $installer, trusted: $isTrusted")
+        return isTrusted
+    }
     /**
      * Creates an intent to uninstall the specified app
      *
@@ -170,4 +182,120 @@ object PackageUtils {
             putExtra(Intent.EXTRA_RETURN_RESULT, true)
         }
     }
+
+    fun isSystemApp(packageInfo: PackageInfo): Boolean {
+        return packageInfo.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM != 0
+    }
+
+    /**
+     * Checks if the app has any risky permission combinations
+     */
+    fun hasRiskyPermissionCombination(permissions: List<String>): Boolean {
+        val permissionSet = permissions.toSet()
+
+        return HIGH_RISK_PERMISSION_COMBINATIONS.any { riskyCombo ->
+            riskyCombo.all { permission -> permissionSet.contains(permission) }
+        }
+    }
+
+    /**
+     * Gets a list of detected risky permission combinations
+     */
+    fun getDetectedRiskyPermissionCombinations(permissions: List<String>): List<Set<String>> {
+        val permissionSet = permissions.toSet()
+
+        return HIGH_RISK_PERMISSION_COMBINATIONS.filter { riskyCombo ->
+            riskyCombo.all { permission -> permissionSet.contains(permission) }
+        }
+    }
+
+    /**
+     * Gets Persian description for risky permission combinations
+     */
+    fun getRiskyPermissionCombinationDescription(combo: Set<String>): String {
+        val persianNames = combo.mapNotNull { permission ->
+            PERMISSION_TITLES[permission]
+        }
+
+        return if (persianNames.isNotEmpty()) {
+            persianNames.joinToString(" + ")
+        } else {
+            combo.joinToString(" + ")
+        }
+    }
+
+    private val TRUSTED_MARKETS = setOf(
+        // Google Play Store
+        "com.android.vending",
+        // Samsung Galaxy Store
+        "com.sec.android.app.samsungapps",
+        // Huawei AppGallery
+        "com.huawei.appmarket",
+        // Xiaomi GetApps
+        "com.xiaomi.market",
+        "com.xiaomi.mipicks",
+        // Oppo App Market
+        "com.oppo.market",
+        "com.heytap.market",
+        // Vivo App Store
+        "com.vivo.appstore",
+        // Honor AppGallery
+        "com.hihonor.appgallery",
+        // Amazon Appstore
+        "com.amazon.venezia",
+        // F-Droid (Open Source)
+        "org.fdroid.fdroid",
+        // APKMirror Installer
+        "com.apkmirror.helper.prod",
+        // APKPure
+        "com.apkpure.aegon",
+        // Uptodown
+        "com.uptodown",
+        "com.uptodown.installer",
+        // TapTap
+        "com.taptap",
+        "com.taptap.global",        // TapTap Global
+        "com.taptap.global.lite",   // TapTap Lite
+        // QooApp
+        "com.qooapp.qoohelper",
+        // Iranian Markets
+        "com.farsitel.bazaar",         // Bazaar
+        "ir.mservices.market",         // Myket
+        // Yandex Store
+        "ru.yandex.store",             // Yandex Store (Russia)
+        "com.yandex.store",
+        // Aptoide
+        "cm.aptoide.pt",
+        "cm.aptoide.lite",    // Aptoide Lite
+        // Tencent MyApp
+        "com.tencent.android.qqdownloader",
+        // Developer Tools - These are NOT actual app stores but Android system components
+        "com.android.development",     // Android Development Tools (System)
+        "com.android.shell",           // Android Shell (System)
+    )
+
+    private val HIGH_RISK_PERMISSION_COMBINATIONS = listOf(
+        // SMS & Contact combinations (Banking trojans)
+        setOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS),
+        setOf(Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS),
+        setOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_SMS),
+        setOf(Manifest.permission.INTERNET, Manifest.permission.READ_SMS),
+        setOf(Manifest.permission.INTERNET, Manifest.permission.RECEIVE_SMS),
+        // Accessibility service abuse
+        setOf(Manifest.permission.INTERNET, Manifest.permission.BIND_ACCESSIBILITY_SERVICE),
+        setOf(Manifest.permission.SEND_SMS, Manifest.permission.BIND_ACCESSIBILITY_SERVICE),
+    )
+
+    private val PERMISSION_TITLES = mapOf(
+        Manifest.permission.INTERNET to "دسترسی به اینترنت",
+        Manifest.permission.SEND_SMS to "ارسال پیامک",
+        Manifest.permission.READ_SMS to "خواندن پیامک‌ها",
+        Manifest.permission.RECEIVE_SMS to "دریافت پیامک",
+        Manifest.permission.READ_CONTACTS to "دسترسی به مخاطب‌ها",
+        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "خدمات دسترسی"
+//                Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به صفحه و کلیک خودکار"
+
+    )
+
+
 }

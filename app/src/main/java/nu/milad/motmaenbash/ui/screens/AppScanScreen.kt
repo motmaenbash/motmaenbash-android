@@ -383,6 +383,7 @@ fun AppScanScreenPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "1.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()
@@ -395,6 +396,7 @@ fun AppScanScreenPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "2.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()
@@ -427,6 +429,7 @@ fun AppScanInProgressPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "1.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()
@@ -439,6 +442,7 @@ fun AppScanInProgressPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "2.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()
@@ -451,6 +455,7 @@ fun AppScanInProgressPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "3.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()
@@ -463,6 +468,7 @@ fun AppScanInProgressPreview() {
                 apkHash = "dummy_hash",
                 sighHash = "dummy_hash",
                 versionName = "4.0",
+                installSource = "market",
                 firstInstallTime = 0L,
                 lastUpdateTime = 0L,
                 permissions = emptyList()

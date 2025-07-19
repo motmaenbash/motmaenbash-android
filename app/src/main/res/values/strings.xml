@@ -31,7 +31,7 @@
     <!--  Guard Titles -->
     <string name="sms">پیامک</string>
     <string name="web">وب‌گردی</string>
-    <string name="app">نصب برنامه</string>
+    <string name="app">برنامه</string>
 
     <string name="guard_sms">سپر پیامک</string>
     <string name="guard_web">سپر وب‌گردی</string>
