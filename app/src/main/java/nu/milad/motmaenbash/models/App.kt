@@ -10,6 +10,7 @@ data class App(
     val apkHash: String,
     val sighHash: String,
     val versionName: String,
+    val installSource: String,
     val firstInstallTime: Long,
     val lastUpdateTime: Long,
     val permissions: List<String>,

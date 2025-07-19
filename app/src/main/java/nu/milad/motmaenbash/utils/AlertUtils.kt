@@ -31,7 +31,8 @@ object AlertUtils {
         alertType: Alert.AlertType,
         alertLevel: Alert.AlertLevel,
         param1: String,
-        param2: String
+        param2: String,
+        param3: String? = null
     ) {
 
 
@@ -58,29 +59,31 @@ object AlertUtils {
                 }
             }
 
-        val (alertTitle, alertSummary, alertContent) = getAlertContent(alertType)
+            val (alertTitle, alertSummary, alertContent) = getAlertContent(alertType)
 
-        val alert = Alert(
-            type = alertType,
-            level = alertLevel,
-            title = alertTitle,
-            summary = alertSummary,
-            content = alertContent,
-            param1 = param1,
-            param2 = param2
-        )
+            val alert = Alert(
+                type = alertType,
+                level = alertLevel,
+                title = alertTitle,
+                summary = alertSummary,
+                content = alertContent,
+                param1 = param1,
+                param2 = param2,
+                param3 = param3
+            )
 
-        val intent = Intent(context, AlertHandlerActivity::class.java).apply {
-            //Pass alert to AlertHandlerActivity
-            putExtra(AlertHandlerActivity.EXTRA_ALERT, alert)
-            // Ensure the alert activity is launched as a new task to prevent conflicts
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+            val intent = Intent(context, AlertHandlerActivity::class.java).apply {
+                //Pass alert to AlertHandlerActivity
+                putExtra(AlertHandlerActivity.EXTRA_ALERT, alert)
+                // Ensure the alert activity is launched as a new task to prevent conflicts
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
+            }
+            // Start the AlertHandlerActivity to display the alert
+            context.startActivity(intent)
         }
-        // Start the AlertHandlerActivity to display the alert
-        context.startActivity(intent)
     }
-    }
+
 
     private fun incrementStatAndLogEvent(
         context: Context,
@@ -90,7 +93,6 @@ object AlertUtils {
     ) {
         val dbHelper = DatabaseHelper(context.applicationContext)
         try {
-
             val statKeys = when (alertType) {
                 Alert.AlertType.SMS_SENDER_FLAGGED -> listOf(
                     STAT_FLAGGED_SMS_DETECTED
@@ -113,20 +115,21 @@ object AlertUtils {
                 else -> emptyList()
             }
 
-            // If a valid statKey exists, increment the corresponding statistic in the database
+            // If a valid statKey exists, increment the corresponding statistic in the local database
             statKeys.forEach { key ->
                 // Increment each relevant statistic
                 dbHelper.incrementUserStat(key)
 
                 if (!BuildConfig.DEBUG) {
-                val firebaseAnalytics = Firebase.analytics
-                firebaseAnalytics.logEvent("Motmaenbash_alert") {
-                    param("alert_type", key)
+                    // Only the type of alert (statKey) is sent; no sensitive or detailed info is logged.
+                    val firebaseAnalytics = Firebase.analytics
+                    firebaseAnalytics.logEvent("Motmaenbash_alert") {
+                        param("alert_type", key)
+                    }
                 }
             }
-            }
-            
-            // Log the alert history in the database
+
+            // Log the alert history in the local database
             dbHelper.logAlertHistory(alertType, param1, param2)
 
         } catch (e: Exception) {
@@ -180,13 +183,18 @@ object AlertUtils {
                 "براساس گزارش کاربرها، این برنامه مشکوک به بدافزار یا کلاهبرداری است و می‌تواند امنیت دستگاه و اطلاعات شما را تهدید کند. توصیه می‌شود بدون اجرای برنامه یا اعطای دسترسی، سریع آن را حذف کنید."
             )
 
+            Alert.AlertType.APP_RISKY_INSTALL -> Triple(
+                "نصب برنامه با ریسک بالا",
+                "نصب برنامه از منبع نامعتبر + دسترسی حساس",
+                "این برنامه از منبع نامعتبر نصب شده و چند سطح دسترسی حساس دارد که معمولا در بدافزارها یا برنامه‌های فیشینگ دیده می‌شود. توصیه می‌شود در صورت عدم اطمینان، آن را حذف کنید."
+            )
 
             Alert.AlertType.URL_FLAGGED -> {
                 val domainOrUrlText =
                     if (isSpecificUrl) "آدرس اینترنتی" else "دامنه اینترنتی"
 
                 val subTitle =
-                    domainOrUrlText + " مشکوک"
+                    "$domainOrUrlText مشکوک"
 
                 when (threatType) {
                     Alert.ThreatType.PHISHING -> Triple(

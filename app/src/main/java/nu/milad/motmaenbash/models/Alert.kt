@@ -12,7 +12,8 @@ data class Alert(
     val summary: String? = null,
     val content: String? = null,
     val param1: String,
-    val param2: String?
+    val param2: String?,
+    val param3: String? = null
 ) : Parcelable {
 
     enum class AlertLevel(val value: Int) {
@@ -35,7 +36,8 @@ data class Alert(
         SMS_PATTERN_FLAGGED(4),
         SMS_NEUTRAL(5),
         APP_FLAGGED(6),
-        URL_FLAGGED(7);
+        URL_FLAGGED(7),
+        APP_RISKY_INSTALL(8);
 
 
         companion object {

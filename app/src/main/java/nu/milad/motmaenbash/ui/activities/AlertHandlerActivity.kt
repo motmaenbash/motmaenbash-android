@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -66,8 +65,8 @@ import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.ui.theme.Red
+import nu.milad.motmaenbash.ui.theme.YellowDark
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
 import nu.milad.motmaenbash.utils.PackageUtils
@@ -142,7 +141,8 @@ class AlertHandlerActivity : ComponentActivity() {
                         summary = alert.summary,
                         content = alert.content,
                         param1 = alert.param1,
-                        param2 = alert.param2
+                        param2 = alert.param2,
+                        param3 = alert.param3
                     ),
 
                     onDismiss = { finishAndRemoveTask() },
@@ -300,6 +300,8 @@ fun AlertDialog(
                             text = alert.content,
                             color = colorScheme.onSurface,
                             fontSize = 13.sp,
+                            lineHeight = 22.sp,
+
                             modifier = Modifier
                                 .fillMaxWidth()
                         )
@@ -312,8 +314,8 @@ fun AlertDialog(
                             SmsAlertContent(context, alert)
                         }
 
-                        Alert.AlertType.APP_FLAGGED -> {
-                            AppAlertContent(context, alert.param1, alert.param2)
+                        Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL -> {
+                            AppAlertContent(context, alert.param1, alert.param2, alert.param3)
                         }
 
                         else -> {
@@ -340,7 +342,7 @@ fun AlertDialog(
                 }
 
 
-                if (alert.type == Alert.AlertType.APP_FLAGGED) {
+                if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
@@ -350,7 +352,7 @@ fun AlertDialog(
                             .height(48.dp)
                             .padding(horizontal = 4.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Red
+                            containerColor = alertColor
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -446,19 +448,45 @@ private fun SmsAlertContent(
 private fun AppAlertContent(
     context: Context,
     packageName: String,
-    appName: String?
+    appName: String?,
+    permissionCombinationDescription: String?
 ) {
     val appInfo = runCatching {
         context.packageManager.getApplicationInfo(packageName, 0)
     }.getOrNull()
 
-    appInfo?.let {
+    if (permissionCombinationDescription != null) {
+
+
+        Column(
+            modifier = Modifier
+                .padding(4.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+            ) {
+            Text(
+                text = permissionCombinationDescription,
+                color = colorScheme.onSurface,
+                fontSize = 13.sp,
+                lineHeight = 21.sp,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+
+                )
+        }
+    }
+
         Column(
             modifier = Modifier
                 .padding(4.dp)
                 .clip(RoundedCornerShape(16.dp)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+        appInfo?.let {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -532,9 +560,7 @@ private fun DefaultActionButton(onDismiss: () -> Unit) {
 private fun AlertFooter(alertType: Alert.AlertType) {
     val protectionType = when (alertType) {
         in SMS_ALERT_TYPES -> "سپر پیامک"
-        Alert.AlertType.APP_FLAGGED -> "سپر برنامه"
-
-
+        Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL -> "سپر برنامه"
         else -> "سپر امنیتی"
     }
 
@@ -575,6 +601,8 @@ class AllAlertTypesPreviewParameterProvider : PreviewParameterProvider<Alert.Ale
         Alert.AlertType.SMS_PATTERN_FLAGGED,
         Alert.AlertType.APP_FLAGGED,
         Alert.AlertType.URL_FLAGGED,
+        Alert.AlertType.APP_RISKY_INSTALL,
+
     )
 }
 
@@ -594,6 +622,8 @@ fun createAlertFromType(
         Alert.AlertType.SMS_NEUTRAL -> "09123456789" to "این یک پیامک عادی است."
         Alert.AlertType.APP_FLAGGED -> "com.malicious.app" to "نام برنامه مخرب"
         Alert.AlertType.URL_FLAGGED -> "https://malicious-site.com" to "این آدرس مشکوک است."
+        Alert.AlertType.APP_RISKY_INSTALL -> "com.malicious.app" to "نام برنامه مخرب"
+
     }
 
     // Define alert level based on type
@@ -605,6 +635,8 @@ fun createAlertFromType(
         Alert.AlertType.SMS_NEUTRAL -> Alert.AlertLevel.NEUTRAL
         Alert.AlertType.APP_FLAGGED -> Alert.AlertLevel.ALERT
         Alert.AlertType.URL_FLAGGED -> Alert.AlertLevel.ALERT
+        Alert.AlertType.APP_RISKY_INSTALL -> Alert.AlertLevel.WARNING
+
     }
 
     return Alert(

@@ -56,19 +56,31 @@ class DatabaseHelper(appContext: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
 
-        when (oldVersion) {
-            1 -> {
-                // Upgrade from version 1 to 2
+        if (oldVersion < 3) {
+            db.execSQL(
+                """
+            CREATE TABLE alert_history_temp (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type INTEGER NOT NULL,
+                timestamp INTEGER NOT NULL
+            )
+        """.trimIndent()
+            )
 
+            db.execSQL(
+                """
+            INSERT INTO alert_history_temp (id, type, timestamp)
+            SELECT id, type, timestamp FROM $TABLE_ALERT_HISTORY
+        """.trimIndent()
+            )
+
+            db.execSQL("DROP TABLE $TABLE_ALERT_HISTORY")
+            db.execSQL("ALTER TABLE alert_history_temp RENAME TO $TABLE_ALERT_HISTORY")
             }
 
-            2 -> {
-
-            }
-        }
-        dropTables(db)
-        createTables(db)
-        prepopulateData(db)
+        // dropTables(db)
+        // createTables(db)
+        // prepopulateData(db)
     }
 
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -189,9 +201,7 @@ class DatabaseHelper(appContext: Context) :
     CREATE TABLE IF NOT EXISTS $TABLE_ALERT_HISTORY (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         type INTEGER NOT NULL,
-        timestamp INTEGER NOT NULL,
-        param1 TEXT,
-        param2 TEXT
+        timestamp INTEGER NOT NULL
     );
     """
         )
@@ -602,8 +612,6 @@ class DatabaseHelper(appContext: Context) :
         val values = ContentValues().apply {
             put("type", alertType.value)
             put("timestamp", System.currentTimeMillis())
-            put("param1", param1)
-            put("param2", param2)
         }
         writableDatabase.insert(TABLE_ALERT_HISTORY, null, values)
     }
