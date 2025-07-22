@@ -12,7 +12,6 @@ workRuntime = "2.10.2"
 navigationCompose = "2.9.2"
 accompanistPermissions = "0.37.3"
 agp = "8.11.1"
-browser = "1.8.0"
 coilCompose = "2.7.0"
 firebaseBom = "33.16.0"
 google-services = "4.4.3"
@@ -21,7 +20,6 @@ firebase-performance = "1.4.2"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
-androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }

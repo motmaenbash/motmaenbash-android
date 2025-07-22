@@ -24,7 +24,7 @@ import nu.milad.motmaenbash.consts.AppConstants.USER_REPORT_FORM_URL
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
+import nu.milad.motmaenbash.utils.WebUtils.openUrl
 
 
 @Composable
@@ -53,7 +53,7 @@ fun UserReportScreen() {
             Button(
                 onClick = {
                     val url = USER_REPORT_FORM_URL
-                    openUrlInCustomTab(context, url)
+                    openUrl(context, url)
                 }, modifier = Modifier
                     .wrapContentWidth()
                     .padding(top = 24.dp)

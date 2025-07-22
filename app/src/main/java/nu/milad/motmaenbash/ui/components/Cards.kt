@@ -32,7 +32,7 @@ import nu.milad.motmaenbash.consts.AppConstants
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.utils.WebUtils.openUrlInCustomTab
+import nu.milad.motmaenbash.utils.WebUtils.openUrl
 
 
 @Composable
@@ -60,7 +60,7 @@ fun DonationCard() {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick = { openUrlInCustomTab(context, AppConstants.DONATE_URL) },
+                    onClick = { openUrl(context, AppConstants.DONATE_URL) },
                     modifier = Modifier.wrapContentSize(),
                     colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
                 ) {

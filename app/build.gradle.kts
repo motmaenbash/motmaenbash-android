@@ -73,7 +73,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.datastore.core.android)
-    implementation(libs.androidx.browser)
     implementation(libs.androidx.work.runtime.ktx)
 
     // Firebase
