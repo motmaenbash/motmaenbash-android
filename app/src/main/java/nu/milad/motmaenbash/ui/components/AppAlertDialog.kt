@@ -35,6 +35,7 @@ fun AppAlertDialog(
     onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {},
     dismissText: String? = null,
+    dismissible: Boolean = true,
     //message text, links and dynamic content
     message: String? = null,
     content: (@Composable () -> Unit)? = null,
@@ -42,12 +43,18 @@ fun AppAlertDialog(
 ) {
     AlertDialog(
         properties = DialogProperties(
-            usePlatformDefaultWidth = false
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = dismissible,
+            dismissOnClickOutside = dismissible
         ),
         modifier = Modifier
             .padding(horizontal = 24.dp),
         containerColor = colorScheme.surface,
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (dismissible) {
+                onDismiss()
+            }
+        },
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

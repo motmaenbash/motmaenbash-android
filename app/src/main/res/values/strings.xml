@@ -31,7 +31,7 @@
     <!--  Guard Titles -->
     <string name="sms">پیامک</string>
     <string name="web">وب‌گردی</string>
-    <string name="app">برنامه</string>
+    <string name="app">نصب برنامه</string>
 
     <string name="guard_sms">سپر پیامک</string>
     <string name="guard_web">سپر وب‌گردی</string>
@@ -53,11 +53,11 @@
     <string name="permission_query_packages">مشاهده لیست برنامه‌ها</string>
 
     <!--  Permission Descriptions  -->
-    <string name="permission_receive_sms_description">برای شناسایی و هشدار در مورد پیامک‌های فیشینگ و کلاهبرداری، برنامه به این دسترسی نیاز دارد.</string>
-    <string name="permission_notification_description">این دسترسی امکان اجرای پایدار سرویس برنامه در پیش‌زمینه (Foreground) و نمایش اعلان مربوط به فعال بودن آن را در اندروید ۸ و بالاتر فراهم می‌کند.</string>
-    <string name="permission_accessibility_description">برای شناسایی و هشدار درباره سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی و نمایش نماد درگاه پرداخت معتبر، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
-    <string name="permission_accessibility_short_description">برای شناسایی سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
     <string name="permission_overlay_description">در صورت شناسایی هرگونه تهدید مانند پیامک، لینک یا برنامه مشکوک، برای نمایش پنجره هشدار حتی هنگام استفاده از سایر برنامه‌ها، برنامه به این دسترسی نیاز دارد.</string>
+    <string name="permission_notification_description">این دسترسی امکان اجرای پایدار سرویس برنامه در پیش‌زمینه (Foreground) و نمایش اعلان مربوط به فعال بودن آن را در اندروید ۸ و بالاتر فراهم می‌کند.</string>
+    <string name="permission_receive_sms_description">برای شناسایی و هشدار درباره پیامک‌های مشکوک، برنامه به این دسترسی نیاز دارد. این دسترسی فقط پیامک دریافتی را بررسی می‌کند و امکان ارسال پیامک ندارد.</string>
+    <string name="permission_accessibility_short_description">برای شناسایی سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
+    <string name="permission_accessibility_description">برای شناسایی و هشدار درباره سایت‌های کلاهبرداری و فیشینگ هنگام وب‌گردی و نمایش نماد درگاه پرداخت معتبر، برنامه نیاز دارد آدرس مرورگر را بررسی کند. این قابلیت از طریق سرویس دسترسی‌پذیری فراهم می‌شود.</string>
     <string name="permission_settings_may_vary">مراحل فعال‌سازی ممکن است در برخی نسخه‌های اندروید یا مدل‌های گوشی کمی متفاوت باشد.</string>
 
 
@@ -130,7 +130,7 @@
 
     <!--  Donation  -->
     <string name="donation_title">حـمـایـت مـالـی</string>
-    <string name="donation_message">با حمایت مالی (دونیت)، می‌توانید به توسعه و بهبود مستمر این پروژه کمک کنید.</string>
+    <string name="donation_message">با حمایت مالی (دونیت)، می‌توانید به توسعه و بهبود مستمر «مطمئن باش» کمک کنید.</string>
 
     <!-- Accessibility -->
     <string name="accessibility_service_description">

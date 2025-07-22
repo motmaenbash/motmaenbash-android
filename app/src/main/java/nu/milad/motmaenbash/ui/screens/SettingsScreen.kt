@@ -185,7 +185,7 @@ fun SettingsScreen(
             preferences = listOf(
                 ListPreferenceItem(
                     title = stringResource(id = R.string.setting_show_sms_dialog),
-                    description = "این گزینه فقط نمایش پنجره پیامک‌های معمولی و بدون مشکل را کنترل می‌کند. هشدار پیامک‌های مشکوک همیشه نمایش داده می‌شود.",
+                    description = "این تنظیم فقط برای پیامک‌های معمولی است و روی هشدارهای امنیتی تاثیری ندارد. هشدار پیامک مشکوک همواره با پنجره قرمز نمایش داده می‌شود.",
                     entries = context.resources.getStringArray(R.array.yes_or_no)
                         .toList(),
                     values = context.resources.getStringArray(R.array.yes_or_no_values)

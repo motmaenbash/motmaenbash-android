@@ -2,8 +2,10 @@ package nu.milad.motmaenbash.ui.components
 
 import android.os.Build
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,18 +15,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Sms
+import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -38,18 +49,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import nu.milad.motmaenbash.R
+import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.models.AppUpdate
+import nu.milad.motmaenbash.ui.activities.SmsAlertContent
+import nu.milad.motmaenbash.ui.theme.ColorPrimary
+import nu.milad.motmaenbash.ui.theme.GreyDark
+import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.utils.WebUtils
 
@@ -551,6 +569,182 @@ fun FontInfoDialog(onDismiss: () -> Unit) {
 }
 
 
+@Composable
+fun SmsSettingsDialog(
+    onEnableNormalSms: () -> Unit,
+    onDisableNormalSms: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AppAlertDialog(
+        title = "تنظیمات پنجره دریافت پیامک",
+        icon = Icons.AutoMirrored.Outlined.Message,
+        confirmText = null,
+        dismissText = null,
+        onDismiss = onDismiss,
+        dismissible = false,
+        message = "آیا مایلید پیامک‌های معمولی (غیرمشکوک) نیز در پنجره پاپ‌آپ نمایش داده شوند؟",
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+            ) {
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Example of normal SMS dialog
+                MockSmsDialog()
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text =
+                        "این تنظیم فقط برای پیامک‌های معمولی است و روی هشدارهای امنیتی تاثیری ندارد. هشدار پیامک مشکوک همواره با پنجره قرمز نمایش داده می‌شود.",
+
+
+                    style = typography.titleSmall,
+                    color = GreyMiddle,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = onDisableNormalSms,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = GreyMiddle
+                        ),
+                        border = BorderStroke(1.dp, GreyMiddle.copy(alpha = 0.5f))
+                    ) {
+                        Text(
+                            text = "خیر",
+                            fontSize = 14.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+
+                    Button(
+                        onClick = onEnableNormalSms,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ColorPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "بله، فعال کن",
+                            fontSize = 14.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text =
+                        "این گزینه بعدا از طریق تنظیمات برنامه قابل تغییر است.",
+                    style = typography.titleSmall,
+                    color = GreyMiddle,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun MockSmsDialog() {
+    AppCard(
+        padding = 0.dp,
+        elevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            // Header row with badge and close button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+
+                Row(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .background(
+                            color = GreyDark,
+                            shape = RoundedCornerShape(bottomEnd = 12.dp, bottomStart = 12.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Textsms,
+                        contentDescription = null,
+                        tint = colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "پیامک جدید",
+                        color = colorScheme.onPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                IconButton(
+                    onClick = { },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(top = 8.dp)
+                ) {
+                    Icon(
+
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "بستن",
+                        tint = GreyMiddle
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            SmsAlertContent(
+                LocalContext.current, Alert(
+                    type = Alert.AlertType.SMS_NEUTRAL,
+                    level = Alert.AlertLevel.NEUTRAL,
+                    title = "پیامک جدید",
+                    param1 = "+989120000000",
+                    param2 = "سلام. خوبی؟ چه خبر؟"
+                )
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+        }
+    }
+
+}
+
+
 // PREVIEW SECTION
 @Preview(showBackground = true)
 @Composable
@@ -681,6 +875,30 @@ fun FontInfoDialogPreview() {
     MotmaenBashTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             FontInfoDialog(onDismiss = {})
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SmsSettingsPreview() {
+    MotmaenBashTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            SmsSettingsDialog(
+                onDismiss = {},
+                onEnableNormalSms = {},
+                onDisableNormalSms = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MockSmsDialogPreview() {
+    MotmaenBashTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            MockSmsDialog()
         }
     }
 }

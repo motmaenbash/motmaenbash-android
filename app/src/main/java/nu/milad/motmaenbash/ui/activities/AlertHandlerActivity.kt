@@ -79,7 +79,7 @@ class AlertHandlerActivity : ComponentActivity() {
 
 
     private lateinit var alert: Alert
-    
+
     private val uninstallLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -376,7 +376,7 @@ fun AlertDialog(
 
 
 @Composable
-private fun SmsAlertContent(
+fun SmsAlertContent(
     context: Context,
     alert: Alert,
 ) {
@@ -428,7 +428,6 @@ private fun SmsAlertContent(
         ) {
             SelectionContainer {
                 Text(
-
                     text = it.replace(Regex("\n{3,}"), "\n\n").trim(),
                     color = colorScheme.onSurface,
                     fontSize = 14.sp,
@@ -480,12 +479,12 @@ private fun AppAlertContent(
         }
     }
 
-        Column(
-            modifier = Modifier
-                .padding(4.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Column(
+        modifier = Modifier
+            .padding(4.dp)
+            .clip(RoundedCornerShape(16.dp)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         appInfo?.let {
             Row(
                 modifier = Modifier
@@ -581,7 +580,7 @@ private fun AlertFooter(alertType: Alert.AlertType) {
                     color = colorScheme.primary, fontWeight = FontWeight.Bold
                 )
             ) {
-                append(" مطمئن باش")
+                append(" «مطمئن باش»")
             }
         },
         fontSize = 12.sp,
@@ -603,7 +602,7 @@ class AllAlertTypesPreviewParameterProvider : PreviewParameterProvider<Alert.Ale
         Alert.AlertType.URL_FLAGGED,
         Alert.AlertType.APP_RISKY_INSTALL,
 
-    )
+        )
 }
 
 @Composable

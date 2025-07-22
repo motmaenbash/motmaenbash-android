@@ -1457,7 +1457,7 @@ fun AppVersion(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "مطمئن باش، نسخه " + BuildConfig.VERSION_NAME,
+            text = "«مطمئن باش»، نسخه " + BuildConfig.VERSION_NAME,
             fontSize = 13.sp,
             color = colorScheme.onSurface
         )

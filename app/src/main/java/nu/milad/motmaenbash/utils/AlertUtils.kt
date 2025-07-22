@@ -23,7 +23,6 @@ object AlertUtils {
 
 
     // Settings
-    private var playNeutralSmsSound = false
     private var showNeutralSmsDialog = true
 
     fun showAlert(
@@ -43,8 +42,7 @@ object AlertUtils {
 
             // Load settings
             val preferences = context.dataStore.data.first()
-            playNeutralSmsSound = preferences[SettingsViewModel.PLAY_NEUTRAL_SMS_SOUND] ?: true
-            showNeutralSmsDialog = preferences[SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG] ?: true
+            showNeutralSmsDialog = preferences[SettingsViewModel.SHOW_NEUTRAL_SMS_DIALOG] ?: false
 
 
             // Exit if alert is neutral and dialog is off
