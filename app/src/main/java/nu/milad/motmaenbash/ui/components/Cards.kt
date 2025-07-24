@@ -58,7 +58,7 @@ fun DonationCard() {
                     color = colorScheme.onTertiaryContainer,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { openUrl(context, AppConstants.DONATE_URL) },
                     modifier = Modifier.wrapContentSize(),
@@ -72,7 +72,7 @@ fun DonationCard() {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         text = stringResource(R.string.donation_title),
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }

@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.DeadObjectException
 import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
@@ -28,20 +29,22 @@ object PackageUtils {
      * @param packageName The package name of the app to retrieve info for.
      * @return An AppData object containing information about the app.
      */
-    fun getAppInfo(context: Context, packageName: String): App {
+    fun getAppInfo(context: Context, packageName: String): App? {
 
-        val pm: PackageManager = context.packageManager
+        return try {
 
-        // Get appropriate flags based on API level
-        val packageFlags = getPackageInfoFlags()
+            val pm: PackageManager = context.packageManager
 
-        try {
+            // Get appropriate flags based on API level
+            val packageFlags = getPackageInfoFlags()
+
 
             val packageInfo: PackageInfo = pm.getPackageInfo(packageName, packageFlags)
 
             // Get basic app information
-            val appName = packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
-                ?: "Unknown"
+            val appName =
+                packageInfo.applicationInfo?.let { pm.getApplicationLabel(it).toString() }
+                    ?: "Unknown"
             val appIcon = pm.getApplicationIcon(packageName)
 
             val versionName = packageInfo.versionName ?: "Unknown"
@@ -67,7 +70,6 @@ object PackageUtils {
             // Get installation source
             val installSource = getInstallationSource(context, packageName)
 
-
             return App(
                 appName,
                 packageName,
@@ -83,11 +85,15 @@ object PackageUtils {
             )
 
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Package not found: $packageName", e)
-            throw e
+            // Package is no longer available or accessible
+            Log.w(TAG, "Package not found during security check: $packageName", e)
+            null
+        } catch (e: DeadObjectException) {
+            Log.w(TAG, "System server died while accessing package: $packageName", e)
+            null
         } catch (e: Exception) {
-            Log.e(TAG, "Error retrieving app info for $packageName", e)
-            throw e
+            Log.e(TAG, "Unexpected error retrieving app info: $packageName", e)
+            null
         }
     }
 
@@ -145,7 +151,7 @@ object PackageUtils {
                     .installingPackageName ?: "Unknown"
             } else {
                 @Suppress("DEPRECATION")
-                    context.packageManager.getInstallerPackageName(packageName) ?: "Unknown"
+                context.packageManager.getInstallerPackageName(packageName) ?: "Unknown"
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting installation source for $packageName", e)
@@ -170,6 +176,8 @@ object PackageUtils {
         Log.d(TAG, "Install source: $installer, trusted: $isTrusted")
         return isTrusted
     }
+
+
     /**
      * Creates an intent to uninstall the specified app
      *

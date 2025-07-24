@@ -117,6 +117,7 @@ import nu.milad.motmaenbash.ui.components.AppCard
 import nu.milad.motmaenbash.ui.components.ChangelogDialog
 import nu.milad.motmaenbash.ui.components.CriticalPermissionsInfoDialog
 import nu.milad.motmaenbash.ui.components.Divider
+import nu.milad.motmaenbash.ui.components.DonationCard
 import nu.milad.motmaenbash.ui.components.GuardsInfoDialog
 import nu.milad.motmaenbash.ui.components.NotificationPermissionDialog
 import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
@@ -431,8 +432,8 @@ fun MainScreen(
                 LinkCard(linkData = it)
             }
 
-            BetaNotice()
-
+            DonationCard()
+            
             Divider()
 
             AppVersion(navController)

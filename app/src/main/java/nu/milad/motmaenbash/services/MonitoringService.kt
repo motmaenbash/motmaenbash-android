@@ -32,7 +32,7 @@ class MonitoringService : Service() {
 
     // Messages for notification rotation
     private val notificationMessages = listOf(
-        " در حال محافظت توسط مطمئن باش ",
+        " در حال محافظت توسط «مطمئن باش»",
         "سپرهای فعال: نصب برنامه"  // Default value, will be updated during rotation
     )
 

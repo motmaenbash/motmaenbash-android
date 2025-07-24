@@ -83,6 +83,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                     nonSystemAppPackages.mapIndexed { index, packageInfo ->
                         async {
                             val app = getAppInfo(context, packageInfo.packageName)
+                            if (app != null) {
                             val currentProcessed = processedAppsCounter.incrementAndGet()
 
                             launch(Dispatchers.Main) {
@@ -90,7 +91,8 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                     NumberUtils.toPersianNumbers("$currentProcessed/$totalApps")
 
                                 // Add app to currently scanned apps
-                                val currentScannedApps = _currentlyScannedApps.value.toMutableList()
+                                    val currentScannedApps =
+                                        _currentlyScannedApps.value.toMutableList()
                                 currentScannedApps.add(app)
                                 _currentlyScannedApps.value = currentScannedApps
                             }
@@ -107,6 +109,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                 app
                             } else null
                         }
+                    }
                     }
 
                 try {

@@ -15,8 +15,8 @@ agp = "8.11.1"
 coilCompose = "2.7.0"
 firebaseBom = "33.16.0"
 google-services = "4.4.3"
-firebase-crashlytics = "3.0.4"
-firebase-performance = "1.4.2"
+firebase-crashlytics = "3.0.5"
+firebase-performance = "2.0.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }

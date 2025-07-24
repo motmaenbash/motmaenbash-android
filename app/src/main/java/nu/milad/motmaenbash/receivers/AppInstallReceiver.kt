@@ -3,8 +3,11 @@ package nu.milad.motmaenbash.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
@@ -43,61 +46,70 @@ class AppInstallReceiver : BroadcastReceiver() {
         }
     }
 
+
     private fun checkAppAgainstDatabase(context: Context, packageName: String) {
-        Log.d(TAG, "Starting security check for app: $packageName")
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.d(TAG, "Starting security check for app: $packageName")
 
-        try {
-            val dbHelper = DatabaseHelper(context)
-            val appInfo = PackageUtils.getAppInfo(context, packageName)
+            try {
+                val app = PackageUtils.getAppInfo(context, packageName) ?: return@launch
 
-            val isAppFlagged = dbHelper.isAppFlagged(packageName, appInfo.apkHash, appInfo.sighHash)
-
-            if (isAppFlagged) {
-                // App found suspicious in the database, alert the user
-                AlertUtils.showAlert(
-                    context = context,
-                    alertType = Alert.AlertType.APP_FLAGGED,
-                    alertLevel = Alert.AlertLevel.ALERT,
-                    param1 = packageName,
-                    param2 = appInfo.appName,
+                val dbHelper = DatabaseHelper(context)
+                val isAppFlagged = dbHelper.isAppFlagged(
+                    packageName,
+                    app.apkHash,
+                    app.sighHash
                 )
-            } else if (!PackageUtils.isFromTrustedSource(appInfo.installSource) &&
-                PackageUtils.hasRiskyPermissionCombination(appInfo.permissions)
-            ) {
 
-                val riskyPermissionCombinations =
-                    PackageUtils.getDetectedRiskyPermissionCombinations(appInfo.permissions)
-
-                // Collect all descriptions
-                val descriptions = riskyPermissionCombinations.mapIndexed { index, combo ->
-                    PackageUtils.getRiskyPermissionCombinationDescription(combo)
-                }
-                // Format the descriptions for param3
-                val param3 = when {
-                    descriptions.isEmpty() -> ""
-                    descriptions.size <= 5 -> descriptions.joinToString("\nو ")
-                    else -> {
-                        val firstFour = descriptions.take(4).joinToString("\nو ")
-                        val remainingCount = descriptions.size - 4
-                        "$firstFour\nو $remainingCount ترکیب دیگر..."
+                if (isAppFlagged) {
+                    withContext(Dispatchers.Main) {
+                        AlertUtils.showAlert(
+                            context = context,
+                            alertType = Alert.AlertType.APP_FLAGGED,
+                            alertLevel = Alert.AlertLevel.ALERT,
+                            param1 = packageName,
+                            param2 = app.appName,
+                        )
                     }
+                    return@launch
+                } else if (!PackageUtils.isFromTrustedSource(app.installSource) &&
+
+                    PackageUtils.hasRiskyPermissionCombination(app.permissions)
+                ) {
+
+                    val riskyPermissionCombinations =
+                        PackageUtils.getDetectedRiskyPermissionCombinations(app.permissions)
+
+                    // Collect all descriptions
+                    val descriptions = riskyPermissionCombinations.mapIndexed { index, combo ->
+                        PackageUtils.getRiskyPermissionCombinationDescription(combo)
+                    }
+                    // Format the descriptions for param3
+                    val param3 = when {
+                        descriptions.isEmpty() -> ""
+                        descriptions.size <= 5 -> descriptions.joinToString("\nو ")
+                        else -> {
+                            val firstFour = descriptions.take(4).joinToString("\nو ")
+                            val remainingCount = descriptions.size - 4
+                            "$firstFour\nو $remainingCount ترکیب دیگر..."
+                        }
+                    }
+
+                    AlertUtils.showAlert(
+                        context = context,
+                        alertType = Alert.AlertType.APP_RISKY_INSTALL,
+                        alertLevel = Alert.AlertLevel.WARNING,
+                        param1 = packageName,
+                        param2 = app.appName,
+                        param3 = param3
+                    )
                 }
 
-                AlertUtils.showAlert(
-                    context = context,
-                    alertType = Alert.AlertType.APP_RISKY_INSTALL,
-                    alertLevel = Alert.AlertLevel.WARNING,
-                    param1 = packageName,
-                    param2 = appInfo.appName,
-                    param3 = param3
-                )
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking app against database: $packageName", e)
             }
-        } catch (e: PackageManager.NameNotFoundException) {
-            // Package was broadcast but is no longer available or accessible
-            Log.w(TAG, "Package not found during security check: $packageName", e)
-            // No need to alert the user as the package isn't accessible
-        } catch (e: Exception) {
-            Log.e(TAG, "Error checking app against database: $packageName", e)
+
         }
     }
 }
