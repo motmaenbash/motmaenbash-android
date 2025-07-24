@@ -101,6 +101,7 @@ class AlertHandlerActivity : ComponentActivity() {
             intent.getParcelableExtra(EXTRA_ALERT, Alert::class.java)
                 ?: throw IllegalStateException("Alert extra is required")
         } else {
+            @Suppress("DEPRECATION")
             (intent.getParcelableExtra(EXTRA_ALERT) as? Alert)
                 ?: throw IllegalStateException("Alert extra is required")
         }

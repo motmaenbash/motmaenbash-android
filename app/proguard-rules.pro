@@ -20,6 +20,10 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Keep Alert class and inner classes
+-keep class nu.milad.motmaenbash.models.Alert { *; }
+-keep class nu.milad.motmaenbash.models.Alert$** { *; }
+
 # Remove Logs
 -assumenosideeffects class android.util.Log {
     public static *;
