@@ -97,7 +97,7 @@ fun AboutScreen() {
             DonationCard()
 
             SecurityWarning()
-            
+
             ActionButtons(context)
 
             Divider(verticalPadding = 12.dp)
@@ -288,7 +288,7 @@ fun ActionButtons(
             ) {
             Icon(
                 imageVector = Icons.Outlined.BugReport,
-                contentDescription = "Donate",
+                contentDescription = "Bug Report",
                 tint = Color.White
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -327,7 +327,10 @@ private fun shareAppInfo(context: Context) {
                 🛡️ شناسایی و هشدار درباره برنامه‌های مخرب
                 
               📥 این برنامه کاملا رایگانه! می‌تونی از اینجا نصبش کنی:  
-                🔗 https://motmaenbash.ir/
+                🔗 https://MotmaenBash.ir/
+                
+                👈 مشاهده ویدئوی معرفی برنامه «مطمئن باش»:
+                https://youtu.be/xN8Pjf4bSC4
             """.trimIndent()
         )
     }
