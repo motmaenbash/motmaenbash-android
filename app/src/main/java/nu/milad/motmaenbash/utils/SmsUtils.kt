@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.telephony.SmsMessage
 import android.util.Log
 import nu.milad.motmaenbash.utils.TextUtils.arabicToPersian
-import nu.milad.motmaenbash.utils.TextUtils.cleanMessage
-import nu.milad.motmaenbash.utils.TextUtils.extractPhrases
-import nu.milad.motmaenbash.utils.TextUtils.removeLinks
 import nu.milad.motmaenbash.utils.TextUtils.removeShortWords
 
 object SmsUtils {
@@ -62,7 +59,6 @@ object SmsUtils {
      */
     fun normalizeMessage(message: String): String {
         var cleanedMessage = message
-
 
 
         // Step 1: Remove charactersoutside the allowed set (Arabic, Persian, whitespace, zero-width) and Kashida

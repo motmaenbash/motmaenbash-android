@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.Divider
+import nu.milad.motmaenbash.ui.components.SecurityWarning
 import nu.milad.motmaenbash.ui.screens.AnimatedPermissionIcon
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 
@@ -75,7 +76,7 @@ fun FinalStep(
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = onNext,
             modifier = Modifier.width(200.dp),
@@ -85,7 +86,8 @@ fun FinalStep(
         }
     }
 
-
+    Spacer(modifier = Modifier.height(16.dp))
+    SecurityWarning()
 }
 
 

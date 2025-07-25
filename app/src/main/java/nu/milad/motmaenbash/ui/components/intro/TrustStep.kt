@@ -126,7 +126,7 @@ fun TrustReasonCard(
         border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
     ) {
 
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

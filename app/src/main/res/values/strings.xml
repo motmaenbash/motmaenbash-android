@@ -117,8 +117,8 @@
     <string name="no_email_app_found">برنامه‌ای برای ارسال ایمیل یافت نشد.</string>
 
     <!-- App Update -->
-    <string name="app_update_message">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. می‌توانید برنامه را به آخرین نسخه به‌روزرسانی کنید.</string>
-    <string name="app_update_message_force">نسخه جدیدی از برنامه مطمئن باش منتشر شده است. برای ادامه، لطفا برنامه را به‌روزرسانی کنید.</string>
+    <string name="app_update_message">نسخه جدیدی از برنامه «مطمئن باش» منتشر شده است. می‌توانید برنامه را به آخرین نسخه به‌روزرسانی کنید.</string>
+    <string name="app_update_message_force">نسخه جدیدی از برنامه «مطمئن باش» منتشر شده است. برای ادامه، لطفا برنامه را به‌روزرسانی کنید.</string>
 
     <!-- Notification-->
     <string name="motmaenbash_general_channel">اعلان‌های برنامه</string>
@@ -134,12 +134,12 @@
 
     <!-- Accessibility -->
     <string name="accessibility_service_description">
-    با فعال‌سازی این سرویس، برنامه مطمئن باش با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی می‌کند. همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وب‌گردی افزایش یابد.
+    با فعال‌سازی این سرویس، برنامه «مطمئن باش» با نظارت بر مرورگرهای پشتیبانی‌شده، اصالت درگاه‌های پرداخت را بررسی می‌کند. همچنین در صورت شناسایی لینک‌های مخرب یا صفحات فیشینگ و کلاهبرداری، به شما هشدار می‌دهد تا امنیت شما هنگام وب‌گردی افزایش یابد.
     \n\n
     By enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways. It also alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.
     </string>
     <string name="accessibility_service_summary">
-        سرویس دسترسی‌پذیری برنامه مطمئن باش، جهت تحلیل لینک‌های مرورگر و هشدار در صورت شناسایی موارد مشکوک
+        سرویس دسترسی‌پذیری برنامه «مطمئن باش»، جهت تحلیل لینک‌های مرورگر و هشدار در صورت شناسایی موارد مشکوک
         \n
         Analyzes browser links and warns about suspicious content
     </string>

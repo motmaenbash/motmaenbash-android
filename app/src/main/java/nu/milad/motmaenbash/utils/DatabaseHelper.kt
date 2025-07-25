@@ -303,9 +303,10 @@ class DatabaseHelper(appContext: Context) :
         jsonArray: JSONArray
     ) {
         db?.let {
-            var insertValues = ContentValues()
 
+            val insertValues = ContentValues()
             try {
+
                 for (i in 0 until jsonArray.length()) {
                     it.transaction {
 
@@ -316,6 +317,7 @@ class DatabaseHelper(appContext: Context) :
                                 if (hash.startsWith("-")) {
                                     // Delete record
                                     val originalHash = hash.substring(1)
+
                                     delete(tableName, "hash = ? LIMIT 1", arrayOf(originalHash))
                                 } else {
                                     // Insert new record
@@ -547,7 +549,11 @@ class DatabaseHelper(appContext: Context) :
         return Triple(false, null, 1)
     }
 
-    private fun countData(tableName: String, selection: String, selectionArgs: Array<String>): Int {
+    private fun countData(
+        tableName: String,
+        selection: String,
+        selectionArgs: Array<String>
+    ): Int {
         val query = "SELECT COUNT(*) FROM $tableName WHERE $selection LIMIT 1"
 
         var count = 0
@@ -563,7 +569,10 @@ class DatabaseHelper(appContext: Context) :
 
     fun getRandomTip(): String {
         val cursor =
-            readableDatabase.rawQuery("SELECT tip FROM $TABLE_TIPS ORDER BY RANDOM() LIMIT 1", null)
+            readableDatabase.rawQuery(
+                "SELECT tip FROM $TABLE_TIPS ORDER BY RANDOM() LIMIT 1",
+                null
+            )
         var tip = ""
         if (cursor.moveToFirst()) {
             tip = cursor.getString(cursor.getColumnIndexOrThrow("tip"))
@@ -596,7 +605,8 @@ class DatabaseHelper(appContext: Context) :
     }
 
     fun incrementUserStat(statKey: String) {
-        val updateQuery = "UPDATE $TABLE_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
+        val updateQuery =
+            "UPDATE $TABLE_STATS SET stat_count = stat_count + 1 WHERE stat_key = ?"
         writableDatabase.execSQL(updateQuery, arrayOf(statKey))
     }
 

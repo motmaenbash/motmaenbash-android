@@ -433,7 +433,7 @@ fun MainScreen(
             }
 
             DonationCard()
-            
+
             Divider()
 
             AppVersion(navController)
@@ -1415,36 +1415,6 @@ fun LinkCard(linkData: Link?) {
     }
 }
 
-// TODO: Remove this component after final release
-@Composable
-fun BetaNotice() {
-    val appVersion = BuildConfig.VERSION_NAME.lowercase()
-    val isPreRelease = appVersion.contains("alpha") || appVersion.contains("beta")
-
-    if (isPreRelease) {
-        AppCard {
-
-            AppCard(
-                containerColor = colorScheme.tertiaryContainer,
-                padding = 4.dp
-
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "نسخه‌های اول برنامه ممکن است دارای ایرادات و اشکالاتی باشد. لطفا مشکلات را از طریق گزارش اشکال در صفحه درباره برنامه اطلاع دهید.",
-                        fontSize = 12.sp,
-                        color = colorScheme.onTertiaryContainer,
-                        textAlign = TextAlign.Center
-                    )
-
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun AppVersion(navController: NavController) {
@@ -1628,16 +1598,5 @@ fun PreviewTipOfDaySection() {
             isRefreshing = false,
             onRefreshClick = {}
         )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun BetaNoticePreview() {
-    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
-        MotmaenBashTheme {
-            BetaNotice()
-        }
     }
 }

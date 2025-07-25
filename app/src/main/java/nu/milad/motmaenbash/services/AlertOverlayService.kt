@@ -35,7 +35,7 @@ class AlertOverlayService : Service() {
         private const val tag = "AlertOverlayService"
 
         fun showAlert(context: Context, suspiciousUrl: SuspiciousUrl) {
-            
+
             val intent = Intent(context, AlertOverlayService::class.java).apply {
                 putExtra(
                     "url",
@@ -114,8 +114,7 @@ class AlertOverlayService : Service() {
             windowManager?.addView(newOverlayView, params)
             overlayViews[alertId] = newOverlayView
 
-        } catch (e: Exception) {
-            Log.e(tag, "Error creating overlay", e)
+        } catch (_: Exception) {
         }
 
         return START_NOT_STICKY
@@ -148,13 +147,11 @@ class AlertOverlayService : Service() {
             overlayViews.forEach { (_, view) ->
                 try {
                     windowManager?.removeView(view)
-                } catch (e: Exception) {
-                    Log.e(tag, "Error removing view on destroy", e)
+                } catch (_: Exception) {
                 }
             }
             overlayViews.clear()
-        } catch (e: Exception) {
-            Log.e(tag, "Error in onDestroy", e)
+        } catch (_: Exception) {
         }
         super.onDestroy()
     }

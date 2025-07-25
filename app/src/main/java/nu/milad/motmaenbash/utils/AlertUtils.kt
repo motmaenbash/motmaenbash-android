@@ -3,13 +3,13 @@ package nu.milad.motmaenbash.utils
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.consts.AppConstants.MOTMAENBASH_EVENT
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_APP_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
@@ -122,11 +122,12 @@ object AlertUtils {
 
                 if (!BuildConfig.DEBUG) {
                     // Only the type of alert (statKey) is sent; no sensitive or detailed info is logged.
-                val bundle = Bundle().apply {
-                    putString("alert_type", alertType)
-                }
-                Firebase.analytics.logEvent(MOTMAENBASH_EVENT, bundle)
+                    val bundle = Bundle().apply {
+                        putString("alert_type", alertType)
+                    }
+                    Firebase.analytics.logEvent(MOTMAENBASH_EVENT, bundle)
 
+                }
             }
 
             // Log the alert history in the local database
@@ -179,13 +180,13 @@ object AlertUtils {
             Alert.AlertType.APP_FLAGGED -> Triple(
                 "نصب برنامه مشکوک",
                 "برنامه نصب شده مشکوک است.",
-                "براساس گزارش کاربرها، این برنامه مشکوک به بدافزار یا کلاهبرداری است و می‌تواند امنیت دستگاه و اطلاعات شما را تهدید کند. توصیه می‌شود بدون اجرای برنامه یا اعطای دسترسی، سریع آن را حذف کنید."
+                "براساس گزارش کاربرها، این برنامه مشکوک است و می‌تواند امنیت دستگاه و اطلاعات شما را تهدید کند. توصیه می‌شود بدون اجرای برنامه یا اعطای دسترسی، سریع آن را حذف کنید."
             )
 
             Alert.AlertType.APP_RISKY_INSTALL -> Triple(
                 "نصب برنامه با ریسک بالا",
                 "نصب برنامه از منبع نامعتبر + دسترسی حساس",
-                "این برنامه از منبع نامعتبر نصب شده و چند سطح دسترسی حساس دارد که معمولا در بدافزارها یا برنامه‌های فیشینگ دیده می‌شود. توصیه می‌شود در صورت عدم اطمینان، آن را حذف کنید."
+                "این برنامه از منبع نامعتبر نصب شده و چند سطح دسترسی حساس دارد که معمولا در بدافزارها یا برنامه‌های فیشینگ دیده می‌شود. توصیه می‌شود در صورت عدم اطمینان، سریع آن را حذف کنید.\nترکیب دسترسی‌های حساس:"
             )
 
             Alert.AlertType.URL_FLAGGED -> {

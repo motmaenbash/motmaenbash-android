@@ -60,10 +60,11 @@ import nu.milad.motmaenbash.ui.components.AppBar
 import nu.milad.motmaenbash.ui.components.AppLogo
 import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.components.DonationCard
+import nu.milad.motmaenbash.ui.components.SecurityWarning
 import nu.milad.motmaenbash.ui.components.TickerText
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
-import nu.milad.motmaenbash.ui.theme.Red
+import nu.milad.motmaenbash.ui.theme.RedVariant
 import nu.milad.motmaenbash.utils.WebUtils
 
 @Composable
@@ -95,8 +96,8 @@ fun AboutScreen() {
 
             DonationCard()
 
-            Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
-
+            SecurityWarning()
+            
             ActionButtons(context)
 
             Divider(verticalPadding = 12.dp)
@@ -108,6 +109,7 @@ fun AboutScreen() {
                     navController.navigate(NavRoutes.CHANGELOG_SCREEN)
                 },
             )
+
 
         }
     }
@@ -149,7 +151,7 @@ fun AppInfo(navController: NavController) {
     )
 
     Text(
-        text = "https://motmaenbash.ir", style =
+        text = "https://MotmaenBash.ir", style =
             typography.bodySmall.copy(
                 color = colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -160,7 +162,6 @@ fun AppInfo(navController: NavController) {
             })
 
     Divider(verticalPadding = 12.dp, horizontalPadding = 32.dp)
-
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -209,7 +210,7 @@ fun AppInfo(navController: NavController) {
             modifier = Modifier
                 .size(18.dp)
                 .scale(scale),
-            tint = Red
+            tint = RedVariant
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(

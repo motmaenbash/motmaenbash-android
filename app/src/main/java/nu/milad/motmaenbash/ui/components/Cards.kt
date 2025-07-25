@@ -1,13 +1,17 @@
 package nu.milad.motmaenbash.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CurrencyBitcoin
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -56,6 +60,7 @@ fun DonationCard() {
                     text = stringResource(R.string.donation_message),
                     style = typography.headlineSmall,
                     color = colorScheme.onTertiaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp),
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -83,6 +88,55 @@ fun DonationCard() {
     }
 }
 
+
+@Composable
+fun SecurityWarning() {
+    AppCard(
+        padding = 12.dp,
+        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
+    ) {
+
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Outlined.WarningAmber,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = colorScheme.onError
+
+                )
+                Text(
+                    text = "نکته مهم",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 4.dp),
+                    style = typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onError
+                )
+            }
+
+            Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
+            Text(
+                text = "اپلیکیشن «مطمئن باش» و به‌روزرسانی‌های آن را فقط از منابع رسمی و مارکت‌های معتبر نصب کنید.",
+                style = typography.bodySmall,
+                color = colorScheme.onSurface
+
+            )
+
+        }
+
+    }
+
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun DonationCardPreview() {
@@ -92,3 +146,15 @@ fun DonationCardPreview() {
         }
     }
 }
+
+
+@Preview(showBackground = true)
+@Composable
+fun SecurityWarningPreview() {
+    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+        MotmaenBashTheme {
+            SecurityWarning()
+        }
+    }
+}
+

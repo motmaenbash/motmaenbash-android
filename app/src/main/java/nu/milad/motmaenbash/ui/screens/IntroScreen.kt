@@ -10,35 +10,24 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Sms
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -55,7 +44,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,12 +61,11 @@ import nu.milad.motmaenbash.ui.components.AccessibilityPermissionDialog
 import nu.milad.motmaenbash.ui.components.NotificationPermissionDialog
 import nu.milad.motmaenbash.ui.components.SmsPermissionDialog
 import nu.milad.motmaenbash.ui.components.SmsSettingsDialog
+import nu.milad.motmaenbash.ui.components.intro.DeveloperCredit
 import nu.milad.motmaenbash.ui.components.intro.FinalStep
 import nu.milad.motmaenbash.ui.components.intro.IntroStep
 import nu.milad.motmaenbash.ui.components.intro.PermissionStep
 import nu.milad.motmaenbash.ui.components.intro.TrustStep
-import nu.milad.motmaenbash.ui.theme.GreyMiddle
-import nu.milad.motmaenbash.ui.theme.RedVariant
 import nu.milad.motmaenbash.utils.PermissionManager
 import nu.milad.motmaenbash.utils.ServiceUtils
 import nu.milad.motmaenbash.viewmodels.IntroViewModel
@@ -447,6 +434,7 @@ fun IntroScreen(viewModel: IntroViewModel = viewModel()) {
             DeveloperCredit()
         }
 
+
         // SMS Permission Denied Dialog
         if (showSmsPermissionDeniedDialog) {
             SmsPermissionDialog(
@@ -510,56 +498,3 @@ fun AnimatedPermissionIcon(
         tint = colorScheme.primary
     )
 }
-
-@Composable
-fun DeveloperCredit() {
-    // pulsing animation for heart
-    val infiniteTransition = rememberInfiniteTransition(label = "heartAnimation")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "heartBeatAnimation"
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .systemBarsPadding()
-    ) {
-        Text(
-            "طراحی و توسعه توسط میلاد نوری",
-            style = typography.bodySmall,
-            color = GreyMiddle,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Favorite,
-                contentDescription = "Heart",
-                modifier = Modifier
-                    .size(18.dp)
-                    .scale(scale),
-                tint = RedVariant
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                "برای مردم ایران",
-                fontWeight = FontWeight.Bold,
-                color = GreyMiddle,
-                style = typography.bodySmall,
-            )
-        }
-    }
-}
-

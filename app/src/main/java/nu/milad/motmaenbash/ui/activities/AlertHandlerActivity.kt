@@ -277,8 +277,8 @@ fun AlertDialog(
 //                Divider(verticalPadding = 4.dp, color = alertColor)
                 if (alert.summary != null) {
                     Text(
-                        text = alert.summary.toString(),
-                        color = alertColor,
+                        text = alert.summary,
+                        color = Red,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,

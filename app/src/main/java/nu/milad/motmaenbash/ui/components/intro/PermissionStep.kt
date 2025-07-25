@@ -1,5 +1,6 @@
 package nu.milad.motmaenbash.ui.components.intro
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,7 +42,6 @@ import nu.milad.motmaenbash.ui.activities.LocalNavController
 import nu.milad.motmaenbash.ui.components.AppCard
 import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.screens.AnimatedPermissionIcon
-import nu.milad.motmaenbash.ui.screens.DeveloperCredit
 import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
@@ -143,10 +143,11 @@ fun PermissionStep(
 
             AppCard(
                 padding = 12.dp,
-//                border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
+                border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
             ) {
 
                 Column(modifier = Modifier.padding(8.dp)) {
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
