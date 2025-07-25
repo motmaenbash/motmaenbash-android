@@ -22,10 +22,12 @@ object AppConstants {
     const val COLUMN_HASH = "hash"
 
     // Stats keys
+    const val MOTMAENBASH_EVENT = "motmaenbash_alert"
     const val STAT_VERIFIED_GATEWAY = "verified_gateway"
     const val STAT_FLAGGED_LINK_DETECTED = "flagged_link_detected"
     const val STAT_FLAGGED_SMS_DETECTED = "flagged_sms_detected"
     const val STAT_FLAGGED_APP_DETECTED = "flagged_app_detected"
+    const val STAT_RISKY_APP_DETECTED = "risky_app_detected"
 
     const val STAT_TOTAL_SCANNED_LINK = "total_scanned_link"
     const val STAT_TOTAL_SCANNED_SMS = "total_scanned_sms"

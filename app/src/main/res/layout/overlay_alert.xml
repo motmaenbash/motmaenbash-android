@@ -158,28 +158,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="4dp"
                         android:fontFamily="@font/vazirmatn"
-                        android:lines="1"
+                        android:maxLines="3"
                         android:padding="4dp"
                         android:textAlignment="center"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        tools:text="https://sample_domain.com/sample_path" />
+                        tools:text="https://sample_domain.com/sample_url" />
 
 
                 </com.google.android.material.card.MaterialCardView>
-
-
-                <!--                <com.google.android.material.button.MaterialButton-->
-                <!--                    android:id="@+id/cancelButton"-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="56dp"-->
-                <!--                    android:layout_marginHorizontal="4dp"-->
-                <!--                    android:fontFamily="@font/vazirmatn"-->
-                <!--                    android:text="متوجه شدم"-->
-                <!--                    android:textColor="@android:color/white"-->
-                <!--                    app:backgroundTint="@color/red"-->
-                <!--                    app:cornerRadius="12dp"-->
-                <!--                    app:iconTint="@android:color/white" />-->
 
 
                 <View

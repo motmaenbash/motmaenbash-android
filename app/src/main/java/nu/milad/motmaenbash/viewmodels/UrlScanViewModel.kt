@@ -33,7 +33,7 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
 
 
             val (resultText, isSafe) = when (result) {
-                is UrlAnalysisResult.SafeUrl -> Pair(
+                is UrlAnalysisResult.VerifiedPaymentGatewayUrl -> Pair(
                     "این آدرس متعلق به یک درگاه پرداخت امن و مطمئن است.", true
                 )
 

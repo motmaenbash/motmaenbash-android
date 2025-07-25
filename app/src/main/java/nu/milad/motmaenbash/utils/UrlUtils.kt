@@ -119,7 +119,10 @@ object UrlUtils {
             val normalizedUrl = removeUrlPrefixes(url.trim().lowercase())
 
             return when {
-                isShaparakSubdomain(normalizedUrl) -> UrlAnalysisResult.SafeUrl(normalizedUrl)
+                isShaparakSubdomain(normalizedUrl) -> UrlAnalysisResult.VerifiedPaymentGatewayUrl(
+                    normalizedUrl
+                )
+
                 else -> {
                     val (isFlagged, threatType, urlMatch) = databaseHelper.isUrlFlagged(
                         normalizedUrl

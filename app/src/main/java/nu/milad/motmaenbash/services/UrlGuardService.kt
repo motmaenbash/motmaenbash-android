@@ -6,6 +6,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import android.util.LruCache
 import android.view.accessibility.AccessibilityEvent
@@ -17,9 +18,9 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
 import nu.milad.motmaenbash.BuildConfig
+import nu.milad.motmaenbash.consts.AppConstants.MOTMAENBASH_EVENT
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
 import nu.milad.motmaenbash.consts.AppConstants.STAT_VERIFIED_GATEWAY
 import nu.milad.motmaenbash.models.Alert
@@ -27,7 +28,6 @@ import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.Suspiciou
 import nu.milad.motmaenbash.utils.DatabaseHelper
 import nu.milad.motmaenbash.utils.UrlUtils
 import nu.milad.motmaenbash.utils.UrlUtils.extractAndCacheDomain
-import org.json.JSONObject
 
 
 class UrlGuardService : AccessibilityService() {
@@ -40,7 +40,7 @@ class UrlGuardService : AccessibilityService() {
 
     sealed class UrlAnalysisResult {
         object NeutralUrl : UrlAnalysisResult()
-        data class SafeUrl(val url: String) : UrlAnalysisResult()
+        data class VerifiedPaymentGatewayUrl(val url: String) : UrlAnalysisResult()
         data class SuspiciousUrl(
             val url: String,
             val threatType: Alert.ThreatType? = null,
@@ -128,14 +128,11 @@ class UrlGuardService : AccessibilityService() {
         )
 
         when (result) {
-            is UrlAnalysisResult.SafeUrl -> {
+            is UrlAnalysisResult.VerifiedPaymentGatewayUrl -> {
                 startOverlayVerificationBadgeService(result.url)
-
-                databaseHelper.incrementUserStat(STAT_VERIFIED_GATEWAY)
-                logAnalyticsAsync(
-                    "Motmaenbash_alert",
-                    mapOf("alert_type" to STAT_VERIFIED_GATEWAY)
-                )
+                if (shouldProcessUrl) {
+                incrementStatAndLogEvent(STAT_VERIFIED_GATEWAY)
+            }
             }
 
 
@@ -154,6 +151,7 @@ class UrlGuardService : AccessibilityService() {
 
                     if (shouldShowAlert) {
                         showSuspiciousUrlAlert(result)
+                        incrementStatAndLogEvent(STAT_FLAGGED_LINK_DETECTED)
                     }
                 }
             }
@@ -269,12 +267,6 @@ class UrlGuardService : AccessibilityService() {
             suspiciousUrl
         )
 
-
-        // Increment statistic
-        databaseHelper.incrementUserStat(STAT_FLAGGED_LINK_DETECTED)
-        logAnalyticsAsync("Motmaenbash_alert", mapOf("alert_type" to STAT_FLAGGED_LINK_DETECTED))
-
-
     }
 
 
@@ -363,18 +355,15 @@ class UrlGuardService : AccessibilityService() {
     }
 
 
-    private fun logAnalyticsAsync(eventName: String, params: Map<String, Any>) {
+    private fun incrementStatAndLogEvent(alertType: String) {
 
         if (BuildConfig.DEBUG) return
 
-        val workRequest = OneTimeWorkRequestBuilder<AnalyticsWorker>()
+        // If a valid statKey exists, increment the corresponding statistic in the local database
+        databaseHelper.incrementUserStat(alertType)
 
-            .setInputData(
-                workDataOf(
-                    "event_name" to eventName,
-                    "params_json" to JSONObject(params).toString()
-                )
-            )
+        val workRequest = OneTimeWorkRequestBuilder<AnalyticsWorker>()
+            .setInputData(workDataOf("alert_type" to alertType))
             .build()
 
         WorkManager.getInstance(applicationContext).enqueue(workRequest)
@@ -384,18 +373,15 @@ class UrlGuardService : AccessibilityService() {
 
 class AnalyticsWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        val eventName = inputData.getString("event_name") ?: return Result.failure()
-        val paramsJson = inputData.getString("params_json") ?: return Result.failure()
+        val alertType = inputData.getString("alert_type") ?: return Result.failure()
 
         try {
-            val firebaseAnalytics = Firebase.analytics
-            val params = JSONObject(paramsJson)
-
-            firebaseAnalytics.logEvent(eventName) {
-                params.keys().forEach { key ->
-                    param(key, params.get(key).toString())
-                }
+            // Only the type of alert (statKey) is sent; no sensitive or detailed info is logged.
+            val bundle = Bundle().apply {
+                putString("alert_type", alertType)
             }
+            Firebase.analytics.logEvent(MOTMAENBASH_EVENT, bundle)
+
             return Result.success()
         } catch (_: Exception) {
             return Result.failure()
