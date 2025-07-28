@@ -111,39 +111,37 @@ fun IntroScreen(viewModel: IntroViewModel = viewModel()) {
             viewModel.updatePermissionStatus(PermissionType.NOTIFICATIONS, isGranted)
         }
     } else null
-
-    // Store required permissions and get remaining ones
-    val allPermissionSteps = remember {
-        listOf(
-            IntroStep.INTRO to true, // Always include intro as the first step
-            IntroStep.TRUST to true, // Always include trust step
-            IntroStep.OVERLAY to overlayPermissionStatus,
-            IntroStep.NOTIFICATIONS to notificationPermissionStatus,
-            IntroStep.SMS to smsPermissionStatus,
-            IntroStep.ACCESSIBILITY to accessibilitySettingStatus,
-            IntroStep.FINAL to true, // Always include final step
-        )
-    }
+    
 
     // Step management
     // Filter out already granted permissions (except intro and trust which should always be shown)
-    val requiredPermissions = remember(
+    val steps = remember(
         overlayPermissionStatus,
         notificationPermissionStatus,
         smsPermissionStatus,
         accessibilitySettingStatus,
     ) {
-        listOf(IntroStep.INTRO, IntroStep.TRUST) + allPermissionSteps.filter {
-            it.first != IntroStep.INTRO && it.first != IntroStep.TRUST && it.first != IntroStep.FINAL && !it.second
-        }.map { it.first } + IntroStep.FINAL
+        buildList {
+            // Always add intro and final steps
+            add(IntroStep.INTRO)
+            add(IntroStep.TRUST)
+            // Always add SMS step (regardless of permission status) to show SMS popup settings dialog
+            add(IntroStep.SMS)
+            // Add other permission steps only if not granted
+            if (!overlayPermissionStatus) add(IntroStep.OVERLAY)
+            if (!notificationPermissionStatus) add(IntroStep.NOTIFICATIONS)
+            if (!accessibilitySettingStatus) add(IntroStep.ACCESSIBILITY)
+            // Always add final step
+            add(IntroStep.FINAL)
+        }
     }
 
     var currentStepIndex by remember { mutableIntStateOf(0) }
     // Get current permission step
-    val currentStep = remember(requiredPermissions, currentStepIndex) {
-        requiredPermissions.getOrNull(currentStepIndex)
+    val currentStep = remember(steps, currentStepIndex) {
+        steps.getOrNull(currentStepIndex)
     }
-    val isLastStep = currentStepIndex == requiredPermissions.size - 1
+    val isLastStep = currentStepIndex == steps.size - 1
 
     // SMS Settings Launcher
     val smsSettingsLauncher = rememberLauncherForActivityResult(
@@ -211,6 +209,7 @@ fun IntroScreen(viewModel: IntroViewModel = viewModel()) {
 
 
     LaunchedEffect(
+        currentStep,
         overlayPermissionStatus,
         notificationPermissionStatus,
         smsPermissionStatus,

@@ -37,7 +37,7 @@ object AppConstants {
     const val PREF_KEY_LAST_UPDATE_TIME = "last_database_update_time"
 
     // const val PREF_KEY_FIRST_LAUNCH = "first_launch"
-    const val PREF_KEY_HAS_SEEN_INTRO = "has_seen_intro"
+    const val PREF_KEY_HAS_SEEN_INTRO = "has_seen_onboarding"
     const val PREF_KEY_LAST_CHANGELOG_SHOW_VERSION = "last_changelog_show_version"
 
     const val DONATE_URL = "https://motmaenbash.ir/donate.html"
