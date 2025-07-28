@@ -1325,7 +1325,7 @@ fun AboutAndFaqs(navController: NavController) {
                 )
             }
             Button(
-                onClick = { navController.navigate(NavRoutes.PERMISSION_SCREEN) },
+                onClick = { navController.navigate(NavRoutes.INFO_LIST_SCREEN) },
                 modifier = Modifier
                     .weight(1f)
                     .padding(1.dp),

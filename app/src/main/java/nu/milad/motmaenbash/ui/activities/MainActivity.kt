@@ -82,7 +82,7 @@ fun AppNavigation(
     // Handle back press
     BackHandler(enabled = true) {
         if (navController.currentBackStackEntry?.destination?.route == NavRoutes.MAIN_SCREEN ||
-            navController.currentBackStackEntry?.destination?.route == NavRoutes.PERMISSION_INTRO_SCREEN
+            navController.currentBackStackEntry?.destination?.route == NavRoutes.INTRO_SCREEN
         ) {
             // Close the app when on Main or Intro screen
             (context as? ComponentActivity)?.finish()
@@ -97,13 +97,13 @@ fun AppNavigation(
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(NavRoutes.MAIN_SCREEN) { MainScreen() }
-        composable(NavRoutes.PERMISSION_INTRO_SCREEN) { IntroScreen() }
+        composable(NavRoutes.INTRO_SCREEN) { IntroScreen() }
         composable(NavRoutes.ABOUT_SCREEN) { AboutScreen() }
         composable(NavRoutes.USER_REPORT_SCREEN) { UserReportScreen() }
         composable(NavRoutes.URL_SCAN_SCREEN) { UrlScanScreen() }
         composable(NavRoutes.APP_SCAN_SCREEN) { AppScanScreen() }
         composable(NavRoutes.FAQ_SCREEN) { InfoListScreen(Pages.FAQ) }
-        composable(NavRoutes.PERMISSION_SCREEN) { InfoListScreen(Pages.PERMISSION) }
+        composable(NavRoutes.INFO_LIST_SCREEN) { InfoListScreen(Pages.PERMISSION) }
         composable(NavRoutes.CHANGELOG_SCREEN) { InfoListScreen(Pages.CHANGELOG) }
         composable(NavRoutes.SETTINGS_SCREEN) { SettingsScreen() }
     }
@@ -118,7 +118,7 @@ private suspend fun handleIntent(intent: Intent?, context: Context): String {
     ) ?: false
 
     if (!isIntroShown) {
-        return NavRoutes.PERMISSION_INTRO_SCREEN
+        return NavRoutes.INTRO_SCREEN
     }
 
     val data = intent?.data

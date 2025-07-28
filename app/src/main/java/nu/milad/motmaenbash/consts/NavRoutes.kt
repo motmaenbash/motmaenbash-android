@@ -1,7 +1,7 @@
 package nu.milad.motmaenbash.consts
 
 object NavRoutes {
-    const val PERMISSION_INTRO_SCREEN = "PermissionsIntroScreen"
+    const val INTRO_SCREEN = "PermissionsIntroScreen"
     const val MAIN_SCREEN = "mainScreen"
     const val ABOUT_SCREEN = "aboutScreen"
     const val USER_REPORT_SCREEN = "userReportScreen"
@@ -9,6 +9,6 @@ object NavRoutes {
     const val APP_SCAN_SCREEN = "appScanScreen"
     const val SETTINGS_SCREEN = "settingsScreen"
     const val FAQ_SCREEN = "faqScreen"
-    const val PERMISSION_SCREEN = "permissionScreen"
+    const val INFO_LIST_SCREEN = "permissionScreen"
     const val CHANGELOG_SCREEN = "changelogScreen"
 }
