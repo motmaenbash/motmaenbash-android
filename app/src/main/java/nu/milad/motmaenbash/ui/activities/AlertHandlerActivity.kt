@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -514,9 +515,12 @@ private fun AppAlertContent(
                     Text(
                         text = "نام بسته: $packageName",
                         color = colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Start,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .basicMarquee()
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -733,7 +737,7 @@ fun AppFlaggedPreview() {
                 title = title,
                 summary = summary,
                 content = message,
-                param1 = "com.malicious.app",
+                param1 = "com.malicious.app.web.messenger",
                 param2 = "نام برنامه مخرب",
             ),
             onDismiss = {},

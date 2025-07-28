@@ -782,6 +782,10 @@ fun ProtectionStatus(
     // Define permissions as a list of triples: (label, isGranted, activateAction)
     val permissions = listOf(
         Triple(
+            stringResource(id = R.string.guard_app),
+            !isCriticalPermissionsMissing
+        ) {}, // This one is always active with no action
+        Triple(
             stringResource(id = R.string.guard_sms),
             smsPermissionStatus && !isCriticalPermissionsMissing,
             onSmsPermissionClick
@@ -796,11 +800,8 @@ fun ProtectionStatus(
             accessibilitySettingStatus && !isCriticalPermissionsMissing,
             onAccessibilitySettingClick
         ),
-        Triple(
-            stringResource(id = R.string.guard_app),
-            !isCriticalPermissionsMissing
-        ) {} // This one is always active with no action
-    )
+
+        )
 
 
     Column {
@@ -934,18 +935,14 @@ fun ProtectionRow(
                 .size(24.dp)
                 .padding(end = 2.dp),
             tint = if (isGranted) colorScheme.primary else colorScheme.onError
-
         )
         Text(
-
-            text = title, // + ": غیرفعال".takeIf { !isGranted }.orEmpty(),
+            text = title,
             modifier = Modifier.weight(1f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             color = if (isGranted) colorScheme.primary else colorScheme.onError
-
         )
-
 
         Column(
             modifier = Modifier
