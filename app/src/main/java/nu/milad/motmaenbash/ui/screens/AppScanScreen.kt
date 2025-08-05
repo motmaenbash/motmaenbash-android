@@ -55,7 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,6 +70,7 @@ import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.utils.PackageUtils
+import nu.milad.motmaenbash.utils.toSafeBitmap
 import nu.milad.motmaenbash.viewmodels.AppScanViewModel
 import nu.milad.motmaenbash.viewmodels.ScanState
 
@@ -226,7 +226,7 @@ fun SuspiciousAppItem(app: App) {
         // Display app icon if available
         app.appIcon?.let { icon ->
             Image(
-                bitmap = icon.toBitmap().asImageBitmap(),
+                bitmap = icon.toSafeBitmap(size = 96).asImageBitmap(),
                 contentDescription = app.appName,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -324,7 +324,7 @@ fun AnimatedAppIcon(app: App) {
     ) {
         app.appIcon?.let { icon ->
             Image(
-                bitmap = icon.toBitmap().asImageBitmap(),
+                bitmap = icon.toSafeBitmap(size = 96).asImageBitmap(),
                 contentDescription = app.appName,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
