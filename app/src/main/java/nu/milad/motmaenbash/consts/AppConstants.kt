@@ -5,13 +5,14 @@ object AppConstants {
 
     // Database Constants
     const val DATABASE_NAME = "motmaenbash.db"
-    const val DATABASE_VERSION = 3
+    const val DATABASE_VERSION = 4
 
     // Table names
     const val TABLE_FLAGGED_URLS = "flagged_urls"
     const val TABLE_FLAGGED_SENDERS = "flagged_senders"
     const val TABLE_FLAGGED_MESSAGES = "flagged_messages"
     const val TABLE_FLAGGED_WORDS = "flagged_words"
+    const val TABLE_SIDELOAD_TRUSTED_APPS = "sideload_trusted_apps"
     const val TABLE_FLAGGED_APPS = "flagged_apps"
     const val TABLE_TIPS = "tips"
     const val TABLE_STATS = "stats"

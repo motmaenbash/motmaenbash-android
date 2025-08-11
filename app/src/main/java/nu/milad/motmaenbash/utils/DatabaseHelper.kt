@@ -23,6 +23,7 @@ import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_MESSAGES
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_SENDERS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_URLS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_WORDS
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_SIDELOAD_TRUSTED_APPS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_STATS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_TIPS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_UPDATE_HISTORY
@@ -45,7 +46,7 @@ class DatabaseHelper(appContext: Context) :
         const val FLAGGED_MESSAGES = 2
         const val FLAGGED_WORDS = 3
         const val FLAGGED_APPS = 4
-        const val TIPS = 5
+        const val SIDELOAD_TRUSTED_APPS = 5
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -59,24 +60,35 @@ class DatabaseHelper(appContext: Context) :
         if (oldVersion < 3) {
             db.execSQL(
                 """
-            CREATE TABLE alert_history_temp (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type INTEGER NOT NULL,
-                timestamp INTEGER NOT NULL
-            )
-        """.trimIndent()
+                CREATE TABLE alert_history_temp (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type INTEGER NOT NULL,
+                    timestamp INTEGER NOT NULL
+                )
+                """.trimIndent()
             )
 
             db.execSQL(
                 """
-            INSERT INTO alert_history_temp (id, type, timestamp)
-            SELECT id, type, timestamp FROM $TABLE_ALERT_HISTORY
-        """.trimIndent()
+                INSERT INTO alert_history_temp (id, type, timestamp)
+                SELECT id, type, timestamp FROM $TABLE_ALERT_HISTORY
+                """.trimIndent()
             )
 
             db.execSQL("DROP TABLE $TABLE_ALERT_HISTORY")
             db.execSQL("ALTER TABLE alert_history_temp RENAME TO $TABLE_ALERT_HISTORY")
-            }
+        }
+
+        if (oldVersion < 4) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS $TABLE_SIDELOAD_TRUSTED_APPS (
+                    hash TEXT NOT NULL UNIQUE
+                );
+                """.trimIndent()
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_sideload_trusted_apps_hash ON $TABLE_SIDELOAD_TRUSTED_APPS(hash);")
+        }
 
         // dropTables(db)
         // createTables(db)
@@ -241,6 +253,12 @@ class DatabaseHelper(appContext: Context) :
                 )
                 insertData(this, TABLE_FLAGGED_APPS, jsonArray.getJSONArray(DataIndex.FLAGGED_APPS))
 
+                insertData(
+                    this,
+                    TABLE_SIDELOAD_TRUSTED_APPS,
+                    jsonArray.getJSONArray(DataIndex.SIDELOAD_TRUSTED_APPS)
+                )
+
                 // Tips
                 val tipsInputStream = context.resources.openRawResource(R.raw.tips)
                 val tipsText = tipsInputStream.bufferedReader().use { it.readText() }
@@ -286,6 +304,7 @@ class DatabaseHelper(appContext: Context) :
             TABLE_FLAGGED_MESSAGES,
             TABLE_FLAGGED_WORDS,
             TABLE_FLAGGED_APPS,
+            TABLE_SIDELOAD_TRUSTED_APPS,
             TABLE_TIPS
         )
 
@@ -310,7 +329,7 @@ class DatabaseHelper(appContext: Context) :
                 for (i in 0 until jsonArray.length()) {
                     it.transaction {
 
-                    when (tableName) {
+                        when (tableName) {
 
                             TABLE_FLAGGED_SENDERS, TABLE_FLAGGED_WORDS, TABLE_FLAGGED_MESSAGES -> {
                                 val hash = jsonArray.getString(i)
@@ -354,22 +373,22 @@ class DatabaseHelper(appContext: Context) :
                                         insertValues.put("match", urlMatch)
                                         insertValues.put("level", alertLevel)
 
-                            insertWithOnConflict(
+                                        insertWithOnConflict(
                                             tableName,
                                             null,
                                             insertValues,
                                             SQLiteDatabase.CONFLICT_IGNORE
-                            )
+                                        )
 
                                     }
 
+                                }
+
                             }
 
-                        }
 
-
-                        TABLE_FLAGGED_APPS -> {
-                            val jsonObject = jsonArray.getJSONObject(i)
+                            TABLE_FLAGGED_APPS -> {
+                                val jsonObject = jsonArray.getJSONObject(i)
                                 val type = jsonObject.getInt("type")
                                 val hashesArray = jsonObject.getJSONArray("hashes")
                                 for (j in 0 until hashesArray.length()) {
@@ -384,18 +403,37 @@ class DatabaseHelper(appContext: Context) :
                                         insertValues.put("hash", hash)
                                         insertValues.put("type", type)
 
-                                    insertWithOnConflict(
-                                        tableName,
-                                        null,
+                                        insertWithOnConflict(
+                                            tableName,
+                                            null,
                                             insertValues,
-                                        SQLiteDatabase.CONFLICT_IGNORE
-                                    )
+                                            SQLiteDatabase.CONFLICT_IGNORE
+                                        )
+                                    }
+
                                 }
+
 
                             }
 
-
-                        }
+                            TABLE_SIDELOAD_TRUSTED_APPS -> {
+                                val hash = jsonArray.getString(i)
+                                if (hash.startsWith("-")) {
+                                    // Delete record
+                                    val originalHash = hash.substring(1)
+                                    delete(tableName, "hash = ? LIMIT 1", arrayOf(originalHash))
+                                } else {
+                                    // Insert new record
+                                    insertValues.clear()
+                                    insertValues.put("hash", hash)
+                                    insertWithOnConflict(
+                                        tableName,
+                                        null,
+                                        insertValues,
+                                        SQLiteDatabase.CONFLICT_IGNORE
+                                    )
+                                }
+                            }
 
                             TABLE_TIPS -> {
                                 insertValues.clear()
@@ -405,10 +443,10 @@ class DatabaseHelper(appContext: Context) :
                                 insertWithOnConflict(
                                     tableName, null, insertValues, SQLiteDatabase.CONFLICT_IGNORE
                                 )
-                    }
+                            }
 
-                }
-            }
+                        }
+                    }
 
                 }
             } catch (_: Exception) {
@@ -426,6 +464,18 @@ class DatabaseHelper(appContext: Context) :
         val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
 
         return isFlagged
+    }
+
+    fun isTrustedSideloadApp(packageName: String, signatureHash: String): Boolean {
+        val packageHash = HashUtils.generateSHA256(packageName.lowercase())
+        val combinedHash = HashUtils.generateSHA256("$packageHash:$signatureHash")
+
+        val selection = "$COLUMN_HASH = ?"
+        val selectionArgs = arrayOf(combinedHash)
+        val isTrusted = countData(TABLE_SIDELOAD_TRUSTED_APPS, selection, selectionArgs) > 0
+
+
+        return isTrusted
     }
 
 
@@ -628,7 +678,7 @@ class DatabaseHelper(appContext: Context) :
 
     fun replaceDatabaseWithFetchedData(dataJsonArray: JSONArray) {
         writableDatabase.transaction {
-        try {
+            try {
                 // Clear existing data within the transaction
                 clearDatabaseTable(TABLE_TIPS)
                 // Populate data
@@ -641,22 +691,23 @@ class DatabaseHelper(appContext: Context) :
     }
 
     private fun clearAllDatabaseTables() {
-            val tables = arrayOf(
-                TABLE_FLAGGED_URLS,
-                TABLE_FLAGGED_SENDERS,
-                TABLE_FLAGGED_MESSAGES,
-                TABLE_FLAGGED_WORDS,
-                TABLE_FLAGGED_APPS,
-                TABLE_TIPS
-            )
+        val tables = arrayOf(
+            TABLE_FLAGGED_URLS,
+            TABLE_FLAGGED_SENDERS,
+            TABLE_FLAGGED_MESSAGES,
+            TABLE_FLAGGED_WORDS,
+            TABLE_FLAGGED_APPS,
+            TABLE_SIDELOAD_TRUSTED_APPS,
+            TABLE_TIPS
+        )
 
-            tables.forEach { tableName ->
+        tables.forEach { tableName ->
             writableDatabase.execSQL("DELETE FROM $tableName")
-                // Reset auto-increment ID
+            // Reset auto-increment ID
             writableDatabase.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '$tableName'")
 
-            }
         }
+    }
 
     private fun clearDatabaseTable(tableName: String) {
         writableDatabase.execSQL("DELETE FROM $tableName")

@@ -81,6 +81,7 @@ class AppInstallReceiver : BroadcastReceiver() {
                     }
                     return@launch
                 } else if (!PackageUtils.isFromTrustedSource(app.installSource) &&
+                    !dbHelper.isTrustedSideloadApp(packageName, app.sighHash) &&
                     PackageUtils.hasRiskyPermissionCombination(app.permissions)
                 ) {
 
