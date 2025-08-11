@@ -290,7 +290,7 @@ class UpdateManager(
         // Only update if more than 15 minutes have passed
         return if (minutesSinceUpdate < 15) {
             Toast.makeText(
-                context, "پایگاه داده کمتر از ۱ ساعت پیش به‌روزرسانی شده است", Toast.LENGTH_SHORT
+                context, "پایگاه داده کمتر از ۱۵ دقیقه پیش به‌روزرسانی شده است", Toast.LENGTH_SHORT
             ).show()
             false
         } else true
