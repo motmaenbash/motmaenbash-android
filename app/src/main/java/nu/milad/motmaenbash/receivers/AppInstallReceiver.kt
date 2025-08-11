@@ -24,6 +24,14 @@ class AppInstallReceiver : BroadcastReceiver() {
         val packageName = intent.data?.schemeSpecificPart ?: return
         Log.d(TAG, "Received broadcast for package: $packageName, action: ${intent.action}")
 
+        val isSystemApp = PackageUtils.isSystemApp(context, packageName)
+        Log.d(TAG, "Received broadcast is for system app: $isSystemApp")
+        // Skip system apps
+        if (isSystemApp) {
+            Log.d(TAG, "Skipping security check for system app: $packageName")
+            return
+        }
+
         val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
 
 
@@ -73,7 +81,6 @@ class AppInstallReceiver : BroadcastReceiver() {
                     }
                     return@launch
                 } else if (!PackageUtils.isFromTrustedSource(app.installSource) &&
-
                     PackageUtils.hasRiskyPermissionCombination(app.permissions)
                 ) {
 

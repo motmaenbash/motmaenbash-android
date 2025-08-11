@@ -195,6 +195,21 @@ object PackageUtils {
         return packageInfo.applicationInfo!!.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
+    fun isSystemApp(context: Context, packageName: String): Boolean {
+        return try {
+            val packageInfo = context.packageManager.getPackageInfo(packageName, 0)
+            val appInfo = packageInfo.applicationInfo
+            // consistent null checking
+            appInfo?.let {
+                (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
+                        (it.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            } ?: false
+
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     /**
      * Checks if the app has any risky permission combinations
      */
