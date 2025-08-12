@@ -77,6 +77,19 @@ class DatabaseHelper(appContext: Context) :
             db.execSQL("ALTER TABLE alert_history_temp RENAME TO $TABLE_ALERT_HISTORY")
         }
 
+        if (oldVersion < 4) {
+            db.execSQL("DROP TABLE $TABLE_FLAGGED_APPS")
+
+            db.execSQL(
+                """
+                CREATE TABLE ${TABLE_FLAGGED_APPS} (
+                    hash TEXT NOT NULL UNIQUE,
+                    type INTEGER NOT NULL CHECK(type IN (1, 2, 3, 4)) -- 1: Package, 2: APK, 3: Sign, 4: Trusted
+                )
+                """.trimIndent()
+            )
+        }
+
         // dropTables(db)
         // createTables(db)
         // prepopulateData(db)
@@ -153,7 +166,7 @@ class DatabaseHelper(appContext: Context) :
                 CREATE TABLE $TABLE_FLAGGED_APPS (
 
                     hash TEXT NOT NULL UNIQUE,
-                    type INTEGER NOT NULL CHECK(type IN (1, 2, 3)) -- 1: Package, 2: APK, 3: Sign
+                    type INTEGER NOT NULL CHECK(type IN (1, 2, 3, 4)) -- 1: Package, 2: APK, 3: Sign, 4: Trusted
                 );
             """
         )
