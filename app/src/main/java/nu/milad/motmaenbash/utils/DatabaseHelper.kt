@@ -23,7 +23,6 @@ import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_MESSAGES
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_SENDERS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_URLS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_FLAGGED_WORDS
-import nu.milad.motmaenbash.consts.AppConstants.TABLE_SIDELOAD_TRUSTED_APPS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_STATS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_TIPS
 import nu.milad.motmaenbash.consts.AppConstants.TABLE_UPDATE_HISTORY
@@ -46,7 +45,6 @@ class DatabaseHelper(appContext: Context) :
         const val FLAGGED_MESSAGES = 2
         const val FLAGGED_WORDS = 3
         const val FLAGGED_APPS = 4
-        const val SIDELOAD_TRUSTED_APPS = 5
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -77,17 +75,6 @@ class DatabaseHelper(appContext: Context) :
 
             db.execSQL("DROP TABLE $TABLE_ALERT_HISTORY")
             db.execSQL("ALTER TABLE alert_history_temp RENAME TO $TABLE_ALERT_HISTORY")
-        }
-
-        if (oldVersion < 4) {
-            db.execSQL(
-                """
-                CREATE TABLE IF NOT EXISTS $TABLE_SIDELOAD_TRUSTED_APPS (
-                    hash TEXT NOT NULL UNIQUE
-                );
-                """.trimIndent()
-            )
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_sideload_trusted_apps_hash ON $TABLE_SIDELOAD_TRUSTED_APPS(hash);")
         }
 
         // dropTables(db)
@@ -253,12 +240,6 @@ class DatabaseHelper(appContext: Context) :
                 )
                 insertData(this, TABLE_FLAGGED_APPS, jsonArray.getJSONArray(DataIndex.FLAGGED_APPS))
 
-                insertData(
-                    this,
-                    TABLE_SIDELOAD_TRUSTED_APPS,
-                    jsonArray.getJSONArray(DataIndex.SIDELOAD_TRUSTED_APPS)
-                )
-
                 // Tips
                 val tipsInputStream = context.resources.openRawResource(R.raw.tips)
                 val tipsText = tipsInputStream.bufferedReader().use { it.readText() }
@@ -304,7 +285,6 @@ class DatabaseHelper(appContext: Context) :
             TABLE_FLAGGED_MESSAGES,
             TABLE_FLAGGED_WORDS,
             TABLE_FLAGGED_APPS,
-            TABLE_SIDELOAD_TRUSTED_APPS,
             TABLE_TIPS
         )
 
@@ -416,25 +396,6 @@ class DatabaseHelper(appContext: Context) :
 
                             }
 
-                            TABLE_SIDELOAD_TRUSTED_APPS -> {
-                                val hash = jsonArray.getString(i)
-                                if (hash.startsWith("-")) {
-                                    // Delete record
-                                    val originalHash = hash.substring(1)
-                                    delete(tableName, "hash = ? LIMIT 1", arrayOf(originalHash))
-                                } else {
-                                    // Insert new record
-                                    insertValues.clear()
-                                    insertValues.put("hash", hash)
-                                    insertWithOnConflict(
-                                        tableName,
-                                        null,
-                                        insertValues,
-                                        SQLiteDatabase.CONFLICT_IGNORE
-                                    )
-                                }
-                            }
-
                             TABLE_TIPS -> {
                                 insertValues.clear()
                                 insertValues.put("tip", jsonArray.getString(i))
@@ -458,7 +419,7 @@ class DatabaseHelper(appContext: Context) :
     fun isAppFlagged(packageName: String, apkHash: String, signHash: String): Boolean {
         val packageHash = HashUtils.generateSHA256(packageName.lowercase())
         val selection =
-            "(hash = ? AND type = 1) OR (hash = ? AND type = 2) OR (hash = ? AND type = 3)"
+            "($COLUMN_HASH = ? AND type = 1) OR ($COLUMN_HASH = ? AND type = 2) OR ($COLUMN_HASH = ? AND type = 3)"
 
         val selectionArgs = arrayOf(packageHash, apkHash, signHash)
         val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
@@ -470,10 +431,9 @@ class DatabaseHelper(appContext: Context) :
         val packageHash = HashUtils.generateSHA256(packageName.lowercase())
         val combinedHash = HashUtils.generateSHA256("$packageHash:$signatureHash")
 
-        val selection = "$COLUMN_HASH = ?"
+        val selection = "$COLUMN_HASH = ? AND type = 4"
         val selectionArgs = arrayOf(combinedHash)
-        val isTrusted = countData(TABLE_SIDELOAD_TRUSTED_APPS, selection, selectionArgs) > 0
-
+        val isTrusted = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
 
         return isTrusted
     }
@@ -491,13 +451,15 @@ class DatabaseHelper(appContext: Context) :
 
     fun hasFlaggedWord(message: String): Boolean {
 
-        // Split the message into words, trim them, and remove duplicates using a Set
-        val words = message.split("\\s+".toRegex()).map { it.trim() }.toSet()
 
-        Log.d("DatabaseHelper", "Words: $words")
+        // Split the message into words, trim them, and remove duplicates using a Set
+        val words = message.trim().split("\\s+".toRegex()).map { it.trim() }.toSet()
+
+
         // Generate hashes for each word
         val wordHashes = words.map { HashUtils.generateSHA256(it) }
         Log.d("DatabaseHelper", "Word hashes: $wordHashes")
+
 
         // Prepare placeholders for SQL query
         val placeholders = wordHashes.joinToString(",") { "?" }
@@ -697,7 +659,6 @@ class DatabaseHelper(appContext: Context) :
             TABLE_FLAGGED_MESSAGES,
             TABLE_FLAGGED_WORDS,
             TABLE_FLAGGED_APPS,
-            TABLE_SIDELOAD_TRUSTED_APPS,
             TABLE_TIPS
         )
 

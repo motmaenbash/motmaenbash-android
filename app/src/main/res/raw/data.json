@@ -1286,9 +1286,12 @@
         "fce3784ac732ccb8dbcdaa40e905367b5de30e52cf26f026bc5cc44d62f406a0"
       ],
       "type": 3
+    },
+    {
+      "hashes": [
+        "f7b6632fc2913dc9003a49faaa69a290acf29cd3fdcbacdeeea7122f5d39f8b8"
+      ],
+      "type": 4
     }
-  ],
-  [
-    "f7b6632fc2913dc9003a49faaa69a290acf29cd3fdcbacdeeea7122f5d39f8b8"
   ]
 ]
