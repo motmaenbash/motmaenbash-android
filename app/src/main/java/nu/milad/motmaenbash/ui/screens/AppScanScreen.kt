@@ -403,13 +403,14 @@ fun AppScanScreenPreview() {
             )
         )
 
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.COMPLETED_SUCCESSFULLY,
             scanStatusMessage = "اسکن کامل شد!",
             lastScanTime = "۸ ساعت پیش",
             suspiciousApps = suspiciousApps
         )
-
+        }
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)
         }
@@ -475,13 +476,15 @@ fun AppScanInProgressPreview() {
             )
         )
 
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.IN_PROGRESS,
             scanStatusMessage = "اسکن ۲/۵۰",
             lastScanTime = "۸ ساعت پیش",
             suspiciousApps = emptyList(),
             currentlyScannedApps = scanningApps
         )
+        }
 
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)
@@ -493,13 +496,14 @@ fun AppScanInProgressPreview() {
 @Composable
 fun AppScanNotStartedPreview() {
     MotmaenBashTheme {
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.NOT_STARTED,
             scanStatusMessage = "تعداد برنامه: ۱۲۳",
             lastScanTime = "هنوز اسکنی انجام نشده",
             suspiciousApps = emptyList()
         )
-
+        }
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)
         }
@@ -510,12 +514,14 @@ fun AppScanNotStartedPreview() {
 @Composable
 fun AppScanCompletedWithErrorsPreview() {
     MotmaenBashTheme {
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.COMPLETED_WITH_ERRORS,
             scanStatusMessage = "خطا در حین اسکن",
             lastScanTime = "۸ ساعت پیش",
             suspiciousApps = emptyList()
         )
+        }
 
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)
@@ -527,12 +533,14 @@ fun AppScanCompletedWithErrorsPreview() {
 @Composable
 fun AppScanStoppedPreview() {
     MotmaenBashTheme {
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.STOPPED,
             scanStatusMessage = "اسکن لغو شد!",
             lastScanTime = "۸ ساعت پیش",
             suspiciousApps = emptyList()
         )
+        }
 
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)
@@ -544,12 +552,14 @@ fun AppScanStoppedPreview() {
 @Composable
 fun AppScanCompletedNoSuspiciousAppsPreview() {
     MotmaenBashTheme {
-        val mockViewModel = PreviewAppScanViewModel(
+        val mockViewModel = remember {
+            PreviewAppScanViewModel(
             scanState = ScanState.COMPLETED_SUCCESSFULLY,
             scanStatusMessage = "اسکن کامل شد!",
             lastScanTime = "۸ ساعت پیش",
             suspiciousApps = emptyList()
         )
+        }
 
         CompositionLocalProvider(LocalNavController provides rememberNavController()) {
             AppScanScreen(viewModel = mockViewModel)

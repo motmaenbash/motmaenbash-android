@@ -146,6 +146,7 @@ object PackageUtils {
      */
     private fun getInstallationSource(context: Context, packageName: String): String {
         return try {
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 context.packageManager.getInstallSourceInfo(packageName)
                     .installingPackageName ?: "Unknown"
@@ -162,21 +163,28 @@ object PackageUtils {
     /**
      * Checks if the app is installed from a trusted source
      *
+     * @param context The application context for database access
      * @param installSource The installer package name
-     * @return true if installed from a known trusted market
+     * @return true if installed from a trusted market
      */
-    fun isFromTrustedSource(installSource: String?): Boolean {
+    fun isFromTrustedSource(context: Context, installSource: String?): Boolean {
         if (installSource.isNullOrBlank()) {
             Log.d(TAG, "Install source is null or blank")
             return false
         }
-        val installer = installSource.trim()
-        val isTrusted = TRUSTED_MARKETS.contains(installer)
+
+        return try {
+            val installer = installSource.trim().lowercase()
+            val dbHelper = DatabaseHelper(context)
+            val isTrusted = dbHelper.isTrustedMarketPackage(installer)
 
         Log.d(TAG, "Install source: $installer, trusted: $isTrusted")
-        return isTrusted
+            isTrusted
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking trusted source for $installSource", e)
+            false
+        }
     }
-
 
     /**
      * Creates an intent to uninstall the specified app
@@ -247,56 +255,6 @@ object PackageUtils {
         }
     }
 
-    private val TRUSTED_MARKETS = setOf(
-        // Google Play Store
-        "com.android.vending",
-        // Samsung Galaxy Store
-        "com.sec.android.app.samsungapps",
-        // Huawei AppGallery
-        "com.huawei.appmarket",
-        // Xiaomi GetApps
-        "com.xiaomi.market",
-        "com.xiaomi.mipicks",
-        // Oppo App Market
-        "com.oppo.market",
-        "com.heytap.market",
-        // Vivo App Store
-        "com.vivo.appstore",
-        // Honor AppGallery
-        "com.hihonor.appgallery",
-        // Amazon Appstore
-        "com.amazon.venezia",
-        // F-Droid (Open Source)
-        "org.fdroid.fdroid",
-        // APKMirror Installer
-        "com.apkmirror.helper.prod",
-        // APKPure
-        "com.apkpure.aegon",
-        // Uptodown
-        "com.uptodown",
-        "com.uptodown.installer",
-        // TapTap
-        "com.taptap",
-        "com.taptap.global",        // TapTap Global
-        "com.taptap.global.lite",   // TapTap Lite
-        // QooApp
-        "com.qooapp.qoohelper",
-        // Iranian Markets
-        "com.farsitel.bazaar",         // Bazaar
-        "ir.mservices.market",         // Myket
-        // Yandex Store
-        "ru.yandex.store",             // Yandex Store (Russia)
-        "com.yandex.store",
-        // Aptoide
-        "cm.aptoide.pt",
-        "cm.aptoide.lite",    // Aptoide Lite
-        // Tencent MyApp
-        "com.tencent.android.qqdownloader",
-        // Developer Tools - These are NOT actual app stores but Android system components
-        "com.android.development",     // Android Development Tools (System)
-        "com.android.shell",           // Android Shell (System)
-    )
-
     private val HIGH_RISK_PERMISSION_COMBINATIONS = listOf(
         // SMS & Contact combinations (Banking trojans)
         setOf(Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS),
@@ -317,6 +275,4 @@ object PackageUtils {
         Manifest.permission.READ_CONTACTS to "دسترسی به مخاطب‌ها",
         Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به صفحه"
     )
-
-
 }

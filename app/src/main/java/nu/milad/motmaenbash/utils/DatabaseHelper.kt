@@ -403,7 +403,7 @@ class DatabaseHelper(appContext: Context) :
     }
 
     fun isTrustedSideloadApp(packageName: String, signatureHash: String): Boolean {
-        val packageHash = HashUtils.generateSHA256(packageName.lowercase())
+        val packageHash = HashUtils.generateSHA256(packageName.trim().lowercase())
         val combinedHash = HashUtils.generateSHA256("$packageHash:$signatureHash")
 
         val selection = "$COLUMN_HASH = ? AND type = $SIDELOAD_COMBINED"
@@ -414,6 +414,15 @@ class DatabaseHelper(appContext: Context) :
         return isTrusted
     }
 
+    fun isTrustedMarketPackage(packageName: String): Boolean {
+        val packageHash = HashUtils.generateSHA256(packageName.trim().lowercase())
+        val selection = "$COLUMN_HASH = ? AND type = $MARKET_PACKAGE"
+        val selectionArgs = arrayOf(packageHash)
+        val isTrusted = countData(TABLE_TRUSTED_ENTITIES, selection, selectionArgs) > 0
+
+
+        return isTrusted
+    }
 
     fun isSenderFlagged(sender: String): Boolean {
         val hash = HashUtils.generateSHA256(sender)
