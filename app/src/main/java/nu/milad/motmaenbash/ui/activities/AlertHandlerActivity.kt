@@ -63,6 +63,7 @@ import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.models.Alert.Companion.SMS_ALERT_TYPES
 import nu.milad.motmaenbash.ui.components.AppCard
 import nu.milad.motmaenbash.ui.components.Divider
+import nu.milad.motmaenbash.ui.components.ExpandablePermissionContent
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
@@ -453,28 +454,15 @@ private fun AppAlertContent(
         context.packageManager.getApplicationInfo(packageName, 0)
     }.getOrNull()
 
+
     if (permissionCombinationDescription != null) {
 
-
-        Column(
-            modifier = Modifier
-                .padding(4.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally,
-
-            ) {
-            Text(
-                text = permissionCombinationDescription,
-                color = colorScheme.onSurface,
-                fontSize = 13.sp,
-                lineHeight = 21.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-
-                )
+        val descriptions = permissionCombinationDescription.split("\n").filter { it.isNotBlank() }
+        if (descriptions.isNotEmpty()) {
+            ExpandablePermissionContent(
+                descriptions = descriptions,
+                modifier = Modifier.padding(4.dp)
+            )
         }
     }
 
