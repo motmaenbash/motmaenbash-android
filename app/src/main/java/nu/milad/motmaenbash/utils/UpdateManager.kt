@@ -17,9 +17,13 @@ import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.consts.AppConstants
 import nu.milad.motmaenbash.consts.AppConstants.APP_PREFERENCES
+import nu.milad.motmaenbash.consts.AppConstants.DataMapping
 import nu.milad.motmaenbash.consts.AppConstants.PREF_KEY_LAST_UPDATE_TIME
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_TIPS
+import nu.milad.motmaenbash.consts.AppConstants.TABLE_TRUSTED_ENTITIES
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_DATA_URL
 import nu.milad.motmaenbash.consts.AppConstants.UPDATE_TIPS_URL
+import nu.milad.motmaenbash.consts.AppConstants.UPDATE_TRUSTED_ENTITIES_URL
 import nu.milad.motmaenbash.models.AppUpdate
 import nu.milad.motmaenbash.models.UpdateHistory
 import nu.milad.motmaenbash.viewmodels.SettingsViewModel
@@ -86,6 +90,7 @@ class UpdateManager(
 
     }
 
+
     /**
      * Executes the actual database update process
      * @param displayFeedback Whether to show toast messages
@@ -97,15 +102,26 @@ class UpdateManager(
         try {
             // Fetch data from server
             val dataResponse = URL(UPDATE_DATA_URL).readText()
+            val trustedResponse = URL(UPDATE_TRUSTED_ENTITIES_URL).readText()
             val tipsResponse = URL(UPDATE_TIPS_URL).readText()
 
-            // Combine data
-            val dataJsonArray = JSONArray(dataResponse).apply {
-                put(JSONArray(tipsResponse))
+            // Convert array-based data to key-based object
+            val dataJsonArray = JSONArray(dataResponse)
+            val dataJsonObject = JSONObject()
+
+            // Map indices to table names
+            for ((index, tableName) in DataMapping.INDEX_TO_TABLE_MAP) {
+                if (index < dataJsonArray.length()) {
+                    dataJsonObject.put(tableName, dataJsonArray.getJSONArray(index))
+                }
             }
 
+            // Add trusted entities and tips
+            dataJsonObject.put(TABLE_TRUSTED_ENTITIES, JSONArray(trustedResponse))
+            dataJsonObject.put(TABLE_TIPS, JSONArray(tipsResponse))
+
             // Update database
-            dbHelper.replaceDatabaseWithFetchedData(dataJsonArray)
+            dbHelper.replaceDatabaseWithFetchedData(dataJsonObject)
 
             // Update timestamp and fetch additional data
             setLastUpdateTime(DateUtils.getCurrentTimeInMillis())
@@ -126,8 +142,6 @@ class UpdateManager(
                 // Log the update history
                 dbHelper.logUpdateHistory(UpdateHistory.UpdateType.AUTO.value)
             }
-
-
             true
         } catch (e: Exception) {
             Log.e(tag, "Error during database update: ${e.message}", e)
@@ -154,7 +168,6 @@ class UpdateManager(
     suspend fun checkAppUpdate(): AppUpdate? = withContext(Dispatchers.IO) {
         try {
             val response = URL(AppConstants.UPDATE_APP_URL).readText()
-
             val jsonObject = JSONObject(response)
 
             val currentVersionCode = BuildConfig.VERSION_CODE

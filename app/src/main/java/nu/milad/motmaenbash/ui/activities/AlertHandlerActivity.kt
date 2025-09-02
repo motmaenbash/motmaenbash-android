@@ -131,8 +131,6 @@ class AlertHandlerActivity : ComponentActivity() {
             taskDescription
         )
 
-
-
         setContent {
             MotmaenBashTheme {
                 AlertDialog(
@@ -287,7 +285,6 @@ fun AlertDialog(
                             .fillMaxWidth()
                             .padding(4.dp)
                     )
-//                    Divider(verticalPadding = 4.dp, color = alertColor)
                     Divider(verticalPadding = 4.dp)
                 }
                 Column(
