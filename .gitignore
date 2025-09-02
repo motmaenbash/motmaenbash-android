@@ -24,4 +24,5 @@ local.properties
 *.keystore
 
 # Sample Files
-/app/src/main/res/raw/data_plain.json
+/app/src/main/res/raw/trusted_data_sample.json
+/app/src/main/res/raw/malicious_data_sample.json
