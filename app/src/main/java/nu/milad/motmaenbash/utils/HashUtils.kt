@@ -7,26 +7,6 @@ import java.security.MessageDigest
 
 object HashUtils {
 
-    /**
-     * Generates the MD5 hash of a given string.
-     *
-     * @param input The string to hash.
-     * @return The MD5 hash as a hexadecimal string.
-     */
-    fun generateMD5(input: String): String {
-        return generateHash(input, HashAlgorithms.MD5)
-    }
-
-
-    /**
-     * Generates the SHA-1 hash of a given string.
-     *
-     * @param input The string to hash.
-     * @return The SHA-1 hash as a hexadecimal string.
-     */
-    fun generateSHA1(input: String): String {
-        return generateHash(input, HashAlgorithms.SHA1)
-    }
 
     /**
      * Generates the SHA-256 hash of a given string.
@@ -52,7 +32,7 @@ object HashUtils {
      * Generates a hash of a given string with the specified algorithm.
      *
      * @param input The string to hash.
-     * @param algorithm The hashing algorithm to use (e.g., "MD5", "SHA-1").
+     * @param algorithm The hashing algorithm to use (e.g., "SHA256", "SHA512").
      * @return The hash as a hexadecimal string.
      */
     private fun generateHash(input: String, algorithm: String): String {
@@ -62,7 +42,6 @@ object HashUtils {
         val hashString = BigInteger(1, hashBytes).toString(16)
         // Pad with leading zeros (adjust padding based on algorithm)
         val paddingLength = when (algorithm) {
-            HashAlgorithms.MD5 -> 32
             HashAlgorithms.SHA256 -> 64
             HashAlgorithms.SHA512 -> 128
             else -> 0 // Handle unknown algorithms
@@ -90,18 +69,6 @@ object HashUtils {
     }
 
     /**
-     * Calculates the SHA-1 hash of the provided byte array.
-     *
-     * @param data The byte array to hash.
-     * @return The SHA-1 hash as a Base64 encoded string.
-     */
-    fun calculateSHA1FromBytes(data: ByteArray): String {
-        val md = MessageDigest.getInstance(HashAlgorithms.SHA1)
-        val digest = md.digest(data)
-        return Base64.encodeToString(digest, Base64.NO_WRAP)
-    }
-
-    /**
      * Calculates the SHA-256 hash of the provided byte array as a hexadecimal string.
      *
      * @param data The byte array to hash.
@@ -113,27 +80,6 @@ object HashUtils {
         return digest.joinToString("") { "%02x".format(it) }
     }
 
-    /**
-     * Calculates the SHA-1 hash of the provided byte array as a hexadecimal string.
-     *
-     * @param data The byte array to hash.
-     * @return The SHA-1 hash as a hexadecimal string.
-     */
-    fun calculateSHA1HexFromBytes(data: ByteArray): String {
-        val md = MessageDigest.getInstance(HashAlgorithms.SHA1)
-        val digest = md.digest(data)
-        return digest.joinToString("") { "%02x".format(it) }
-    }
-
-    /**
-     * Calculates the SHA-1 hash of the provided file.
-     *
-     * @param file The file to hash.
-     * @return The SHA-1 hash as a Base64 encoded string.
-     */
-    fun calculateSHA1FromFile(file: File): String {
-        return Base64.encodeToString(digestFile(file, HashAlgorithms.SHA1), Base64.NO_WRAP)
-    }
 
     /**
      * Calculates the SHA-256 hash of the provided file.
@@ -143,11 +89,6 @@ object HashUtils {
      */
     fun calculateSHA256FromFile(file: File): String {
         return Base64.encodeToString(digestFile(file, HashAlgorithms.SHA256), Base64.NO_WRAP)
-    }
-
-
-    fun calculateSHA1HexFromFile(file: File): String {
-        return digestFile(file, HashAlgorithms.SHA1).joinToString("") { "%02x".format(it) }
     }
 
 
@@ -184,8 +125,6 @@ object HashUtils {
 }
 
 object HashAlgorithms {
-    const val MD5 = "MD5"
-    const val SHA1 = "SHA-1"
     const val SHA256 = "SHA-256"
     const val SHA512 = "SHA-512"
 }
