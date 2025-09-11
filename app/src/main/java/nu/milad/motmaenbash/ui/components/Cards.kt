@@ -43,96 +43,99 @@ import nu.milad.motmaenbash.utils.WebUtils.openUrl
 fun DonationCard() {
     val context = LocalContext.current
 
-    AppCard {
+    AppCard(
+        content = {
 
-        AppCard(
-            containerColor = colorScheme.tertiaryContainer,
-            padding = 4.dp
+            AppCard(
+                containerColor = colorScheme.tertiaryContainer,
+                padding = 4.dp
 
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = stringResource(R.string.donation_message),
-                    style = typography.headlineSmall,
-                    color = colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { openUrl(context, AppConstants.DONATE_URL) },
-                    modifier = Modifier.wrapContentSize(),
-                    colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
+                Column(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CurrencyBitcoin,
-                        contentDescription = "Donate",
-                        tint = Color.White
-                    )
                     Text(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        text = stringResource(R.string.donation_title),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.donation_message),
+                        style = typography.headlineSmall,
+                        color = colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { openUrl(context, AppConstants.DONATE_URL) },
+                        modifier = Modifier.wrapContentSize(),
+                        colors = ButtonDefaults.buttonColors(containerColor = ColorPrimary)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CurrencyBitcoin,
+                            contentDescription = "Donate",
+                            tint = Color.White
+                        )
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            text = stringResource(R.string.donation_title),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
                 }
-
             }
-        }
 
-    }
+        },
+    )
 }
 
 
 @Composable
 fun SecurityWarning() {
     AppCard(
+        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f)),
         padding = 12.dp,
-        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
-    ) {
+        content = {
 
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.WarningAmber,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = colorScheme.onError
-
-                )
-                Text(
-                    text = "نکته مهم",
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp),
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onError
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.WarningAmber,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = colorScheme.onError
+
+                    )
+                    Text(
+                        text = "نکته مهم",
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 4.dp),
+                        style = typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onError
+                    )
+                }
+
+                Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
+                Text(
+                    text = "اپلیکیشن «مطمئن باش» و به‌روزرسانی‌های آن را فقط از منابع رسمی و مارکت‌های معتبر نصب کنید.",
+                    style = typography.bodySmall,
+                    color = colorScheme.onSurface
+
                 )
+
             }
 
-            Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
-            Text(
-                text = "اپلیکیشن «مطمئن باش» و به‌روزرسانی‌های آن را فقط از منابع رسمی و مارکت‌های معتبر نصب کنید.",
-                style = typography.bodySmall,
-                color = colorScheme.onSurface
-
-            )
-
-        }
-
-    }
+        },
+    )
 
 }
 

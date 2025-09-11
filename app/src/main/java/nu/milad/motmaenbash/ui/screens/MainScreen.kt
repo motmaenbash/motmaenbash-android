@@ -567,57 +567,59 @@ fun TipOfDaySection(
     )
 
 
-    AppCard {
+    AppCard(
+        content = {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 12.dp, end = 8.dp, top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "نکته روز",
-                color = colorScheme.primary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-
-            )
-
-            IconButton(
-                onClick = onRefreshClick,
-                modifier = Modifier
-                    .size(24.dp)
-                    .graphicsLayer {
-                        rotationZ = if (isRefreshing) rotation else 0f
-                    },
-                enabled = !isRefreshing
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 8.dp, top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Refresh,
-                    contentDescription = "نمایش یک نکته دیگر",
-                    modifier = Modifier.fillMaxSize(),
-                    tint = if (isRefreshing)
-                        colorScheme.onSurface.copy(alpha = 0.6f)
-                    else
-                        colorScheme.primary
+                Text(
+                    text = "نکته روز",
+                    color = colorScheme.primary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .weight(1f)
+
                 )
+
+                IconButton(
+                    onClick = onRefreshClick,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .graphicsLayer {
+                            rotationZ = if (isRefreshing) rotation else 0f
+                        },
+                    enabled = !isRefreshing
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Refresh,
+                        contentDescription = "نمایش یک نکته دیگر",
+                        modifier = Modifier.fillMaxSize(),
+                        tint = if (isRefreshing)
+                            colorScheme.onSurface.copy(alpha = 0.6f)
+                        else
+                            colorScheme.primary
+                    )
+                }
             }
-        }
-        Divider()
+            Divider()
 
-        Text(
-            text = tip ?: "در حال دریافت...",
-            modifier = Modifier
-                .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
-                .fillMaxWidth()
-                .heightIn(min = 48.dp),
-            fontSize = 13.sp,
+            Text(
+                text = tip ?: "در حال دریافت...",
+                modifier = Modifier
+                    .padding(start = 12.dp, end = 12.dp, bottom = 8.dp)
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp),
+                fontSize = 13.sp,
 
-            )
+                )
 
-    }
+        },
+    )
 
 
 }
@@ -646,67 +648,67 @@ fun CriticalPermissionsSection(
             )
 
             AppCard(
-                padding = 8.dp,
                 border = BorderStroke(
                     width = 1.dp,
                     color = colorScheme.onError
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    PermissionWarningBanner(
-                        warningTitle = "برای شروع، برنامه به این دسترسی‌ها نیاز دارد:",
-                        missingPermissions = missingPermissions,
-                        warningIcon = Icons.Outlined.Info
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp, end = 16.dp, bottom = 8.dp
-                    )
-                ) {
-
-                    // Notification Permission Status
-                    ProtectionRow(
-                        title = stringResource(id = R.string.permission_notification),
-                        isGranted = notificationPermissionStatus,
-                        onActivateClick = onNotificationPermissionClick,
-                        enabledIcon = Icons.Outlined.CheckCircle,
-                        disabledIcon = Icons.Outlined.ErrorOutline
-                    )
-                    Divider()
-
-
-                    // Overlay Permission Status
-                    ProtectionRow(
-                        title = stringResource(id = R.string.permission_overlay),
-                        isGranted = overlayPermissionStatus,
-                        onActivateClick = onOverlayPermissionClick,
-                        enabledIcon = Icons.Outlined.CheckCircle,
-                        disabledIcon = Icons.Outlined.ErrorOutline
-                    )
-                    Divider()
-                    Row(
+                ),
+                content = {
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     ) {
-
-                        MoreInfoButton(
-                            onClick = onMoreInfoClick
+                        PermissionWarningBanner(
+                            warningTitle = "برای شروع، برنامه به این دسترسی‌ها نیاز دارد:",
+                            missingPermissions = missingPermissions,
+                            warningIcon = Icons.Outlined.Info
                         )
                     }
 
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                }
-            }
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp, end = 16.dp, bottom = 8.dp
+                        )
+                    ) {
+
+                        // Notification Permission Status
+                        ProtectionRow(
+                            title = stringResource(id = R.string.permission_notification),
+                            isGranted = notificationPermissionStatus,
+                            onActivateClick = onNotificationPermissionClick,
+                            enabledIcon = Icons.Outlined.CheckCircle,
+                            disabledIcon = Icons.Outlined.ErrorOutline
+                        )
+                        Divider()
+
+
+                        // Overlay Permission Status
+                        ProtectionRow(
+                            title = stringResource(id = R.string.permission_overlay),
+                            isGranted = overlayPermissionStatus,
+                            onActivateClick = onOverlayPermissionClick,
+                            enabledIcon = Icons.Outlined.CheckCircle,
+                            disabledIcon = Icons.Outlined.ErrorOutline
+                        )
+                        Divider()
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+
+                            MoreInfoButton(
+                                onClick = onMoreInfoClick
+                            )
+                        }
+
+
+                    }
+                },
+            )
         }
     }
 }
@@ -722,44 +724,45 @@ fun PermissionWarningBanner(
     if (missingPermissions.isNotEmpty()) {
 
         AppCard(
-            containerColor = colorScheme.errorContainer,
             cornerRadius = 12.dp,
-            padding = 0.dp
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 4.dp)
+            padding = 0.dp,
+            containerColor = colorScheme.errorContainer,
+            content = {
+                Column(
+                    modifier = Modifier.padding(8.dp)
                 ) {
-                    Icon(
-                        imageVector = warningIcon,
-                        contentDescription = "هشدار",
-                        tint = colorScheme.onError,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text(
-                        text = warningTitle,
-                        color = colorScheme.onError,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = warningIcon,
+                            contentDescription = "هشدار",
+                            tint = colorScheme.onError,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Text(
+                            text = warningTitle,
+                            color = colorScheme.onError,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
-                missingPermissions.forEach { permission ->
-                    Text(
-                        text = "• $permission",
-                        color = colorScheme.onError,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Right,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    missingPermissions.forEach { permission ->
+                        Text(
+                            text = "• $permission",
+                            color = colorScheme.onError,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Right,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-            }
-        }
+            },
+        )
 
     }
 }
@@ -810,7 +813,6 @@ fun ProtectionStatus(
         Box(modifier = Modifier.fillMaxWidth()) {
             // The original card content
             AppCard(
-                padding = 8.dp,
                 modifier = Modifier.fillMaxWidth(),
                 border = if (missingPermissions.isNotEmpty() && !isCriticalPermissionsMissing) {
                     BorderStroke(
@@ -819,52 +821,53 @@ fun ProtectionStatus(
                     )
                 } else {
                     null
-                }
-            ) {
-                if (missingPermissions.isNotEmpty() && !isCriticalPermissionsMissing) {
-                    // Permission Warning
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        PermissionWarningBanner(
-                            warningTitle = "برای حفاظت کامل، دسترسی‌های زیر را فعال کنید:",
-                            missingPermissions = missingPermissions,
-                            warningIcon = Icons.Outlined.PrivacyTip
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp, end = 16.dp, bottom = 8.dp
-                    )
-                ) {
-                    permissions.forEach { (label, isGranted, onActivateClick) ->
-                        ProtectionRow(
-                            title = label,
-                            isGranted = isGranted,
-                            onActivateClick = onActivateClick,
-                        )
-
-                        Divider()
+                },
+                content = {
+                    if (missingPermissions.isNotEmpty() && !isCriticalPermissionsMissing) {
+                        // Permission Warning
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            PermissionWarningBanner(
+                                warningTitle = "برای حفاظت کامل، دسترسی‌های زیر را فعال کنید:",
+                                missingPermissions = missingPermissions,
+                                warningIcon = Icons.Outlined.PrivacyTip
+                            )
+                        }
                     }
 
+                    Spacer(modifier = Modifier.height(8.dp))
 
-
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp, end = 16.dp, bottom = 8.dp
+                        )
                     ) {
-                        MoreInfoButton(
-                            onClick = { showProtectorInfoDialog = true },
-                        )
+                        permissions.forEach { (label, isGranted, onActivateClick) ->
+                            ProtectionRow(
+                                title = label,
+                                isGranted = isGranted,
+                                onActivateClick = onActivateClick,
+                            )
+
+                            Divider()
+                        }
+
+
+
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            MoreInfoButton(
+                                onClick = { showProtectorInfoDialog = true },
+                            )
+                        }
+
+
                     }
-
-
-                }
-            }
+                },
+            )
 
             // Overlay that appears when critical permissions are missing
             if (isCriticalPermissionsMissing) {
@@ -1036,25 +1039,27 @@ fun Stats(stats: Stats) {
 
     Column {
         SectionTitle("آمار شما")
-        AppCard(padding = 8.dp) {
+        AppCard(
+            content = {
 
-            Column(modifier = Modifier.padding(16.dp)) {
-                userStats.forEachIndexed { index, (label, value) ->
-                    StatRow(
-                        label = label,
-                        value = value,
-                        isLabelBold = index == userStats.size - 1 || index == userStats.size - 2,
-                        icon = if (index == userStats.size - 1) Icons.Outlined.Security else if (index == userStats.size - 2) Icons.Outlined.GppGood else Icons.Outlined.Shield
-                    )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    userStats.forEachIndexed { index, (label, value) ->
+                        StatRow(
+                            label = label,
+                            value = value,
+                            isLabelBold = index == userStats.size - 1 || index == userStats.size - 2,
+                            icon = if (index == userStats.size - 1) Icons.Outlined.Security else if (index == userStats.size - 2) Icons.Outlined.GppGood else Icons.Outlined.Shield
+                        )
 
-                    // Only show divider if it's not the last item
-                    if (index != userStats.size - 1) {
-                        Divider()
+                        // Only show divider if it's not the last item
+                        if (index != userStats.size - 1) {
+                            Divider()
+                        }
+
                     }
-
                 }
-            }
-        }
+            },
+        )
     }
 }
 
@@ -1156,35 +1161,34 @@ fun ToolCard(
     AppCard(
         modifier = modifier,
         padding = 4.dp,
-    )
-
-    {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
+        content = {
+            Column(
                 modifier = Modifier
-                    .size(40.dp)
-                    .padding(bottom = 8.dp),
-                tint = colorScheme.primary
-            )
-            Text(
-
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 13.sp,
-                color = colorScheme.onSurface,
-                text = text,
-                textAlign = TextAlign.Center,
-
+                    .fillMaxWidth()
+                    .clickable { onClick() }
+                    .padding(vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(bottom = 8.dp),
+                    tint = colorScheme.primary
                 )
+                Text(
+
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 13.sp,
+                    color = colorScheme.onSurface,
+                    text = text,
+                    textAlign = TextAlign.Center,
+
+                    )
+            }
         }
-    }
+    )
 }
 
 
@@ -1200,85 +1204,88 @@ fun UpdateSection(
         ), label = "Infinite Rotation"
     )
 
-    AppCard(padding = 8.dp) {
+    AppCard(
+        padding = 8.dp,
+        content = {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Display appropriate text based on update state
-            Text(
-                text = when (updateState) {
-                    is UpdateState.Idle -> stringResource(
-                        R.string.last_update_time,
-                        updateState.lastUpdateTime
-                    )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Display appropriate text based on update state
+                Text(
+                    text = when (updateState) {
+                        is UpdateState.Idle -> stringResource(
+                            R.string.last_update_time,
+                            updateState.lastUpdateTime
+                        )
 
-                    is UpdateState.Updating -> "در حال به‌روزرسانی..."
-                    is UpdateState.Success -> stringResource(
-                        R.string.last_update_time,
-                        updateState.lastUpdateTime
-                    )
+                        is UpdateState.Updating -> "در حال به‌روزرسانی..."
+                        is UpdateState.Success -> stringResource(
+                            R.string.last_update_time,
+                            updateState.lastUpdateTime
+                        )
 
-                    is UpdateState.Skipped -> stringResource(
-                        R.string.last_update_time,
-                        updateState.message
-                    )
+                        is UpdateState.Skipped -> stringResource(
+                            R.string.last_update_time,
+                            updateState.message
+                        )
 
-                    is UpdateState.Error -> "خطا! لطفا بعدا تلاش کنید."
+                        is UpdateState.Error -> "خطا! لطفا بعدا تلاش کنید."
 
-                }, modifier = Modifier.weight(1f),
-                fontSize = 13.sp,
-                color = when (updateState) {
-                    is UpdateState.Error -> colorScheme.onError
-                    else -> colorScheme.onSurface
-                }
-            )
-
-            // Show progress indicator or update button
-            when (updateState) {
-                is UpdateState.Updating -> {
-                    LaunchedEffect(updateState) {
-                        // Animation auto-managed by infiniteTransition
+                    }, modifier = Modifier.weight(1f),
+                    fontSize = 13.sp,
+                    color = when (updateState) {
+                        is UpdateState.Error -> colorScheme.onError
+                        else -> colorScheme.onSurface
                     }
-                    Icon(
-                        imageVector = Icons.Outlined.Update,
-                        contentDescription = "در حال به‌روزرسانی",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .graphicsLayer { rotationZ = rotation },
-                        tint = colorScheme.onSurface.copy(alpha = 0.6f)
+                )
 
-                    )
-                }
-
-                is UpdateState.Success -> {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "به‌روزرسانی موفق",
-                        modifier = Modifier.size(24.dp),
-                        tint = colorScheme.primary
-                    )
-                }
-
-                else -> {
-                    IconButton(
-                        onClick = onUpdateDatabaseClick, modifier = Modifier.size(24.dp)
-                    ) {
+                // Show progress indicator or update button
+                when (updateState) {
+                    is UpdateState.Updating -> {
+                        LaunchedEffect(updateState) {
+                            // Animation auto-managed by infiniteTransition
+                        }
                         Icon(
                             imageVector = Icons.Outlined.Update,
-                            contentDescription = "به‌روزرسانی",
-                            modifier = Modifier.size(24.dp),
-                            tint = colorScheme.primary
+                            contentDescription = "در حال به‌روزرسانی",
+                            modifier = Modifier
+                                .size(24.dp)
+                                .graphicsLayer { rotationZ = rotation },
+                            tint = colorScheme.onSurface.copy(alpha = 0.6f)
 
                         )
                     }
+
+                    is UpdateState.Success -> {
+                        Icon(
+                            imageVector = Icons.Outlined.Check,
+                            contentDescription = "به‌روزرسانی موفق",
+                            modifier = Modifier.size(24.dp),
+                            tint = colorScheme.primary
+                        )
+                    }
+
+                    else -> {
+                        IconButton(
+                            onClick = onUpdateDatabaseClick, modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Update,
+                                contentDescription = "به‌روزرسانی",
+                                modifier = Modifier.size(24.dp),
+                                tint = colorScheme.primary
+
+                            )
+                        }
+                    }
                 }
             }
-        }
-    }
+        },
+    )
 }
 
 

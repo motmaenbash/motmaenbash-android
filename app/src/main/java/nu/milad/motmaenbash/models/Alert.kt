@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Alert(
     val type: AlertType,
-    val threatType: ThreatType? = null,
+    val threatType: UrlThreatType? = null,
     val level: AlertLevel,
     val title: String,
     val summary: String? = null,
@@ -47,14 +47,14 @@ data class Alert(
         }
     }
 
-    enum class ThreatType(val value: Int) {
+    enum class UrlThreatType(val value: Int) {
         PHISHING(1),
         SCAM(2),
         PONZI(3),
         Other(4);
 
         companion object {
-            fun fromInt(value: Int): ThreatType? {
+            fun fromInt(value: Int): UrlThreatType? {
                 return entries.find { it.value == value }
             }
         }

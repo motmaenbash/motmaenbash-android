@@ -142,48 +142,49 @@ fun PermissionStep(
         if (optionalDescription != null) {
 
             AppCard(
+                border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f)),
                 padding = 12.dp,
-                border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
-            ) {
+                content = {
 
-                Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(8.dp)) {
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.Outlined.AdminPanelSettings,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = ColorPrimary
-
-                        )
-                        Text(
-                            text = "دسترسی اختیاری",
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 4.dp),
-                            style = typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Outlined.AdminPanelSettings,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = ColorPrimary
+
+                            )
+                            Text(
+                                text = "دسترسی اختیاری",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 4.dp),
+                                style = typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = colorScheme.onSurface
+                            )
+                        }
+
+                        Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
+                        Text(
+                            optionalDescription,
                             fontSize = 12.sp,
                             color = colorScheme.onSurface
+
                         )
+
                     }
 
-                    Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
-                    Text(
-                        optionalDescription,
-                        fontSize = 12.sp,
-                        color = colorScheme.onSurface
-
-                    )
-
-                }
-
-            }
+                },
+            )
         }
 
         // Custom content section

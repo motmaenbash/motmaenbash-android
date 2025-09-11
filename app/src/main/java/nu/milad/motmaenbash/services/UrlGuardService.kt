@@ -43,7 +43,7 @@ class UrlGuardService : AccessibilityService() {
         data class VerifiedPaymentGatewayUrl(val url: String) : UrlAnalysisResult()
         data class SuspiciousUrl(
             val url: String,
-            val threatType: Alert.ThreatType? = null,
+            val threatType: Alert.UrlThreatType? = null,
             val urlMatch: Int = 1
         ) : UrlAnalysisResult()
     }

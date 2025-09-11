@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nu.milad.motmaenbash.R
 import nu.milad.motmaenbash.models.Alert
-import nu.milad.motmaenbash.models.Alert.ThreatType
+import nu.milad.motmaenbash.models.Alert.UrlThreatType
 import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.SuspiciousUrl
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
@@ -53,7 +53,7 @@ class AlertOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val url = intent?.getStringExtra("url") ?: return START_NOT_STICKY
         val threatTypeName = intent.getStringExtra("threatType")
-        val threatType = threatTypeName?.let { ThreatType.valueOf(it) }
+        val threatType = threatTypeName?.let { UrlThreatType.valueOf(it) }
         val isSpecificUrl = intent.getBooleanExtra("isSpecificUrl", false)
 
         val alertId = alertIdGenerator.incrementAndGet()

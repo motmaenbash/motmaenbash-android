@@ -91,29 +91,30 @@ fun InfoCard(
 ) {
     AppCard(
         cornerRadius = 12.dp,
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        content = {
+            Column(modifier = Modifier.padding(16.dp)) {
 
-            Row(
-                verticalAlignment = Alignment.Top
-            ) {
-                if (faq.icon != null) {
-                    Icon(
-                        imageVector = faq.icon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
+                Row(
+                    verticalAlignment = Alignment.Top
+                ) {
+                    if (faq.icon != null) {
+                        Icon(
+                            imageVector = faq.icon,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                    Text(text = faq.question, style = typography.headlineSmall)
                 }
-                Text(text = faq.question, style = typography.headlineSmall)
-            }
 
-            Text(
-                text = faq.answer,
-                style = typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+                Text(
+                    text = faq.answer,
+                    style = typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
-    }
+    )
 }
 
 

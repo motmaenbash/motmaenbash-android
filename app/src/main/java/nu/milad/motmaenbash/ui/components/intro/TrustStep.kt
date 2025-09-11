@@ -122,46 +122,47 @@ fun TrustReasonCard(
     description: String
 ) {
     AppCard(
+        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f)),
         padding = 2.dp,
-        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
-    ) {
+        content = {
 
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = ColorPrimary
-
-                )
-                Text(
-                    text = title,
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp),
-                    style = typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = ColorPrimary
+
+                    )
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 4.dp),
+                        style = typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface
+                    )
+                }
+
+                Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
+                Text(
+                    description,
+                    style = typography.bodySmall,
                     color = colorScheme.onSurface
+
                 )
+
             }
 
-            Divider(verticalPadding = 2.dp, horizontalPadding = 8.dp)
-            Text(
-                description,
-                style = typography.bodySmall,
-                color = colorScheme.onSurface
-
-            )
-
-        }
-
-    }
+        },
+    )
 }
 
 

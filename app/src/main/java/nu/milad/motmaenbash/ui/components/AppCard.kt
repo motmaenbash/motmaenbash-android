@@ -22,13 +22,15 @@ fun AppCard(
     elevation: Dp = 0.dp,
     containerColor: Color = colorScheme.surface,
     contentColor: Color = colorScheme.onSurface,
+    shape: RoundedCornerShape = RoundedCornerShape(cornerRadius),
     content: @Composable () -> Unit
+
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(padding),
-        shape = RoundedCornerShape(cornerRadius),
+        shape = shape,
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,

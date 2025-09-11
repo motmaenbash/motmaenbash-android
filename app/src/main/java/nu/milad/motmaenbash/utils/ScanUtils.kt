@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import nu.milad.motmaenbash.consts.AppConstants.APP_PREFERENCES
-import nu.milad.motmaenbash.models.App
 
 class ScanUtils(private val context: Context) {
 
@@ -27,12 +26,6 @@ class ScanUtils(private val context: Context) {
             !PackageUtils.isSystemApp(packageInfo) && packageInfo.packageName != context.packageName
         }
 
-    }
-
-
-    fun isAppSuspicious(app: App): Boolean {
-
-        return dbHelper.isAppFlagged(app.packageName, app.apkHash, app.sighHash)
     }
 
 

@@ -141,7 +141,7 @@ object AlertUtils {
 
     fun getAlertContent(
         alertType: Alert.AlertType,
-        threatType: Alert.ThreatType? = null,
+        threatType: Alert.UrlThreatType? = null,
         isSpecificUrl: Boolean = false
     ): Triple<String, String?, String?> =
         when (alertType) {
@@ -184,13 +184,13 @@ object AlertUtils {
             )
 
             Alert.AlertType.APP_RISKY_INSTALL -> Triple(
-                "نصب برنامه با ریسک بالا",
-                "نصب برنامه از منبع نامعتبر + دسترسی حساس",
-                "این برنامه از منبعی خارج از فروشگاه‌های معتبر نصب شده و دارای دسترسی‌های حساسی است که می‌تواند منجر به سواستفاده شود. چنین الگوهایی معمولا در بدافزارها و برنامه‌های ناایمن دیده می‌شود. در صورت عدم اطمینان از منبع نصب، توصیه می‌شود آن را سریع حذف کنید.\nترکیب دسترسی‌های حساس:"
+                "برنامه دارای ریسک",
+                "نصب از منبع ناشناخته + دسترسی حساس",
+                "این برنامه <b>خارج از مارکت‌های معتبر اندروید</b> نصب شده و <b>ترکیب دسترسی‌های حساسی</b> دارد که می‌تواند منجر به سواستفاده شود. اگر برنامه را از سایت رسمی توسعه‌دهنده نصب کرده‌اید، این هشدار صرفا جنبه احتیاطی دارد." +
+                        " در غیر این صورت چنین الگوهایی معمولا در <b>بدافزارها</b> دیده می‌شود و توصیه می‌شود در صورت عدم اطمینان از منبع نصب، آن را سریع حذف کنید."
             )
 
-
-                    Alert.AlertType.URL_FLAGGED -> {
+            Alert.AlertType.URL_FLAGGED -> {
                 val domainOrUrlText =
                     if (isSpecificUrl) "آدرس اینترنتی" else "دامنه اینترنتی"
 
@@ -198,19 +198,19 @@ object AlertUtils {
                     "$domainOrUrlText مشکوک"
 
                 when (threatType) {
-                    Alert.ThreatType.PHISHING -> Triple(
+                    Alert.UrlThreatType.PHISHING -> Triple(
                         subTitle,
                         "این $domainOrUrlText برای فیشینگ گزارش شده است.",
                         "براساس گزارش کاربرها، این $domainOrUrlText برای فیشینگ استفاده می‌شود و هدف آن سرقت اطلاعات شخصی و مالی شماست. توصیه می‌شود از ورود به این سایت خودداری کنید."
                     )
 
-                    Alert.ThreatType.PONZI -> Triple(
+                    Alert.UrlThreatType.PONZI -> Triple(
                         subTitle,
                         "این $domainOrUrlText مربوط به طرح پانزی است.",
                         "براساس گزارش کاربرها، این $domainOrUrlText مرتبط با طرح‌های پانزی یا هرمی است که با وعده‌های غیرواقعی سود، سرمایه‌ی شما را به خطر می‌اندازند. توصیه می‌شود از ورود به این سایت خودداری کنید."
                     )
 
-                    Alert.ThreatType.SCAM -> Triple(
+                    Alert.UrlThreatType.SCAM -> Triple(
                         subTitle,
                         "این $domainOrUrlText برای کلاهبرداری گزارش شده است.",
                         "براساس گزارش کاربرها، این $domainOrUrlText برای کلاهبرداری استفاده می‌شود و می‌تواند به ضرر مالی شما منجر شود. توصیه می‌شود از ورود به این سایت خودداری کنید."
@@ -229,7 +229,7 @@ object AlertUtils {
 
     fun getAlertHint(
         alertType: Alert.AlertType,
-        threatType: Alert.ThreatType? = null,
+        threatType: Alert.UrlThreatType? = null,
     ): String? {
         return when (alertType) {
             Alert.AlertType.SMS_LINK_FLAGGED -> "از باز کردن لینک این پیامک خودداری کنید."
@@ -240,9 +240,9 @@ object AlertUtils {
             Alert.AlertType.APP_FLAGGED -> "بدون اجرای برنامه، سریع آن را حذف کنید."
 
             Alert.AlertType.URL_FLAGGED -> when (threatType) {
-                Alert.ThreatType.PHISHING -> "از باز کردن این لینک خودداری کنید."
-                Alert.ThreatType.SCAM -> "از ورود به این سایت خودداری کنید."
-                Alert.ThreatType.PONZI -> "از ورود و پرداخت در این سایت خودداری کنید."
+                Alert.UrlThreatType.PHISHING -> "از باز کردن این لینک خودداری کنید."
+                Alert.UrlThreatType.SCAM -> "از ورود به این سایت خودداری کنید."
+                Alert.UrlThreatType.PONZI -> "از ورود و پرداخت در این سایت خودداری کنید."
                 else -> "از ورود به این سایت خودداری کنید."
             }
 

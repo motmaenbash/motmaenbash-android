@@ -166,59 +166,60 @@ fun UrlScanScreen(
                 is UrlScanViewModel.ScanState.Result -> {
                     AppCard(
                         cornerRadius = 12.dp,
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 18.dp, horizontal = 24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val resultIcon = when (currentState.isSafe) {
-                                true -> Icons.Outlined.VerifiedUser
-                                false -> Icons.Outlined.RemoveModerator
-                                else -> Icons.Outlined.GppMaybe
-                            }
-                            Icon(
-                                imageVector = resultIcon,
-                                contentDescription = null,
+                        content = {
+                            Column(
                                 modifier = Modifier
-                                    .size(84.dp)
-                                    .padding(bottom = 8.dp),
-                                tint = when (currentState.isSafe) {
+                                    .fillMaxWidth()
+                                    .padding(vertical = 18.dp, horizontal = 24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                val resultIcon = when (currentState.isSafe) {
+                                    true -> Icons.Outlined.VerifiedUser
+                                    false -> Icons.Outlined.RemoveModerator
+                                    else -> Icons.Outlined.GppMaybe
+                                }
+                                Icon(
+                                    imageVector = resultIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(84.dp)
+                                        .padding(bottom = 8.dp),
+                                    tint = when (currentState.isSafe) {
+                                        true -> Green
+                                        false -> Red
+                                        else -> GreyDark
+                                    }
+                                )
+
+                                val textColor = when (currentState.isSafe) {
                                     true -> Green
                                     false -> Red
                                     else -> GreyDark
                                 }
-                            )
 
-                            val textColor = when (currentState.isSafe) {
-                                true -> Green
-                                false -> Red
-                                else -> GreyDark
+                                Text(
+                                    text = currentState.message,
+                                    style = typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = textColor,
+                                    modifier = Modifier
+                                        .padding(bottom = 8.dp),
+                                    textAlign = TextAlign.Center,
+
+                                    )
+
+                                Text(
+                                    text = currentState.url,
+                                    fontWeight = FontWeight.Bold,
+                                    color = textColor,
+                                    textAlign = TextAlign.Center,
+                                    style = typography.bodyMedium.copy(
+                                        textDirection = TextDirection.Ltr
+                                    )
+                                )
                             }
-
-                            Text(
-                                text = currentState.message,
-                                style = typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = textColor,
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp),
-                                textAlign = TextAlign.Center,
-
-                                )
-
-                            Text(
-                                text = currentState.url,
-                                fontWeight = FontWeight.Bold,
-                                color = textColor,
-                                textAlign = TextAlign.Center,
-                                style = typography.bodyMedium.copy(
-                                    textDirection = TextDirection.Ltr
-                                )
-                            )
                         }
-                    }
+                    )
                 }
 
 

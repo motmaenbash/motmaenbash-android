@@ -72,6 +72,7 @@ import nu.milad.motmaenbash.ui.theme.YellowDark
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
 import nu.milad.motmaenbash.utils.PackageUtils
+import nu.milad.motmaenbash.utils.parseBoldTags
 
 class AlertHandlerActivity : ComponentActivity() {
 
@@ -198,179 +199,183 @@ fun AlertDialog(
 
         AppCard(
             padding = 16.dp,
-            elevation = 4.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Header row with badge and close button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-
-                    Row(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .background(
-                                color = alertColor,
-                                shape = RoundedCornerShape(bottomEnd = 12.dp, bottomStart = 12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (alert.type == Alert.AlertType.SMS_NEUTRAL) Icons.Outlined.Textsms else Icons.Outlined.GppBad,
-                            contentDescription = alertLevelLabel,
-                            tint = colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Text(
-                            text = alert.title,
-                            color = colorScheme.onPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(top = 8.dp)
-                    ) {
-                        Icon(
-
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "بستن",
-                            tint = GreyMiddle
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-//                // Alert title
-//                Text(
-//                    text = alert.title,
-//                    color = alertColor,
-//                    fontSize = 15.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    textAlign = TextAlign.Center,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(bottom = 8.dp)
-//                )
-
-//                Divider(verticalPadding = 4.dp, color = alertColor)
-                if (alert.summary != null) {
-                    Text(
-                        text = alert.summary,
-                        color = Red,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp)
-                    )
-                    Divider(verticalPadding = 4.dp)
-                }
+            elevation = 4.dp,
+            content = {
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .weight(1f, fill = false)
-                        .verticalScroll(scrollState)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Alert message if present
-                    if (!alert.content.isNullOrBlank()) {
+                    // Header row with badge and close button
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+
+                        Row(
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .background(
+                                    color = alertColor,
+                                    shape = RoundedCornerShape(
+                                        bottomEnd = 12.dp,
+                                        bottomStart = 12.dp
+                                    )
+                                )
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = if (alert.type == Alert.AlertType.SMS_NEUTRAL) Icons.Outlined.Textsms else Icons.Outlined.GppBad,
+                                contentDescription = alertLevelLabel,
+                                tint = colorScheme.onPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Text(
+                                text = alert.title,
+                                color = colorScheme.onPrimary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .padding(top = 8.dp)
+                        ) {
+                            Icon(
+
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "بستن",
+                                tint = GreyMiddle
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    //                // Alert title
+                    //                Text(
+                    //                    text = alert.title,
+                    //                    color = alertColor,
+                    //                    fontSize = 15.sp,
+                    //                    fontWeight = FontWeight.Bold,
+                    //                    textAlign = TextAlign.Center,
+                    //                    modifier = Modifier
+                    //                        .fillMaxWidth()
+                    //                        .padding(bottom = 8.dp)
+                    //                )
+
+                    //                Divider(verticalPadding = 4.dp, color = alertColor)
+                    if (alert.summary != null) {
                         Text(
-                            text = alert.content,
-                            color = colorScheme.onSurface,
+                            text = alert.summary,
+                            color = Red,
                             fontSize = 13.sp,
-                            lineHeight = 22.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        )
+                        Divider(verticalPadding = 4.dp)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .weight(1f, fill = false)
+                            .verticalScroll(scrollState)
+                    ) {
+                        // Alert message if present
+                        if (!alert.content.isNullOrBlank()) {
+                            Text(
+                                text = parseBoldTags(alert.content),
+                                color = colorScheme.onSurface,
+                                fontSize = 13.sp,
+                                lineHeight = 22.sp,
+
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
+
+                        Divider(verticalPadding = 4.dp)
+                        // Content based on alert type
+                        when (alert.type) {
+                            in SMS_ALERT_TYPES -> {
+                                SmsAlertContent(context, alert)
+                            }
+
+                            Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL -> {
+                                AppAlertContent(context, alert.param1, alert.param2, alert.param3)
+                            }
+
+                            else -> {
+                                DefaultActionButton(onDismiss)
+                            }
+                        }
+                    }
+
+                    if (!hint.isNullOrBlank()) {
+                        Divider(verticalPadding = 4.dp)
+
+                        Text(
+                            text = hint,
+                            //                        color = colorScheme.onSurface,
+                            color = alertColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
 
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = 2.dp, vertical = 4.dp)
                         )
                     }
 
-                    Divider(verticalPadding = 4.dp)
-                    // Content based on alert type
-                    when (alert.type) {
-                        in SMS_ALERT_TYPES -> {
-                            SmsAlertContent(context, alert)
-                        }
 
-                        Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL -> {
-                            AppAlertContent(context, alert.param1, alert.param2, alert.param3)
-                        }
+                    if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL) {
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        else -> {
-                            DefaultActionButton(onDismiss)
+                        Button(
+                            onClick = { onUninstall?.invoke() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .padding(horizontal = 4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = alertColor
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = if (alert.type == Alert.AlertType.APP_FLAGGED) "حذف سریع این برنامه" else "حذف برنامه",
+                                color = White,
+                                //                            modifier = Modifier.padding(horizontal = 8.dp)
+                            )
                         }
                     }
-                }
 
-                if (!hint.isNullOrBlank()) {
-                    Divider(verticalPadding = 4.dp)
-
-                    Text(
-                        text = hint,
-//                        color = colorScheme.onSurface,
-                        color = alertColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 2.dp, vertical = 4.dp)
-                    )
-                }
-
-
-                if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(
-                        onClick = { onUninstall?.invoke() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .padding(horizontal = 4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = alertColor
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "حذف سریع این برنامه",
-                            color = White,
-//                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
+                    if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
+                        Spacer(modifier = Modifier.height(18.dp))
+                    } else {
+                        AlertFooter(alert.type)
                     }
                 }
-
-                if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
-                    Spacer(modifier = Modifier.height(18.dp))
-                } else {
-                    AlertFooter(alert.type)
-                }
-            }
-        }
+            },
+        )
     }
 }
 
@@ -510,9 +515,7 @@ private fun AppAlertContent(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Image(
-                    painter = rememberAsyncImagePainter(
-                        model = it.loadIcon(context.packageManager)
-                    ),
+                    painter = rememberAsyncImagePainter(model = it.loadIcon(context.packageManager)),
                     contentDescription = "App Icon",
                     modifier = Modifier
                         .size(48.dp)

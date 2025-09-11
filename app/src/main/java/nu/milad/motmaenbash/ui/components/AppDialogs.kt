@@ -665,82 +665,83 @@ fun SmsSettingsDialog(
 private fun MockSmsDialog() {
     AppCard(
         padding = 0.dp,
-        elevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            // Header row with badge and close button
-            Row(
+        elevation = 4.dp,
+        content = {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp),
+                horizontalAlignment = Alignment.Start
             ) {
-
-
+                // Header row with badge and close button
                 Row(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .background(
-                            color = GreyDark,
-                            shape = RoundedCornerShape(bottomEnd = 12.dp, bottomStart = 12.dp)
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+
+                    Row(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .background(
+                                color = GreyDark,
+                                shape = RoundedCornerShape(bottomEnd = 12.dp, bottomStart = 12.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Textsms,
+                            contentDescription = null,
+                            tint = colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Textsms,
-                        contentDescription = null,
-                        tint = colorScheme.onPrimary,
-                        modifier = Modifier.size(20.dp)
-                    )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
-                    Text(
-                        text = "پیامک جدید",
-                        color = colorScheme.onPrimary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                        Text(
+                            text = "پیامک جدید",
+                            color = colorScheme.onPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(top = 8.dp)
+                    ) {
+                        Icon(
+
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "بستن",
+                            tint = GreyMiddle
+                        )
+                    }
                 }
-
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .padding(top = 8.dp)
-                ) {
-                    Icon(
-
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "بستن",
-                        tint = GreyMiddle
+                Spacer(modifier = Modifier.height(8.dp))
+                SmsAlertContent(
+                    LocalContext.current, Alert(
+                        type = Alert.AlertType.SMS_NEUTRAL,
+                        level = Alert.AlertLevel.NEUTRAL,
+                        title = "پیامک جدید",
+                        param1 = "+989120000000",
+                        param2 = "سلام. خوبی؟ چه خبر؟"
                     )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            SmsAlertContent(
-                LocalContext.current, Alert(
-                    type = Alert.AlertType.SMS_NEUTRAL,
-                    level = Alert.AlertLevel.NEUTRAL,
-                    title = "پیامک جدید",
-                    param1 = "+989120000000",
-                    param2 = "سلام. خوبی؟ چه خبر؟"
                 )
-            )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-        }
-    }
+            }
+        },
+    )
 
 }
 
