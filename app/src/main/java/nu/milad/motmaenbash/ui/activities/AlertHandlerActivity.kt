@@ -407,7 +407,10 @@ fun SmsAlertContent(
                             data = "sms:$sender".toUri()
                         }
                         context.startActivity(intent)
-
+                        // Close the alert activity after navigating to SMS app
+                        if (context is AlertHandlerActivity) {
+                            context.finishAndRemoveTask()
+                        }
                     }
                 } else {
                     Modifier
