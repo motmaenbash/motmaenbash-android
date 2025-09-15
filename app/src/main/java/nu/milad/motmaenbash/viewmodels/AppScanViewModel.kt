@@ -40,6 +40,7 @@ import nu.milad.motmaenbash.utils.PackageUtils
 import nu.milad.motmaenbash.utils.PackageUtils.getAppInfo
 import nu.milad.motmaenbash.utils.PermissionAnalyzer
 import nu.milad.motmaenbash.utils.ScanUtils
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -72,6 +73,9 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
     private val databaseHelper by lazy { DatabaseHelper(context) }
     private var scanManuallyStopped = false
 
+    //Flag to control single alert sound per scan
+    private val alertSoundPlayed = AtomicBoolean(false)
+
     init {
         scanScope.launch {
             try {
@@ -92,6 +96,9 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
         _suspiciousApps.value = emptyList()
         _currentlyScannedApps.value = emptyList()
         scanManuallyStopped = false
+        //Reset alert sound flag for new scan
+        alertSoundPlayed.set(false)
+
         // Use an atomic counter for thread-safe progress tracking
         val processedAppsCounter = AtomicInteger(0)
 
@@ -144,8 +151,11 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                         suspiciousList.add(appWithThreat)
                                         _suspiciousApps.value = suspiciousList
 
+                                        // Play alert sound and vibrate only for first suspicious app found
+                                        if (alertSoundPlayed.compareAndSet(false, true)) {
                                         audioHelper.vibrateDevice(context)
                                         audioHelper.playAlertSound()
+                                    }
                                     }
                                     appWithThreat
                                 } else null
