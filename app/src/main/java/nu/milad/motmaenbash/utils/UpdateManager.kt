@@ -237,7 +237,7 @@ class UpdateManager(
      * @return Timestamp in milliseconds, 0 if never updated
      */
     private fun getLastUpdateTime(): Long {
-        return sharedPreferences.getLong("last_database_update_time", 0)
+        return sharedPreferences.getLong(PREF_KEY_LAST_UPDATE_TIME, 0)
     }
 
     /**
