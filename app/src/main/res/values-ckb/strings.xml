@@ -1,0 +1,140 @@
+<resources>
+    <string name="app_name">MotmaenBash</string>
+    <string name="app_name_fa">مطمئن باش</string>
+    <string name="app_name_ku">دڵنیا بە</string>
+
+    <!-- Slogan and ticker texts -->
+    <string name="app_slogan">سپەری ئاسایشی دیجیتاڵیی ئێوە</string>
+    <string name="app_slogan_ticker1">ناسینەوەی کورتەنامە گومانلێکراوەکان</string>
+    <string name="app_slogan_ticker2">هۆشداریی دامەزراندنی بەرنامە زیانبەخشەکان</string>
+    <string name="app_slogan_ticker3">هۆشداریی ماڵپەڕە ساختەچییەکان</string>
+    <string name="app_slogan_ticker4">ڕێگریکردن لە هێرشەکانی فیشینگ (Phishing)</string>
+
+    <string name="alert_dialog_activity_title">هۆشداری!</string>
+    <string name="share_url_label">🕵️ پشکنینی لینک</string>
+	
+    <!-- Screen Titles -->
+    <string name="user_report_screen_title">ناردنی ڕاپۆرت</string>
+    <string name="faq_screen_title">پرسیارە باوەکان</string>
+    <string name="permissions_explanation_screen_title">دەستپێگەیشتنەکانی بەرنامە</string>
+    <string name="changelog_screen_title">مێژووی وەشانەکانی بەرنامە</string>
+    <string name="url_scan_screen_title">پشکنینی لینک (URL)</string>
+    <string name="about_screen_title">لەبارەی بەرنامە</string>
+    <string name="settings_screen_title">ڕێکخستنەکان</string>
+    <string name="app_scan_screen_title">پشکنینی بەرنامەکان</string>
+
+    <!--  Guards  -->
+    <string name="guards_status">سپەرە ئەمنییەکان</string>
+    <string name="guards_functionality">کارکردنی قەڵغانەکانی دڵنیا بە</string>
+
+    <!--  Guard Titles -->
+    <string name="sms">کورتەنامە</string>
+    <string name="web">گەڕانی وێب</string>
+    <string name="app">دامەزراندنی بەرنامە</string>
+
+    <string name="guard_sms">سپەری کورتەنامە</string>
+    <string name="guard_web">سپەری گەڕانی وێب</string>
+    <string name="guard_gateway">پشکنینی ڕەسەنایەتی دەرگاکان</string>
+    <string name="guard_app">سپەری دامەزراندنی بەرنامە</string>
+	
+    <!--  Guard Descriptions  -->
+    <string name="guard_sms_description">هۆشداریدان بە بەکارهێنەر لە کاتی ناسینەوە و دەستنیشانکردنی کورتەنامەکانی گومانلێکراو و فیشینگ</string>
+    <string name="guard_web_description">هۆشداریدان بە بەکارهێنەر لە کاتی ناسینەوەی ماڵپەڕە ساختەچییەکان و فیشینگ لە کاتی گەڕانی وێب</string>
+    <string name="guard_gateway_description">پشکنین و پیشاندانی نیشانەی دەرگاکانی پارەدانی باوەڕپێکراو</string>
+    <string name="guard_app_description">هۆشداریدان بە بەکارهێنەر لە کاتی ناسینەوەی بەرنامە ساختەچییەکان و زیانبەخشەکان</string>
+
+    <!--  Permission Titles  -->
+    <string name="permission_receive_sms">دەستپێگەیشتنی وەرگرتنی کورتەنامەی نوێ</string>
+    <string name="permission_notification">دەستپێگەیشتنی پیشاندانی ئاگادارکردنەوە</string>
+    <string name="permission_accessibility">خزمەتگوزاریی دەستپێگەیشتن</string>
+    <string name="permission_overlay">پیشاندانی پەنجەرە بەسەر بەرنامەکانی تردا</string>
+    <string name="permission_query_packages">بینینی لیستی بەرنامەکان</string>
+	
+    <!--  Permission Descriptions  -->
+    <string name="permission_overlay_description">لە کاتی ناسینەوەی هەر هەڕەشەیەک وەک کورتەنامە، لینک یان بەرنامەی گومانلێکراو، بۆ پیشاندانی پەنجەرەی هۆشداری تەنانەت کاتێک بەرنامەی دیکە بەکاردەهێنیت، بەرنامەکە پێویستی بەم دەستپێگەیشتنە هەیە.</string>
+    <string name="permission_notification_description">ئەم دەستپێگەیشتنە توانای جێبەجێکردنی جێگیری خزمەتگوزاریی بەرنامەکە لە پێشینەدا (Foreground) و پیشاندانی ئاگادارکردنەوەی پەیوەندیدار بە چالاکبوونی لە ئەندرۆیدی ٨ و بە سەرەوەدا دابین دەکات.</string>
+    <string name="permission_receive_sms_description">بۆ ناسینەوە و هۆشداریدان دەربارەی کورتەنامەکانی گومانلێکراو، بەرنامەکە پێویستی بەم دەستپێگەیشتنە هەیە. ئەم دەستپێگەیشتنە تەنها نامەی وەرگیراو دەپشکنێت و توانای ناردنی کورتەنامەی نییە.</string>
+    <string name="permission_accessibility_short_description">بۆ ناسینەوەی ماڵپەڕە ساختەچییەکان و فیشینگ لە کاتی گەڕانی وێب، بەرنامەکە پێویستە ناونیشانی وێبگەڕ بپشکنێت. ئەم تایبەتمەندییە لە ڕێگەی خزمەتگوزاریی دەستپێگەیشتنەوە دابین دەکرێت.</string>
+    <string name="permission_accessibility_description">بۆ ناسینەوە و هۆشداریدان دەربارەی ماڵپەڕە ساختەچییەکان و فیشینگ لە کاتی گەڕانی وێب و پیشاندانی نیشانەی دەرگای پارەدانی باوەڕپێکراو، بەرنامەکە پێویستە ناونیشانی وێبگەڕ بپشکنێت. ئەم تایبەتمەندییە لە ڕێگەی خزمەتگوزاریی دەستپێگەیشتنەوە دابین دەکرێت.</string>
+    <string name="permission_settings_may_vary">ڕێکارەکانی چالاککردن لەوانەیە لە هەندێک وەشانی ئەندرۆید یان مۆدێلی مۆبایلدا کەمێک جیاواز بێت.</string>
+
+    <!-- User Report Activity -->
+    <string name="report_description">بە ڕاپۆرتکردنی بەرنامە، کورتەنامە و لینکە گومانلێکراوەکانی فیشینگ و سیخوڕی، یارمەتیمان بدە لە پاراستنی کەسانی تر. ڕاپۆرتە نێردراوەکانی ئێوە ئەم توانایەمان پێ دەبەخشن کە بە خێراتر وەڵامی هەڕەشەکان بدەینەوە و ڕێکارە پێویستەکان بۆ باشترکردنی ئاسایشی کۆمەڵگە بگرینە بەر. تکایە بە زووترین کات ڕاپۆرتەکەت بنێرە، چونکە هەر ڕاپۆرتێک دەتوانێت ڕۆڵێکی گرنگ لە ڕێگریکردن لە ڕوودانی ساختەچێتی زیاتر و پاراستنی ئاسایشی تۆ و کەسانی تردا هەبێت.</string>
+    <string name="send_report">دەستپێکردنی ناردنی ڕاپۆرت</string>
+    <string name="report_time_message">ناردنی ڕاپۆرت تەنها چەند خولەکێک کات دەبات.</string>
+
+    <!-- App version and updates -->
+    <string name="version">وەشان: %1$s</string>
+    <string name="last_update_time">دوایین نوێکردنەوە: %1$s</string>
+    <string name="last_scan_time">دوایین پشکنین: %1$s</string>
+    <string name="updates_changelog">مێژووی وەشانەکانی بەرنامە</string>
+
+    <!-- Settings -->
+    <string name="setting_theme">داڕشتەی ڕەنگی بەرنامە (تیم)</string>
+    <string name="light">شێوازی ڕووناک</string>
+    <string name="dark">شێوازی تاریک</string>
+    <string name="dim">شێوازی تاریکی مامناوەند</string>
+    <string name="system_default">بنەڕەتی سیستەم</string>
+
+    <string name="setting_alert_sound">دەنگی هۆشداری</string>
+    <string name="ding1_sound">دەنگی دینگ ١</string>
+    <string name="ding2_sound">دەنگی دینگ ٢</string>
+    <string name="ding3_sound">دەنگی دینگ ٣</string>
+    <string name="ding4_sound">دەنگی دینگ ٤</string>
+    <string name="ding5_sound">دەنگی دینگ ٥</string>
+    <string name="ding6_sound">دەنگی دینگ ٦</string>
+
+    <string name="setting_database_update_frequency">دووبارە نوێکردنەوەی بنکەدراوە</string>
+    <string name="hourly">هەموو ١ کاتژمێر</string>
+    <string name="every_3_hours">هەموو ٣ کاتژمێر</string>
+    <string name="every_6_hours">هەموو ٦ کاتژمێر</string>
+    <string name="every_12_hours">هەموو ١٢ کاتژمێر</string>
+    <string name="daily">هەموو ٢٤ کاتژمێر</string>
+
+    <string name="setting_font">فۆنتی بەرنامە</string>
+    <string name="vazir">وەزیر مەتن</string>
+    <string name="sahel">ساحێڵ</string>
+
+    <string name="setting_show_sms_dialog">پیشاندانی پەنجەرەی وەرگرتنی کورتەنامەی نوێ</string>
+
+    <string name="setting_alert_silent_mode">لێدانی دەنگ لە شێوازی بێدەنگدا</string>
+
+    <!--  Tools  -->
+    <string name="shortcut_app_scan_label">‌پشکنینی بەرنامەکان</string>
+    <string name="shortcut_url_scan_label">پشکنینی URL</string>
+    <string name="shortcut_report_label">ناردنی ڕاپۆرت</string>
+
+    <!-- Bug Report -->
+    <string name="report_bug_toast_message">هەڵە ئەگەرییەکانمان لە ڕێگەی ئیمەیڵەوە پێ ڕابگەیەنە</string>
+    <string name="bug_report_placeholder">تکایە لێرە ڕوونکردنەوەی تایبەت بە ڕاپۆرتی هەڵەکە بنووسە…</string>
+    <string name="send_email_chooser_title">ناردنی ئیمەیڵ …</string>
+    <string name="no_email_app_found">هیچ بەرنامەیەکی ناردنی ئیمەیڵ نەدۆزرایەوە.</string>
+
+   <!-- App Update -->
+    <string name="app_update_message">وەشانێکی نوێی بەرنامەی «دڵنیا بە» بڵاوکراوەتەوە. دەتوانیت بەرنامەکە نوێ بکەیتەوە بۆ نوێترین وەشان.</string>
+    <string name="app_update_message_force">وەشانێکی نوێی بەرنامەی «دڵنیا بە» بڵاوکراوەتەوە. بۆ بەردەوامبوون، تکایە بەرنامەکە نوێ بکەرەوە.</string>
+
+    <!-- Notification-->
+    <string name="motmaenbash_general_channel">ئاگادارکردنەوەکانی بەرنامە</string>
+    <string name="general_channel_description">کەناڵی سەرەکی بۆ وەرگرتنی ئاگادارکردنەوەکانی بەرنامە</string>
+    <string name="motmaenbash_monitoring_service_channel">ئاگادارکردنەوەی خزمەتگوزاریی پاراستن</string>
+    <string name="monitoring_service_channel_description">کەناڵی ئاگادارکردنەوەی خزمەتگوزاریی پاراستن</string>
+    <string name="notification_overlay_required">پێویستی بە چالاککردنی دەستپێگەیشتن هەیە</string>
+    <string name="notification_active_shields">سپەرە چالاکەکان: %1$s</string>
+
+    <!--  Donation  -->
+    <string name="donation_title">پشتگیریی دارایی</string>
+    <string name="donation_message">بە پشتگیریی دارایی (دۆنەیت)، دەتوانیت یارمەتی گەشەپێدان و باشترکردنی بەردەوامی «دڵنیا بە» بدەیت.</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_description">
+    بە چالاککردنی ئەم خزمەتگوزارییە، بەرنامەی «دڵنیا بە» بە چاودێریکردنی وێبگەڕە پشتگیریکراوەکان، ڕەسەنایەتی دەرگاکانی پارەدان دەپشکنێت. هەروەها ئەگەر هەر لینکێکی زیانبەخش یان پەڕەی فیشینگ و ساختەچی بناسێتەوە، هۆشداریت پێ دەدات بۆ ئەوەی ئاسایشی تۆ لە کاتی گەڕانی وێبدا زیاتر بێت.
+    \n\n
+    By enabling this service, the Motmaen Bash app monitors supported browsers to verify the authenticity of payment gateways. It also alerts you if any malicious links, phishing pages, or fraud attempts are detected, enhancing your security while browsing.
+    </string>
+    <string name="accessibility_service_summary">
+        خزمەتگوزاریی دەستپێگەیشتنی بەرنامەی «دڵنیا بە»، بۆ شیکردنەوەی لینکەکانی وێبگەڕ و هۆشداریدان لە کاتی ناسینەوەی حاڵەتە گومانلێکراوەکان
+        \n
+        Analyzes browser links and warns about suspicious content
+    </string>
+</resources>
