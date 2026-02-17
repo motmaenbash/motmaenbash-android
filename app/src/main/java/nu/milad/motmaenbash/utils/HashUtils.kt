@@ -2,7 +2,6 @@ package nu.milad.motmaenbash.utils
 
 import android.util.Base64
 import java.io.File
-import java.math.BigInteger
 import java.security.MessageDigest
 
 object HashUtils {
@@ -37,17 +36,10 @@ object HashUtils {
      */
     private fun generateHash(input: String, algorithm: String): String {
         val digest = MessageDigest.getInstance(algorithm)
-        digest.reset()
-        val hashBytes = digest.digest(input.toByteArray())
-        val hashString = BigInteger(1, hashBytes).toString(16)
-        // Pad with leading zeros (adjust padding based on algorithm)
-        val paddingLength = when (algorithm) {
-            HashAlgorithms.SHA256 -> 64
-            HashAlgorithms.SHA512 -> 128
-            else -> 0 // Handle unknown algorithms
-        }
-        return hashString.padStart(paddingLength, '0')
+        val hashBytes = digest.digest(input.toByteArray(Charsets.UTF_8))
+        return hashBytes.joinToString("") { "%02x".format(it) }
     }
+
 
     fun generateHashFromBytes(bytes: ByteArray, algorithm: String): String {
         val digest = MessageDigest.getInstance(algorithm)

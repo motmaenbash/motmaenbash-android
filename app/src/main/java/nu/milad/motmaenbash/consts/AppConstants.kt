@@ -52,9 +52,9 @@ object AppConstants {
 
     // SMS Threat Types
     object SmsThreatType {
-        const val SENDER = 1
+        const val KEYWORD = 1
         const val PATTERN = 2
-        const val KEYWORD = 3
+        const val SENDER = 3
     }
 
     // URL Match Types

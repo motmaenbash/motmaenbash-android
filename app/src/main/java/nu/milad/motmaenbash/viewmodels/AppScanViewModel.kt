@@ -73,6 +73,9 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
     private val databaseHelper by lazy { DatabaseHelper(context) }
     private var scanManuallyStopped = false
 
+    private val _uninstalledApps = MutableStateFlow<Set<String>>(emptySet())
+    val uninstalledApps: StateFlow<Set<String>> = _uninstalledApps.asStateFlow()
+
     //Flag to control single alert sound per scan
     private val alertSoundPlayed = AtomicBoolean(false)
 
@@ -95,6 +98,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
         _scanState.value = ScanState.IN_PROGRESS
         _suspiciousApps.value = emptyList()
         _currentlyScannedApps.value = emptyList()
+        resetUninstalledApps()
         scanManuallyStopped = false
         //Reset alert sound flag for new scan
         alertSoundPlayed.set(false)
@@ -129,16 +133,32 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                         app.packageName,
                                         app.apkHash,
                                         app.sighHash
-                                    ) ->
-                                        AppThreatType.MALWARE
+                                    ) -> AppThreatType.MALWARE
 
                                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
                                             !databaseHelper.isTrustedSideloadApp(
                                                 app.packageName,
                                                 app.sighHash
-                                            ) &&
-                                            PermissionAnalyzer.hasRiskyPermissionCombination(app.permissions) ->
-                                        AppThreatType.RISKY_PERMISSIONS
+                                            ) -> {
+                                        // Calculate DEX hash
+                                        val dexHash =
+                                            PackageUtils.calculateDexHash(context, app.packageName)
+                                        if (dexHash != null && databaseHelper.isAppFlaggedByDex(
+                                                dexHash
+                                            )
+                                        ) {
+
+                                            AppThreatType.MALWARE
+                                        } else if (PermissionAnalyzer.hasRiskyPermissionCombination(
+                                                app.permissions
+                                            )
+                                        ) {
+                                            AppThreatType.RISKY_PERMISSIONS
+                                        } else {
+                                            null
+                                        }
+                                    }
+
 
                                     else -> null
                                 }
@@ -153,9 +173,9 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
 
                                         // Play alert sound and vibrate only for first suspicious app found
                                         if (alertSoundPlayed.compareAndSet(false, true)) {
-                                        audioHelper.vibrateDevice(context)
-                                        audioHelper.playAlertSound()
-                                    }
+                                            audioHelper.vibrateDevice(context)
+                                            audioHelper.playAlertSound()
+                                        }
                                     }
                                     appWithThreat
                                 } else null
@@ -206,6 +226,15 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
         super.onCleared()
         scanScope.cancel()
         audioHelper.release()
+    }
+
+
+    fun markAppAsUninstalled(packageName: String) {
+        _uninstalledApps.value = _uninstalledApps.value + packageName
+    }
+
+    private fun resetUninstalledApps() {
+        _uninstalledApps.value = emptySet()
     }
 }
 
@@ -292,7 +321,7 @@ object EmptyStateHelper {
             scanState == ScanState.COMPLETED_SUCCESSFULLY -> {
                 when (appItemType) {
                     AppThreatType.MALWARE -> "بدافزاری شناسایی نشد"
-                    AppThreatType.RISKY_PERMISSIONS -> "برنامه‌ای با دسترسی‌های مشکوک یافت نشد"
+                    AppThreatType.RISKY_PERMISSIONS -> "برنامه‌ای یافت نشد"
                 }
             }
 

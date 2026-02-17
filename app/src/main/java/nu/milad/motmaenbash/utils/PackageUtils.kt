@@ -97,6 +97,35 @@ object PackageUtils {
         }
     }
 
+    fun calculateDexHash(context: Context, packageName: String): String? {
+        return try {
+            val pm: PackageManager = context.packageManager
+            val applicationInfo: ApplicationInfo =
+                pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val sourceApk = File(applicationInfo.sourceDir)
+
+            val dexResult = ApkClassesExtractor.extractAndCalculateClassesHash(
+                context,
+                applicationInfo,
+                sourceApk
+            )
+            when (dexResult) {
+                is ApkExtractionResult.Success -> {
+                    Log.d(TAG, "DEX extraction successful via: ${dexResult.method}")
+                    dexResult.primaryHash
+                }
+
+                is ApkExtractionResult.Error -> {
+                    Log.w(TAG, "DEX extraction failed: ${dexResult.message}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error calculating DEX hash for $packageName", e)
+            null
+        }
+    }
+
 
     /**
      * Returns the appropriate flags for PackageManager.getPackageInfo based on API level

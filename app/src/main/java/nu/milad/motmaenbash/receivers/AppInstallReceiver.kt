@@ -63,18 +63,25 @@ class AppInstallReceiver : BroadcastReceiver() {
 
             try {
                 val app = PackageUtils.getAppInfo(context, packageName) ?: return@launch
-
                 val dbHelper = DatabaseHelper(context)
-
 
                 val threatType = when {
                     dbHelper.isAppFlagged(packageName, app.apkHash, app.sighHash) ->
                         AppThreatType.MALWARE
 
                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
-                            !dbHelper.isTrustedSideloadApp(packageName, app.sighHash) &&
-                            PermissionAnalyzer.hasRiskyPermissionCombination(app.permissions) ->
-                        AppThreatType.RISKY_PERMISSIONS
+                            !dbHelper.isTrustedSideloadApp(packageName, app.sighHash) -> {
+                        // Calculate DEX hash
+                        val dexHash = PackageUtils.calculateDexHash(context, packageName)
+                        if (dexHash != null && dbHelper.isAppFlaggedByDex(dexHash)) {
+                            AppThreatType.MALWARE
+                        } else if (PermissionAnalyzer.hasRiskyPermissionCombination(app.permissions)) {
+                            AppThreatType.RISKY_PERMISSIONS
+                        } else {
+                            null
+                        }
+                    }
+
 
                     else -> null
                 }

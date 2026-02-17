@@ -156,7 +156,8 @@ fun AppScanScreen(
                     item {
                         AppSectionView(
                             section = section,
-                            scanState = currentScanState
+                            scanState = currentScanState,
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -236,7 +237,8 @@ private fun ScanHeader(
 @Composable
 private fun AppSectionView(
     section: SectionConfig,
-    scanState: ScanState
+    scanState: ScanState,
+    viewModel: AppScanViewModel
 ) {
     AppCard {
         Column(modifier = Modifier.padding(vertical = 0.dp, horizontal = 8.dp)) {
@@ -251,8 +253,15 @@ private fun AppSectionView(
             if (section.apps.isNotEmpty()) {
                 section.apps.forEachIndexed { index, app ->
                     when (section.appItemType) {
-                        AppThreatType.MALWARE -> MalwareAppItem(app = app)
-                        AppThreatType.RISKY_PERMISSIONS -> RiskyPermissionAppItem(app = app)
+                        AppThreatType.MALWARE -> MalwareAppItem(
+                            app = app,
+                            viewModel = viewModel
+                        )
+
+                        AppThreatType.RISKY_PERMISSIONS -> RiskyPermissionAppItem(
+                            app = app,
+                            viewModel = viewModel
+                        )
                     }
                     if (index < section.apps.size - 1) {
                         Divider(
@@ -402,11 +411,17 @@ fun EmptyStateCard(
 }
 
 @Composable
-fun MalwareAppItem(app: App) {
-    val context = LocalContext.current
-    // Track if this app has been uninstalled
-    val (isUninstalled, setUninstalled) = remember { mutableStateOf(false) }
+fun MalwareAppItem(
+    app: App,
+    viewModel: AppScanViewModel
 
+) {
+    val context = LocalContext.current
+    val scanState by viewModel.scanState.collectAsState()
+    // Track if this app has been uninstalled
+    val (isUninstalled, setUninstalled) = remember(scanState) {
+        mutableStateOf(false)
+    }
     val uninstallLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -498,9 +513,14 @@ fun MalwareAppItem(app: App) {
 }
 
 @Composable
-fun RiskyPermissionAppItem(app: App) {
+fun RiskyPermissionAppItem(
+    app: App,
+    viewModel: AppScanViewModel
+) {
     val context = LocalContext.current
-    val (isUninstalled, setUninstalled) = remember { mutableStateOf(false) }
+    val uninstalledApps by viewModel.uninstalledApps.collectAsState()
+    val isUninstalled = app.packageName in uninstalledApps
+
 
     val uninstallLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -509,7 +529,7 @@ fun RiskyPermissionAppItem(app: App) {
         if (result.resultCode == Activity.RESULT_OK) {
             Toast.makeText(context, "برنامه '$appName' با موفقیت حذف شد", Toast.LENGTH_SHORT)
                 .show()
-            setUninstalled(true)
+            viewModel.markAppAsUninstalled(app.packageName)
         } else {
             Toast.makeText(context, "حذف برنامه '$appName' لغو شد", Toast.LENGTH_SHORT).show()
         }
@@ -538,6 +558,9 @@ fun RiskyPermissionAppItem(app: App) {
                     param3 = param3
                 )
             )
+
+            putExtra(AlertHandlerActivity.EXTRA_IS_INFO_ONLY, true)
+
         }
         context.startActivity(intent)
     }

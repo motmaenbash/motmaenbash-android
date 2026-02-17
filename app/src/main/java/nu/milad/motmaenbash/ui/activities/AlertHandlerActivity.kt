@@ -78,8 +78,8 @@ class AlertHandlerActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_ALERT = "extra_alert"
+        const val EXTRA_IS_INFO_ONLY = "extra_is_info_only"
     }
-
 
     private lateinit var alert: Alert
 
@@ -89,6 +89,7 @@ class AlertHandlerActivity : ComponentActivity() {
         if (result.resultCode == RESULT_OK) {
             Toast.makeText(this, "برنامه '${alert.param2}' با موفقیت حذف شد", Toast.LENGTH_SHORT)
                 .show()
+
             finishAndRemoveTask()
         } else {
             Toast.makeText(this, "حذف برنامه '${alert.param2}' لغو شد", Toast.LENGTH_SHORT).show()
@@ -97,7 +98,6 @@ class AlertHandlerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         // Extract intent extras
         alert = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -108,6 +108,9 @@ class AlertHandlerActivity : ComponentActivity() {
             (intent.getParcelableExtra(EXTRA_ALERT) as? Alert)
                 ?: throw IllegalStateException("Alert extra is required")
         }
+
+
+        val isInfoOnly = intent.getBooleanExtra(EXTRA_IS_INFO_ONLY, false)
 
 
         val taskLabel = when (alert.type) {
@@ -153,7 +156,8 @@ class AlertHandlerActivity : ComponentActivity() {
                             uninstallLauncher.launch(it)
                         }
                     },
-                    context = this@AlertHandlerActivity
+                    context = this@AlertHandlerActivity,
+                    isInfoOnly = isInfoOnly
                 )
             }
         }
@@ -171,6 +175,7 @@ class AlertHandlerActivity : ComponentActivity() {
 fun AlertDialog(
     context: Context,
     alert: Alert,
+    isInfoOnly: Boolean = false,
     onDismiss: () -> Unit,
     onUninstall: (() -> Unit)? = null
 ) {
@@ -349,26 +354,27 @@ fun AlertDialog(
                     if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL) {
                         Spacer(modifier = Modifier.height(8.dp))
 
+
                         Button(
-                            onClick = { onUninstall?.invoke() },
+                            onClick = { if (isInfoOnly) onDismiss() else onUninstall?.invoke() },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
                                 .padding(horizontal = 4.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = alertColor
+                                containerColor = if (isInfoOnly) GreyMiddle else alertColor
                             ),
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
-                                text = if (alert.type == Alert.AlertType.APP_FLAGGED) "حذف سریع این برنامه" else "حذف برنامه",
+                                text = if (isInfoOnly) "متوجه شدم" else if (alert.type == Alert.AlertType.APP_FLAGGED) "حذف سریع این برنامه" else "حذف برنامه",
                                 color = White,
                                 //                            modifier = Modifier.padding(horizontal = 8.dp)
                             )
                         }
                     }
 
-                    if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
+                    if (alert.type == Alert.AlertType.SMS_NEUTRAL || isInfoOnly) {
                         Spacer(modifier = Modifier.height(18.dp))
                     } else {
                         AlertFooter(alert.type)
@@ -384,7 +390,8 @@ fun AlertDialog(
 fun SmsAlertContent(
     context: Context,
     alert: Alert,
-) {
+
+    ) {
     val sender: String = alert.param1
     val messageText: String? = alert.param2
 

@@ -103,7 +103,7 @@ class DatabaseHelper(appContext: Context) :
 
         // Creating flagged links table
         // Get the values from the enums for type constraints
-        val threatTypeValues = Alert.ThreatType.entries
+        val threatTypeValues = Alert.UrlThreatType.entries
             .joinToString(", ") { it.value.toString() }
 
         val alertLevelValues = Alert.AlertLevel.entries
@@ -113,7 +113,7 @@ class DatabaseHelper(appContext: Context) :
             """
                 CREATE TABLE $TABLE_FLAGGED_URLS (
                     hash TEXT NOT NULL UNIQUE,
-                    type INTEGER NOT NULL CHECK(type IN ($threatTypeValues)), -- ${Alert.ThreatType.PHISHING.value}: phishing, ${Alert.ThreatType.SCAM.value}: scam, ${Alert.ThreatType.PONZI.value}: ponzi
+                    type INTEGER NOT NULL CHECK(type IN ($threatTypeValues)), -- ${Alert.UrlThreatType.PHISHING.value}: phishing, ${Alert.UrlThreatType.SCAM.value}: scam, ${Alert.UrlThreatType.PONZI.value}: ponzi
                     match INTEGER NOT NULL CHECK(match IN ($DOMAIN, $SPECIFIC_URL)),
                     level INTEGER NOT NULL CHECK(level IN ($alertLevelValues))) -- '${Alert.AlertLevel.ALERT.value}:alert', '${Alert.AlertLevel.WARNING.value}:warning', '${Alert.AlertLevel.INFO.value}:info'
 
@@ -392,15 +392,30 @@ class DatabaseHelper(appContext: Context) :
     }
 
 
-    fun isAppFlagged(packageName: String, apkHash: String, signHash: String): Boolean {
+    fun isAppFlagged(
+        packageName: String,
+        apkHash: String,
+        signHash: String
+    ): Boolean {
+
         val packageHash = HashUtils.generateSHA256(packageName.lowercase())
         val selection =
             "($COLUMN_HASH = ? AND type = $PACKAGE) OR ($COLUMN_HASH = ? AND type = $APK) OR ($COLUMN_HASH = ? AND type = $SIGN)"
+
         val selectionArgs = arrayOf(packageHash, apkHash, signHash)
         val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
 
         return isFlagged
     }
+
+    // DEX-only check (use only when basic check fails)
+    fun isAppFlaggedByDex(classesHash: String?): Boolean {
+        if (classesHash == null || classesHash.isEmpty()) return false
+        val selection = "$COLUMN_HASH = ? AND type = $DEX"
+        val selectionArgs = arrayOf(classesHash)
+        return countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
+    }
+
 
     fun isTrustedSideloadApp(packageName: String, signatureHash: String): Boolean {
         val packageHash = HashUtils.generateSHA256(packageName.trim().lowercase())
@@ -510,7 +525,7 @@ class DatabaseHelper(appContext: Context) :
     }
 
     // This function returns a triple: (isFlagged, threatType, match)
-    fun isUrlFlagged(url: String): Triple<Boolean, Alert.ThreatType?, Int> {
+    fun isUrlFlagged(url: String): Triple<Boolean, Alert.UrlThreatType?, Int> {
 
         var cleanedUrl = UrlUtils.removeUrlPrefixes(url).lowercase()
         cleanedUrl = removeQueryStringAndFragment(cleanedUrl)
@@ -526,7 +541,7 @@ class DatabaseHelper(appContext: Context) :
         readableDatabase.rawQuery(domainQuery, arrayOf(domainHash)).use { cursor ->
             if (cursor.moveToFirst()) {
                 val typeValue = cursor.getInt(0)
-                return Triple(true, Alert.ThreatType.fromInt(typeValue), 1)
+                return Triple(true, Alert.UrlThreatType.fromInt(typeValue), 1)
             }
         }
         // Then check for specific URL
@@ -535,7 +550,7 @@ class DatabaseHelper(appContext: Context) :
         readableDatabase.rawQuery(urlQuery, arrayOf(urlHash)).use { cursor ->
             if (cursor.moveToFirst()) {
                 val typeValue = cursor.getInt(0)
-                return Triple(true, Alert.ThreatType.fromInt(typeValue), 2)
+                return Triple(true, Alert.UrlThreatType.fromInt(typeValue), 2)
             }
         }
 
