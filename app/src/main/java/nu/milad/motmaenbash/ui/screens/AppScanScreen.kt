@@ -414,14 +414,12 @@ fun EmptyStateCard(
 fun MalwareAppItem(
     app: App,
     viewModel: AppScanViewModel
-
 ) {
     val context = LocalContext.current
-    val scanState by viewModel.scanState.collectAsState()
     // Track if this app has been uninstalled
-    val (isUninstalled, setUninstalled) = remember(scanState) {
-        mutableStateOf(false)
-    }
+    val uninstalledApps by viewModel.uninstalledApps.collectAsState()
+    val isUninstalled = app.packageName in uninstalledApps
+
     val uninstallLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -430,7 +428,7 @@ fun MalwareAppItem(
             Toast.makeText(context, "برنامه '$appName' با موفقیت حذف شد", Toast.LENGTH_SHORT)
                 .show()
             // Mark as uninstalled when successful
-            setUninstalled(true)
+            viewModel.markAppAsUninstalled(app.packageName)
         } else {
             Toast.makeText(context, "حذف برنامه '$appName' انجام نشد", Toast.LENGTH_SHORT).show()
         }

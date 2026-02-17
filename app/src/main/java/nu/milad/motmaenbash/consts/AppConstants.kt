@@ -5,7 +5,7 @@ object AppConstants {
 
     // Database Constants
     const val DATABASE_NAME = "motmaenbash.db"
-    const val DATABASE_VERSION = 5
+    const val DATABASE_VERSION = 6
 
     // Table names
     const val TABLE_FLAGGED_URLS = "flagged_urls"

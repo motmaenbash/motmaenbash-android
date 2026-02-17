@@ -208,6 +208,7 @@ class DatabaseHelper(appContext: Context) :
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_URLS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_APPS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_SMS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TRUSTED_ENTITIES")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TIPS")
         // Delete Old Tables
         db.execSQL("DROP TABLE IF EXISTS $TABLE_FLAGGED_SENDERS")
