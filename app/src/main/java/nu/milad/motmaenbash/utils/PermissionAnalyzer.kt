@@ -317,50 +317,50 @@ object PermissionAnalyzer {
 //        Manifest.permission.RECEIVE_BOOT_COMPLETED
 //    )
 //
-//    // Persian titles for permissions
+//    // Permission display titles
 //    private val PERMISSION_TITLES = mapOf(
-//        Manifest.permission.INTERNET to "دسترسی به اینترنت",
-//        Manifest.permission.SEND_SMS to "ارسال پیامک",
-//        Manifest.permission.READ_SMS to "خواندن پیامک‌ها",
-//        Manifest.permission.RECEIVE_SMS to "دریافت پیامک",
-//        Manifest.permission.READ_CONTACTS to "دسترسی به مخاطب‌ها",
-//        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به صفحه",
-//        Manifest.permission.CAMERA to "دسترسی به دوربین",
-//        Manifest.permission.RECORD_AUDIO to "ضبط صدا",
-//        Manifest.permission.ACCESS_FINE_LOCATION to "موقعیت مکانی دقیق",
-//        Manifest.permission.ACCESS_COARSE_LOCATION to "موقعیت مکانی تقریبی",
-//        Manifest.permission.CALL_PHONE to "برقراری تماس",
-//        Manifest.permission.READ_CALL_LOG to "خواندن تاریخچه تماس",
-//        Manifest.permission.WRITE_CALL_LOG to "تغییر تاریخچه تماس",
-//        Manifest.permission.READ_PHONE_STATE to "خواندن وضعیت تلفن",
-//        Manifest.permission.SYSTEM_ALERT_WINDOW to "نمایش روی برنامه‌های دیگر",
-//        Manifest.permission.BIND_DEVICE_ADMIN to "مدیریت دستگاه",
-//        Manifest.permission.REQUEST_INSTALL_PACKAGES to "نصب برنامه",
-//        Manifest.permission.WRITE_SECURE_SETTINGS to "تغییر تنظیمات سیستم",
-//        Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE to "خواندن اعلان‌ها",
-//        Manifest.permission.GET_ACCOUNTS to "دسترسی به حساب‌های کاربری",
-//        Manifest.permission.PROCESS_OUTGOING_CALLS to "پردازش تماس‌های خروجی",
-//        Manifest.permission.ACCESS_NETWORK_STATE to "وضعیت شبکه",
-//        Manifest.permission.ACCESS_WIFI_STATE to "وضعیت WiFi",
-//        Manifest.permission.VIBRATE to "لرزش دستگاه",
-//        Manifest.permission.WAKE_LOCK to "بیدار نگه داشتن صفحه",
-//        Manifest.permission.READ_EXTERNAL_STORAGE to "خواندن حافظه خارجی",
-//        Manifest.permission.WRITE_EXTERNAL_STORAGE to "نوشتن در حافظه خارجی",
-//        Manifest.permission.RECEIVE_BOOT_COMPLETED to "اجرا در شروع سیستم"
+//        Manifest.permission.INTERNET to "Internet access",
+//        Manifest.permission.SEND_SMS to "Send SMS",
+//        Manifest.permission.READ_SMS to "Read SMS messages",
+//        Manifest.permission.RECEIVE_SMS to "Receive SMS",
+//        Manifest.permission.READ_CONTACTS to "Access contacts",
+//        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "Full screen access",
+//        Manifest.permission.CAMERA to "Camera access",
+//        Manifest.permission.RECORD_AUDIO to "Record audio",
+//        Manifest.permission.ACCESS_FINE_LOCATION to "Precise location",
+//        Manifest.permission.ACCESS_COARSE_LOCATION to "Approximate location",
+//        Manifest.permission.CALL_PHONE to "Make phone calls",
+//        Manifest.permission.READ_CALL_LOG to "Read call history",
+//        Manifest.permission.WRITE_CALL_LOG to "Modify call history",
+//        Manifest.permission.READ_PHONE_STATE to "Read phone state",
+//        Manifest.permission.SYSTEM_ALERT_WINDOW to "Display over other apps",
+//        Manifest.permission.BIND_DEVICE_ADMIN to "Device administrator",
+//        Manifest.permission.REQUEST_INSTALL_PACKAGES to "Install apps",
+//        Manifest.permission.WRITE_SECURE_SETTINGS to "Modify system settings",
+//        Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE to "Read notifications",
+//        Manifest.permission.GET_ACCOUNTS to "Access accounts",
+//        Manifest.permission.PROCESS_OUTGOING_CALLS to "Process outgoing calls",
+//        Manifest.permission.ACCESS_NETWORK_STATE to "Network state",
+//        Manifest.permission.ACCESS_WIFI_STATE to "WiFi state",
+//        Manifest.permission.VIBRATE to "Vibrate",
+//        Manifest.permission.WAKE_LOCK to "Keep screen on",
+//        Manifest.permission.READ_EXTERNAL_STORAGE to "Read external storage",
+//        Manifest.permission.WRITE_EXTERNAL_STORAGE to "Write to external storage",
+//        Manifest.permission.RECEIVE_BOOT_COMPLETED to "Run at system startup"
 //    )
 //
-//    // Detailed Persian descriptions for permissions
+//    // Detailed descriptions for permissions
 //    private val PERMISSION_DESCRIPTIONS = mapOf(
-//        Manifest.permission.SEND_SMS to "امکان ارسال پیامک که ممکن است هزینه‌بر باشد",
-//        Manifest.permission.READ_SMS to "خواندن تمام پیامک‌های دریافتی شما",
-//        Manifest.permission.RECEIVE_SMS to "دریافت و پردازش پیامک‌های جدید",
-//        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "دسترسی کامل به محتوای صفحه و امکان کنترل برنامه‌ها",
-//        Manifest.permission.CAMERA to "استفاده از دوربین برای عکسبرداری و فیلمبرداری",
-//        Manifest.permission.RECORD_AUDIO to "ضبط صداهای محیط و مکالمات",
-//        Manifest.permission.ACCESS_FINE_LOCATION to "دسترسی به موقعیت دقیق مکانی شما",
-//        Manifest.permission.CALL_PHONE to "برقراری تماس که ممکن است هزینه‌بر باشد",
-//        Manifest.permission.SYSTEM_ALERT_WINDOW to "نمایش پنجره‌هایی روی سایر برنامه‌ها",
-//        Manifest.permission.BIND_DEVICE_ADMIN to "کنترل کامل بر روی دستگاه شما"
+//        Manifest.permission.SEND_SMS to "Ability to send SMS which may incur costs",
+//        Manifest.permission.READ_SMS to "Read all your received SMS messages",
+//        Manifest.permission.RECEIVE_SMS to "Receive and process new SMS messages",
+//        Manifest.permission.BIND_ACCESSIBILITY_SERVICE to "Full screen content access and app control",
+//        Manifest.permission.CAMERA to "Use camera for photos and videos",
+//        Manifest.permission.RECORD_AUDIO to "Record ambient audio and conversations",
+//        Manifest.permission.ACCESS_FINE_LOCATION to "Access your precise location",
+//        Manifest.permission.CALL_PHONE to "Make phone calls which may incur costs",
+//        Manifest.permission.SYSTEM_ALERT_WINDOW to "Display windows over other apps",
+//        Manifest.permission.BIND_DEVICE_ADMIN to "Full control over your device"
 //    )
 //
 
