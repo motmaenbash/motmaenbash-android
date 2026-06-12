@@ -12,6 +12,7 @@ import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.models.AppThreatType
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.HiddenAppDetector
 import nu.milad.motmaenbash.utils.PackageUtils
 import nu.milad.motmaenbash.utils.PermissionAnalyzer
 
@@ -65,9 +66,13 @@ class AppInstallReceiver : BroadcastReceiver() {
                 val app = PackageUtils.getAppInfo(context, packageName) ?: return@launch
                 val dbHelper = DatabaseHelper(context)
 
+                val hiddenAppResult = HiddenAppDetector.analyze(context, packageName)
+
                 val threatType = when {
                     dbHelper.isAppFlagged(packageName, app.apkHash, app.sighHash) ->
                         AppThreatType.MALWARE
+
+                    hiddenAppResult.isHidden -> AppThreatType.HIDDEN_APP
 
                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
                             !dbHelper.isTrustedSideloadApp(packageName, app.sighHash) -> {
@@ -122,6 +127,19 @@ class AppInstallReceiver : BroadcastReceiver() {
                                     param3 = param3
                                 )
                             }
+
+                            AppThreatType.HIDDEN_APP -> {
+                                AlertUtils.showAlert(
+                                    context = context,
+                                    alertType = Alert.AlertType.APP_HIDDEN,
+                                    alertLevel = Alert.AlertLevel.WARNING,
+                                    param1 = packageName,
+                                    param2 = app.appName,
+                                    param3 = hiddenAppResult.reasons.joinToString("\n")
+                                )
+                            }
+
+                            AppThreatType.DISABLED_APP -> Unit
                         }
 
                     }

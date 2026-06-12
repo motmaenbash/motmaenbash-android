@@ -85,12 +85,15 @@ import nu.milad.motmaenbash.ui.components.Divider
 import nu.milad.motmaenbash.ui.theme.GreyDark
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
 import nu.milad.motmaenbash.ui.theme.MotmaenBashTheme
+import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.ui.theme.YellowDark
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
+import nu.milad.motmaenbash.utils.HiddenAppDetector
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.PackageUtils
 import nu.milad.motmaenbash.utils.PermissionAnalyzer
+import nu.milad.motmaenbash.utils.UsageStatsHelper
 import nu.milad.motmaenbash.utils.parseBoldTags
 import nu.milad.motmaenbash.utils.toSafeBitmap
 import nu.milad.motmaenbash.viewmodels.AppScanViewModel
@@ -254,6 +257,16 @@ private fun AppSectionView(
                 section.apps.forEachIndexed { index, app ->
                     when (section.appItemType) {
                         AppThreatType.MALWARE -> MalwareAppItem(
+                            app = app,
+                            viewModel = viewModel
+                        )
+
+                        AppThreatType.HIDDEN_APP -> HiddenAppItem(
+                            app = app,
+                            viewModel = viewModel
+                        )
+
+                        AppThreatType.DISABLED_APP -> DisabledAppItem(
                             app = app,
                             viewModel = viewModel
                         )
@@ -663,6 +676,255 @@ fun RiskyPermissionAppItem(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun HiddenAppItem(
+    app: App,
+    viewModel: AppScanViewModel
+) {
+    val context = LocalContext.current
+    val uninstalledApps by viewModel.uninstalledApps.collectAsState()
+    val isUninstalled = app.packageName in uninstalledApps
+
+    val uninstallLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val appName = result.data?.getStringExtra("APP_NAME") ?: app.appName
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "برنامه '$appName' با موفقیت حذف شد", Toast.LENGTH_SHORT)
+                .show()
+            viewModel.markAppAsUninstalled(app.packageName)
+        } else {
+            Toast.makeText(context, "حذف برنامه '$appName' لغو شد", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun showAppDetails() {
+        val usage = UsageStatsHelper.getUsage(context, app.packageName)
+        val reasons = HiddenAppDetector
+            .analyze(context, app.packageName, usage?.foregroundLaunchCount)
+            .reasons.toMutableList()
+        usage?.let { UsageStatsHelper.describe(it).takeIf { d -> d.isNotBlank() }?.let(reasons::add) }
+        val param3 = reasons.joinToString("\n")
+
+        val (alertTitle, alertSummary, alertContent) = getAlertContent(Alert.AlertType.APP_HIDDEN)
+
+        val intent = Intent(context, AlertHandlerActivity::class.java).apply {
+            putExtra(
+                AlertHandlerActivity.EXTRA_ALERT, Alert(
+                    type = Alert.AlertType.APP_HIDDEN,
+                    level = Alert.AlertLevel.WARNING,
+                    title = alertTitle,
+                    summary = alertSummary,
+                    content = alertContent,
+                    param1 = app.packageName,
+                    param2 = app.appName,
+                    param3 = param3
+                )
+            )
+
+            putExtra(AlertHandlerActivity.EXTRA_IS_INFO_ONLY, true)
+        }
+        context.startActivity(intent)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        app.appIcon?.let { icon ->
+            Image(
+                painter = rememberAsyncImagePainter(model = icon),
+                contentDescription = app.appName,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = app.appName,
+                style = typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = app.packageName,
+                color = GreyMiddle,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Start,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .basicMarquee()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Column(horizontalAlignment = Alignment.End) {
+
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                Button(
+                    onClick = {
+                        val intent = PackageUtils.uninstallApp(app.packageName)
+                        uninstallLauncher.launch(intent)
+                    },
+                    modifier = Modifier
+                        .heightIn(min = 36.dp),
+
+                    enabled = !isUninstalled,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isUninstalled) Color.Gray else Orange,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.White
+                    ),
+
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+
+                ) {
+                    Text(
+                        text = if (isUninstalled) "حذف شد" else "حذف برنامه",
+                        fontSize = 12.sp,
+                    )
+                }
+            }
+
+            if (!isUninstalled) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    Button(
+                        onClick = { showAppDetails() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GreyMiddle.copy(alpha = 0.1f),
+                            contentColor = GreyMiddle
+                        ),
+                        modifier = Modifier
+                            .heightIn(min = 28.dp),
+
+
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "اطلاعات بیشتر",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "جزییات",
+                            fontSize = 10.sp,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DisabledAppItem(
+    app: App,
+    viewModel: AppScanViewModel
+) {
+    val context = LocalContext.current
+    val uninstalledApps by viewModel.uninstalledApps.collectAsState()
+    val isUninstalled = app.packageName in uninstalledApps
+
+    val uninstallLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val appName = result.data?.getStringExtra("APP_NAME") ?: app.appName
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "برنامه '$appName' با موفقیت حذف شد", Toast.LENGTH_SHORT)
+                .show()
+            viewModel.markAppAsUninstalled(app.packageName)
+        } else {
+            Toast.makeText(context, "حذف برنامه '$appName' لغو شد", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        app.appIcon?.let { icon ->
+            Image(
+                painter = rememberAsyncImagePainter(model = icon),
+                contentDescription = app.appName,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = app.appName,
+                style = typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = app.packageName,
+                color = GreyMiddle,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Start,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .basicMarquee()
+            )
+
+            Text(
+                text = "غیرفعال شده روی دستگاه",
+                color = GreyMiddle,
+                fontSize = 11.sp,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+            Button(
+                onClick = {
+                    val intent = PackageUtils.uninstallApp(app.packageName)
+                    uninstallLauncher.launch(intent)
+                },
+                modifier = Modifier.heightIn(min = 36.dp),
+                enabled = !isUninstalled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isUninstalled) Color.Gray else GreyMiddle,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                ),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                Text(
+                    text = if (isUninstalled) "حذف شد" else "حذف برنامه",
+                    fontSize = 12.sp,
+                )
             }
         }
     }

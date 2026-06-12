@@ -3,11 +3,13 @@ package nu.milad.motmaenbash.viewmodels
 import android.app.Application
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AdminPanelSettings
+import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.GppBad
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.TrackChanges
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -31,10 +33,14 @@ import nu.milad.motmaenbash.ui.theme.ColorPrimary
 import nu.milad.motmaenbash.ui.theme.Green
 import nu.milad.motmaenbash.ui.theme.Grey
 import nu.milad.motmaenbash.ui.theme.GreyMiddle
+import nu.milad.motmaenbash.ui.theme.Orange
 import nu.milad.motmaenbash.ui.theme.Red
 import nu.milad.motmaenbash.ui.theme.YellowDark
 import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.DisabledAppDetector
+import nu.milad.motmaenbash.utils.HiddenAppDetector
+import nu.milad.motmaenbash.utils.UsageStatsHelper
 import nu.milad.motmaenbash.utils.NumberUtils
 import nu.milad.motmaenbash.utils.PackageUtils
 import nu.milad.motmaenbash.utils.PackageUtils.getAppInfo
@@ -110,6 +116,8 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
             try {
                 val nonSystemAppPackages = scanUtils.getNonSystemInstalledPackages()
                 val totalApps = nonSystemAppPackages.size
+
+                val foregroundCounts = UsageStatsHelper.getForegroundLaunchCounts(context)
                 val detectSuspiciousAppsJobs =
                     nonSystemAppPackages.mapIndexed { index, packageInfo ->
                         async {
@@ -134,6 +142,17 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                         app.apkHash,
                                         app.sighHash
                                     ) -> AppThreatType.MALWARE
+
+                                    HiddenAppDetector.analyze(
+                                        context,
+                                        app.packageName,
+                                        foregroundCounts[app.packageName]
+                                    ).isHidden -> AppThreatType.HIDDEN_APP
+
+                                    DisabledAppDetector.isDisabled(
+                                        context,
+                                        app.packageName
+                                    ) -> AppThreatType.DISABLED_APP
 
                                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
                                             !databaseHelper.isTrustedSideloadApp(
@@ -241,6 +260,8 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
 @Composable
 fun createAppSections(suspiciousApps: List<App>): List<SectionConfig> {
     val malwareApps = suspiciousApps.filter { it.threatType == AppThreatType.MALWARE }
+    val hiddenApps = suspiciousApps.filter { it.threatType == AppThreatType.HIDDEN_APP }
+    val disabledApps = suspiciousApps.filter { it.threatType == AppThreatType.DISABLED_APP }
     val riskyPermissionApps =
         suspiciousApps.filter { it.threatType == AppThreatType.RISKY_PERMISSIONS }
 
@@ -252,6 +273,25 @@ fun createAppSections(suspiciousApps: List<App>): List<SectionConfig> {
             color = if (malwareApps.isNotEmpty()) Red else GreyMiddle.copy(alpha = 0.5f),
             apps = malwareApps,
             appItemType = AppThreatType.MALWARE
+        ),
+        SectionConfig(
+            title = "برنامه‌های مخفی (بدون آیکون)",
+            subtitle = ("این برنامه‌ها آیکونی در فهرست برنامه‌ها ندارند تا از دید کاربر پنهان بمانند، " +
+                    "اما می‌توانند صفحه‌هایی مانند تبلیغ را نمایش دهند. این رفتار رایج <b>تبلیغ‌افزارها</b> است. " +
+                    "اگر برنامه‌ای را در این فهرست نمی‌شناسید، آن را حذف کنید.").takeIf { hiddenApps.isNotEmpty() },
+            icon = Icons.Outlined.VisibilityOff,
+            color = if (hiddenApps.isNotEmpty()) Orange else GreyMiddle.copy(alpha = 0.5f),
+            apps = hiddenApps,
+            appItemType = AppThreatType.HIDDEN_APP
+        ),
+        SectionConfig(
+            title = "برنامه‌های غیرفعال (قابل حذف)",
+            subtitle = ("این برنامه‌ها روی دستگاه غیرفعال شده‌اند، بنابراین اجرا نمی‌شوند و آیکونی ندارند، " +
+                    "اما همچنان نصب هستند. اگر به آن‌ها نیازی ندارید، می‌توانید کاملا حذفشان کنید.").takeIf { disabledApps.isNotEmpty() },
+            icon = Icons.Outlined.Block,
+            color = if (disabledApps.isNotEmpty()) GreyMiddle else GreyMiddle.copy(alpha = 0.5f),
+            apps = disabledApps,
+            appItemType = AppThreatType.DISABLED_APP
         ),
         SectionConfig(
             title = "برنامه‌های نیاز به بررسی بیشتر",
@@ -321,6 +361,8 @@ object EmptyStateHelper {
             scanState == ScanState.COMPLETED_SUCCESSFULLY -> {
                 when (appItemType) {
                     AppThreatType.MALWARE -> "بدافزاری شناسایی نشد"
+                    AppThreatType.HIDDEN_APP -> "برنامه مخفی‌ای شناسایی نشد"
+                    AppThreatType.DISABLED_APP -> "برنامه غیرفعالی یافت نشد"
                     AppThreatType.RISKY_PERMISSIONS -> "برنامه‌ای یافت نشد"
                 }
             }

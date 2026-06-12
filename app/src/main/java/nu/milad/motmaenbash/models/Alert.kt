@@ -37,7 +37,8 @@ data class Alert(
         SMS_NEUTRAL(5),
         APP_FLAGGED(6),
         URL_FLAGGED(7),
-        APP_RISKY_INSTALL(8);
+        APP_RISKY_INSTALL(8),
+        APP_HIDDEN(9);
 
 
         companion object {
