@@ -44,7 +44,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -425,35 +427,25 @@ fun SmsAlertContent(
             )
     )
 
-    messageText?.let {
+    messageText?.let { text ->
+        val clipboardManager = LocalClipboardManager.current
+        
         Text(
-            text = "متن پیامک:",
-            color = colorScheme.onSurface,
+            text = buildAnnotatedString {
+                append("متن پیامک: ")
+                withStyle(style = SpanStyle(color = colorScheme.primary)) {
+                    append(text.replace(Regex("\n{3,}"), "\n\n").trim())
+                }
+            },
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable {
+                    clipboardManager.setText(AnnotatedString(text))
+                    Toast.makeText(context, "متن پیامک کپی شد", Toast.LENGTH_SHORT).show()
+                }
         )
-
-        Column(
-            modifier = Modifier
-                .padding(2.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            horizontalAlignment = Alignment.Start
-        ) {
-            SelectionContainer {
-                Text(
-                    text = it.replace(Regex("\n{3,}"), "\n\n").trim(),
-                    color = colorScheme.onSurface,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorScheme.background)
-                        .padding(8.dp)
-                )
-            }
-        }
     }
 
 }
