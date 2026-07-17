@@ -392,49 +392,41 @@ fun AlertDialog(
 fun SmsAlertContent(
     context: Context,
     alert: Alert,
-
-    ) {
+) {
     val sender: String = alert.param1
     val messageText: String? = alert.param2
+    val clipboardManager = LocalClipboardManager.current
 
     Text(
         text = buildAnnotatedString {
             append("فرستنده: ")
             withStyle(style = SpanStyle(color = if (alert.type == Alert.AlertType.SMS_NEUTRAL) colorScheme.primary else colorScheme.onSurface)) {
-                append("\u200E$sender") // Ensure proper LTR rendering for sender (\u200E is the LTR mark)
+                append("\u200E$sender")
             }
         },
-
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
-            .wrapContentSize()
-            .then(
-                if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
-                    Modifier.clickable {
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            data = "sms:$sender".toUri()
-                        }
-                        context.startActivity(intent)
-                        // Close the alert activity after navigating to SMS app
-                        if (context is AlertHandlerActivity) {
-                            context.finishAndRemoveTask()
-                        }
-                    }
-                } else {
-                    Modifier
+            .fillMaxWidth()
+            .clickable(enabled = alert.type == Alert.AlertType.SMS_NEUTRAL) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = "sms:$sender".toUri()
                 }
-            )
+                context.startActivity(intent)
+                    // Close the alert activity after navigating to SMS app
+                if (context is AlertHandlerActivity) {
+                    context.finishAndRemoveTask()
+                }
+            }
     )
 
     messageText?.let { text ->
-        val clipboardManager = LocalClipboardManager.current
-        
+        val cleanText = text.replace(Regex("\n{3,}"), "\n\n").trim()
         Text(
             text = buildAnnotatedString {
                 append("متن پیامک: ")
                 withStyle(style = SpanStyle(color = colorScheme.primary)) {
-                    append(text.replace(Regex("\n{3,}"), "\n\n").trim())
+                    append(cleanText)
                 }
             },
             fontSize = 13.sp,
@@ -442,13 +434,13 @@ fun SmsAlertContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    clipboardManager.setText(AnnotatedString(text))
+                    clipboardManager.setText(AnnotatedString(cleanText))
                     Toast.makeText(context, "متن پیامک کپی شد", Toast.LENGTH_SHORT).show()
                 }
         )
     }
-
 }
+
 
 @Composable
 private fun AppAlertContent(
