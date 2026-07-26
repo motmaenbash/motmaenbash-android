@@ -190,6 +190,12 @@ object AlertUtils {
                         " در غیر این صورت چنین الگوهایی معمولا در <b>بدافزارها</b> دیده می‌شود و توصیه می‌شود در صورت عدم اطمینان از منبع نصب، آن را سریع حذف کنید."
             )
 
+            Alert.AlertType.APP_HIDDEN -> Triple(
+                "برنامه مخفی شناسایی شد",
+                "این برنامه آیکون خود را پنهان کرده است.",
+                "این برنامه <b>آیکونی ندارد</b> تا پیدا یا حذف نشود، ولی می‌تواند تبلیغ نشان دهد؛ رفتاری رایج در <b>تبلیغ‌افزارها</b>. اگر آن را نصب نکرده‌اید، حذفش کنید."
+            )
+
             Alert.AlertType.URL_FLAGGED -> {
                 val domainOrUrlText =
                     if (isSpecificUrl) "آدرس اینترنتی" else "دامنه اینترنتی"
@@ -238,6 +244,7 @@ object AlertUtils {
 
             Alert.AlertType.SMS_SENDER_FLAGGED -> "پیامک‌های این شماره را با دقت بررسی کنید."
             Alert.AlertType.APP_FLAGGED -> "بدون اجرای برنامه، سریع آن را حذف کنید."
+            Alert.AlertType.APP_HIDDEN -> "اگر این برنامه را نمی‌شناسید، آن را حذف کنید."
 
             Alert.AlertType.URL_FLAGGED -> when (threatType) {
                 Alert.UrlThreatType.PHISHING -> "از باز کردن این لینک خودداری کنید."

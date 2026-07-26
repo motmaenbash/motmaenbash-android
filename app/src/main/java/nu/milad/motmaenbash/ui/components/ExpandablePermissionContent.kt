@@ -46,13 +46,14 @@ import nu.milad.motmaenbash.utils.NumberUtils
 fun ExpandablePermissionContent(
     descriptions: List<String>,
     modifier: Modifier = Modifier,
-    maxVisibleItems: Int = 5
+    maxVisibleItems: Int = 5,
+    title: String = "ترکیب دسترسی‌های حساس:"
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         Text(
-            text = "ترکیب دسترسی‌های حساس:",
+            text = title,
             fontSize = 13.sp,
             fontWeight = Bold,
             modifier = Modifier.padding(horizontal = 4.dp)

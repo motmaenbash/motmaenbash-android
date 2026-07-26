@@ -327,6 +327,13 @@ fun AlertDialog(
                                 AppAlertContent(context, alert.param1, alert.param2, alert.param3)
                             }
 
+                            Alert.AlertType.APP_HIDDEN -> {
+                                AppAlertContent(
+                                    context, alert.param1, alert.param2, alert.param3,
+                                    descriptionTitle = "نشانه‌های مشکوک:"
+                                )
+                            }
+
                             else -> {
                                 DefaultActionButton(onDismiss)
                             }
@@ -351,7 +358,7 @@ fun AlertDialog(
                     }
 
 
-                    if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL) {
+                    if (alert.type == Alert.AlertType.APP_FLAGGED || alert.type == Alert.AlertType.APP_RISKY_INSTALL || alert.type == Alert.AlertType.APP_HIDDEN) {
                         Spacer(modifier = Modifier.height(8.dp))
 
 
@@ -463,7 +470,8 @@ private fun AppAlertContent(
     context: Context,
     packageName: String,
     appName: String?,
-    permissionCombinationDescription: String?
+    permissionCombinationDescription: String?,
+    descriptionTitle: String = "ترکیب دسترسی‌های حساس:"
 ) {
     val appInfo = runCatching {
         context.packageManager.getApplicationInfo(packageName, 0)
@@ -476,7 +484,8 @@ private fun AppAlertContent(
         if (descriptions.isNotEmpty()) {
             ExpandablePermissionContent(
                 descriptions = descriptions,
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(4.dp),
+                title = descriptionTitle
             )
         }
     }
@@ -562,7 +571,8 @@ private fun DefaultActionButton(onDismiss: () -> Unit) {
 private fun AlertFooter(alertType: Alert.AlertType) {
     val protectionType = when (alertType) {
         in SMS_ALERT_TYPES -> "سپر پیامک"
-        Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL -> "سپر برنامه"
+        Alert.AlertType.APP_FLAGGED, Alert.AlertType.APP_RISKY_INSTALL,
+        Alert.AlertType.APP_HIDDEN -> "سپر برنامه"
         else -> "سپر امنیتی"
     }
 
@@ -625,6 +635,7 @@ fun createAlertFromType(
         Alert.AlertType.APP_FLAGGED -> "com.malicious.app" to "نام برنامه مخرب"
         Alert.AlertType.URL_FLAGGED -> "https://malicious-site.com" to "این آدرس مشکوک است."
         Alert.AlertType.APP_RISKY_INSTALL -> "com.malicious.app" to "نام برنامه مخرب"
+        Alert.AlertType.APP_HIDDEN -> "com.hidden.app" to "برنامه مخفی"
 
     }
 
@@ -638,6 +649,7 @@ fun createAlertFromType(
         Alert.AlertType.APP_FLAGGED -> Alert.AlertLevel.ALERT
         Alert.AlertType.URL_FLAGGED -> Alert.AlertLevel.ALERT
         Alert.AlertType.APP_RISKY_INSTALL -> Alert.AlertLevel.WARNING
+        Alert.AlertType.APP_HIDDEN -> Alert.AlertLevel.WARNING
 
     }
 
