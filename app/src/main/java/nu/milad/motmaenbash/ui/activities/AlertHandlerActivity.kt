@@ -44,7 +44,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -397,73 +399,55 @@ fun AlertDialog(
 fun SmsAlertContent(
     context: Context,
     alert: Alert,
-
-    ) {
+) {
     val sender: String = alert.param1
     val messageText: String? = alert.param2
+    val clipboardManager = LocalClipboardManager.current
 
     Text(
         text = buildAnnotatedString {
             append("فرستنده: ")
             withStyle(style = SpanStyle(color = if (alert.type == Alert.AlertType.SMS_NEUTRAL) colorScheme.primary else colorScheme.onSurface)) {
-                append("\u200E$sender") // Ensure proper LTR rendering for sender (\u200E is the LTR mark)
+                append("\u200E$sender")
             }
         },
-
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
-            .wrapContentSize()
-            .then(
-                if (alert.type == Alert.AlertType.SMS_NEUTRAL) {
-                    Modifier.clickable {
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            data = "sms:$sender".toUri()
-                        }
-                        context.startActivity(intent)
-                        // Close the alert activity after navigating to SMS app
-                        if (context is AlertHandlerActivity) {
-                            context.finishAndRemoveTask()
-                        }
-                    }
-                } else {
-                    Modifier
+            .fillMaxWidth()
+            .clickable(enabled = alert.type == Alert.AlertType.SMS_NEUTRAL) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = "sms:$sender".toUri()
                 }
-            )
+                context.startActivity(intent)
+                    // Close the alert activity after navigating to SMS app
+                if (context is AlertHandlerActivity) {
+                    context.finishAndRemoveTask()
+                }
+            }
     )
 
-    messageText?.let {
+    messageText?.let { text ->
+        val cleanText = text.replace(Regex("\n{3,}"), "\n\n").trim()
         Text(
-            text = "متن پیامک:",
-            color = colorScheme.onSurface,
+            text = buildAnnotatedString {
+                append("متن پیامک: ")
+                withStyle(style = SpanStyle(color = colorScheme.primary)) {
+                    append(cleanText)
+                }
+            },
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable {
+                    clipboardManager.setText(AnnotatedString(cleanText))
+                    Toast.makeText(context, "متن پیامک کپی شد", Toast.LENGTH_SHORT).show()
+                }
         )
-
-        Column(
-            modifier = Modifier
-                .padding(2.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            horizontalAlignment = Alignment.Start
-        ) {
-            SelectionContainer {
-                Text(
-                    text = it.replace(Regex("\n{3,}"), "\n\n").trim(),
-                    color = colorScheme.onSurface,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(colorScheme.background)
-                        .padding(8.dp)
-                )
-            }
-        }
     }
-
 }
+
 
 @Composable
 private fun AppAlertContent(
