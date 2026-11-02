@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PhoneAndroid
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Sms
 import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.material.icons.outlined.Update
@@ -743,6 +744,94 @@ private fun MockSmsDialog() {
         },
     )
 
+}
+
+/**
+ * Dialog showing critical remediation steps after removing a banking trojan / SMS worm
+ *
+ * @param appName The name of the uninstalled malicious application
+ * @param onDismiss Callback when dialog is dismissed
+ */
+@Composable
+fun SecurityRemediationDialog(
+    appName: String? = null,
+    onDismiss: () -> Unit
+) {
+    AppAlertDialog(
+        title = stringResource(R.string.remediation_dialog_title),
+        icon = Icons.Outlined.Security,
+        content = {
+            Text(
+                text = stringResource(R.string.remediation_dialog_desc),
+                style = typography.bodySmall,
+                color = colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            RemediationStepItem(
+                title = stringResource(R.string.remediation_step_sessions_title),
+                description = stringResource(R.string.remediation_step_sessions_desc),
+                icon = Icons.Outlined.PhoneAndroid
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            RemediationStepItem(
+                title = stringResource(R.string.remediation_step_messages_title),
+                description = stringResource(R.string.remediation_step_messages_desc),
+                icon = Icons.Outlined.Sms
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            RemediationStepItem(
+                title = stringResource(R.string.remediation_step_bank_title),
+                description = stringResource(R.string.remediation_step_bank_desc),
+                icon = Icons.Outlined.VerifiedUser
+            )
+        },
+        confirmText = stringResource(R.string.remediation_dialog_confirm),
+        onConfirm = onDismiss,
+        onDismiss = onDismiss
+    )
+}
+
+@Composable
+private fun RemediationStepItem(
+    title: String,
+    description: String,
+    icon: ImageVector
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(colorScheme.background)
+            .padding(10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = title,
+                style = typography.bodySmall,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.primary
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = description,
+            style = typography.bodySmall,
+            color = colorScheme.onSurface,
+            lineHeight = 18.sp
+        )
+    }
 }
 
 

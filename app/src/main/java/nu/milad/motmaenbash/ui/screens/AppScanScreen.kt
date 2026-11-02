@@ -51,6 +51,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import nu.milad.motmaenbash.ui.components.SecurityRemediationDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -433,6 +435,8 @@ fun MalwareAppItem(
     val uninstalledApps by viewModel.uninstalledApps.collectAsState()
     val isUninstalled = app.packageName in uninstalledApps
 
+    var showRemediationDialog by remember { mutableStateOf(false) }
+
     val uninstallLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -442,9 +446,17 @@ fun MalwareAppItem(
                 .show()
             // Mark as uninstalled when successful
             viewModel.markAppAsUninstalled(app.packageName)
+            showRemediationDialog = true
         } else {
             Toast.makeText(context, "حذف برنامه '$appName' انجام نشد", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    if (showRemediationDialog) {
+        SecurityRemediationDialog(
+            appName = app.appName,
+            onDismiss = { showRemediationDialog = false }
+        )
     }
 
     Row(
@@ -493,30 +505,38 @@ fun MalwareAppItem(
         Spacer(modifier = Modifier.width(4.dp))
 
         CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-            Button(
-                onClick = {
-                    val intent = PackageUtils.uninstallApp(app.packageName)
-                    uninstallLauncher.launch(intent)
-                },
-                modifier = Modifier
-                    .heightIn(min = 36.dp),
-
-
-                enabled = !isUninstalled,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isUninstalled) Color.Gray else Red,
-                    disabledContainerColor = Color.Gray,
-                    disabledContentColor = Color.White
-
-                ),
-
-                contentPadding = PaddingValues(horizontal = 12.dp)
-
-            ) {
-                Text(
-                    text = if (isUninstalled) "حذف شد" else "حذف برنامه",
-                    fontSize = 12.sp,
-                )
+            if (isUninstalled) {
+                Button(
+                    onClick = { showRemediationDialog = true },
+                    modifier = Modifier.heightIn(min = 36.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.primary
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = "اقدامات امنیتی",
+                        fontSize = 11.sp,
+                    )
+                }
+            } else {
+                Button(
+                    onClick = {
+                        val intent = PackageUtils.uninstallApp(app.packageName)
+                        uninstallLauncher.launch(intent)
+                    },
+                    modifier = Modifier
+                        .heightIn(min = 36.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Red
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                ) {
+                    Text(
+                        text = "حذف برنامه",
+                        fontSize = 12.sp,
+                    )
+                }
             }
         }
 

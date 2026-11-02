@@ -143,4 +143,14 @@
         \n
         Analyzes browser links and warns about suspicious content
     </string>
+    <!-- Security Remediation Strings -->
+    <string name="remediation_dialog_title">اقدامات امنیتی فوری پس از حذف بدافزار</string>
+    <string name="remediation_dialog_desc">برنامه مخرب از دستگاه شما حذف شد؛ اما به دلیل ماهیت سرقت پیامک و نفوذ این بدافزار، حتماً اقدامات زیر را انجام دهید:</string>
+    <string name="remediation_step_sessions_title">۱. خروج از تمامی نشست‌های فعال در شبکه‌های اجتماعی</string>
+    <string name="remediation_step_sessions_desc">این بدافزار کدهای پیامکی ورود را سرقت می‌کند. وارد تنظیمات پیام‌رسان‌ها (تلگرام، ایتا، سروش، روبیکا، بله، واتساپ و...) شده و در بخش «دستگاه‌ها / نشست‌ها» (Devices / Sessions)، گزینه «خروج از سایر نشست‌ها» را بزنید تا هرگونه نفوذگر خارج شود.</string>
+    <string name="remediation_step_messages_title">۲. حذف دوطرفه پیام‌های فریبنده ارسالی</string>
+    <string name="remediation_step_messages_desc">بدافزار ممکن است به صورت خودکار پیامی با محتوای «سلام خوبی چند تا عکس یادگاری باهم داشتیم گذاشتمشون توی این فایل ممنون میشم نظرتو بدی» برای مخاطبان شما فرستاده باشد. چت‌های خود را بررسی و این پیام را برای هر دو طرف حذف کنید تا دیگران آلوده نشوند.</string>
+    <string name="remediation_step_bank_title">۳. بررسی امنیت حساب و کارت‌های بانکی</string>
+    <string name="remediation_step_bank_desc">در صورت وارد کردن اطلاعات کارت در درگاه‌های مشکوک، فوراً رمز کارت خود را تعویض کرده یا نسبت به مسدودسازی کارت اقدام کنید.</string>
+    <string name="remediation_dialog_confirm">متوجه شدم و انجام می‌دهم</string>
 </resources>
