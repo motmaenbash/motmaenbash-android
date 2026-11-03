@@ -22,6 +22,7 @@ import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.Suspiciou
 import nu.milad.motmaenbash.utils.AlertUtils
 import nu.milad.motmaenbash.utils.AlertUtils.getAlertContent
 import nu.milad.motmaenbash.utils.AudioHelper
+import nu.milad.motmaenbash.utils.GatewayCertificateChecker
 import nu.milad.motmaenbash.utils.UrlUtils
 import java.util.concurrent.atomic.AtomicLong
 
@@ -48,10 +49,30 @@ class AlertOverlayService : Service() {
             }
             context.startService(intent)
         }
+
+        fun showCertificateAlert(
+            context: Context,
+            host: String,
+            status: GatewayCertificateChecker.Status
+        ) {
+            val alertType = if (status == GatewayCertificateChecker.Status.USER_INSTALLED_ROOT) {
+                Alert.AlertType.GATEWAY_USER_INSTALLED_ROOT
+            } else {
+                Alert.AlertType.GATEWAY_UNTRUSTED_CERTIFICATE
+            }
+
+            val intent = Intent(context, AlertOverlayService::class.java).apply {
+                putExtra("url", host)
+                putExtra("alertType", alertType.name)
+            }
+            context.startService(intent)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val url = intent?.getStringExtra("url") ?: return START_NOT_STICKY
+        val alertType = intent.getStringExtra("alertType")?.let { Alert.AlertType.valueOf(it) }
+            ?: Alert.AlertType.URL_FLAGGED
         val threatTypeName = intent.getStringExtra("threatType")
         val threatType = threatTypeName?.let { UrlThreatType.valueOf(it) }
         val isSpecificUrl = intent.getBooleanExtra("isSpecificUrl", false)
@@ -78,11 +99,11 @@ class AlertOverlayService : Service() {
 
             // Set url and message
             val (title, summary, message) = getAlertContent(
-                alertType = Alert.AlertType.URL_FLAGGED,
+                alertType = alertType,
                 threatType = threatType,
                 isSpecificUrl = isSpecificUrl
             )
-            val hint = AlertUtils.getAlertHint(Alert.AlertType.URL_FLAGGED, threatType)
+            val hint = AlertUtils.getAlertHint(alertType, threatType)
             newOverlayView.findViewById<TextView>(R.id.url)?.text = url
             newOverlayView.findViewById<TextView>(R.id.alertBadge)?.text = title
             newOverlayView.findViewById<TextView>(R.id.alertTitle)?.text = summary

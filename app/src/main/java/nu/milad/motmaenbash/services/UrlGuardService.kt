@@ -19,6 +19,12 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nu.milad.motmaenbash.BuildConfig
 import nu.milad.motmaenbash.consts.AppConstants.MOTMAENBASH_EVENT
 import nu.milad.motmaenbash.consts.AppConstants.STAT_FLAGGED_LINK_DETECTED
@@ -26,6 +32,7 @@ import nu.milad.motmaenbash.consts.AppConstants.STAT_VERIFIED_GATEWAY
 import nu.milad.motmaenbash.models.Alert
 import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult.SuspiciousUrl
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.GatewayCertificateChecker
 import nu.milad.motmaenbash.utils.UrlUtils
 import nu.milad.motmaenbash.utils.UrlUtils.extractAndCacheDomain
 
@@ -37,6 +44,10 @@ class UrlGuardService : AccessibilityService() {
     private val domainCache = LruCache<String, String>(100)
     private var lastProcessedUrlInfo: Triple<String, String, Long>? = null
     val throttleInterval = 2 * 60 * 1000L //2 Minutes
+
+    private val certificateScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var currentGatewayHost: String? = null
+    private var checkingGatewayHost: String? = null
 
     sealed class UrlAnalysisResult {
         object NeutralUrl : UrlAnalysisResult()
@@ -127,12 +138,13 @@ class UrlGuardService : AccessibilityService() {
             databaseHelper = databaseHelper
         )
 
+        if (result !is UrlAnalysisResult.VerifiedPaymentGatewayUrl) {
+            currentGatewayHost = null
+        }
+
         when (result) {
             is UrlAnalysisResult.VerifiedPaymentGatewayUrl -> {
-                startOverlayVerificationBadgeService(result.url)
-                if (shouldProcessUrl) {
-                incrementStatAndLogEvent(STAT_VERIFIED_GATEWAY)
-            }
+                verifyGatewayCertificate(capturedUrl, result.url, shouldProcessUrl)
             }
 
 
@@ -221,6 +233,52 @@ class UrlGuardService : AccessibilityService() {
 
     }
 
+
+    /**
+     * Shows the verified badge only after the gateway's certificate turns out to chain up to a
+     * system root certificate, and warns if it was issued by a root the user installed or isn't
+     * trusted at all.
+     */
+    private fun verifyGatewayCertificate(capturedUrl: String, gatewayUrl: String, isNewVisit: Boolean) {
+        val host = UrlUtils.extractHost(capturedUrl)
+        currentGatewayHost = host
+
+        // Accessibility events keep coming while the page loads; check each host once at a time
+        if (checkingGatewayHost == host) return
+        checkingGatewayHost = host
+
+        certificateScope.launch {
+            val status = GatewayCertificateChecker.check(host)
+
+            withContext(Dispatchers.Main) {
+                if (checkingGatewayHost == host) {
+                    checkingGatewayHost = null
+                }
+
+                // The user may have left the gateway while it was being checked
+                if (currentGatewayHost != host) return@withContext
+
+                when (status) {
+                    GatewayCertificateChecker.Status.TRUSTED -> {
+                        startOverlayVerificationBadgeService(gatewayUrl)
+                        if (isNewVisit) {
+                            incrementStatAndLogEvent(STAT_VERIFIED_GATEWAY)
+                        }
+                    }
+
+                    GatewayCertificateChecker.Status.USER_INSTALLED_ROOT,
+                    GatewayCertificateChecker.Status.UNTRUSTED -> {
+                        stopOverlayVerificationBadgeService()
+                        if (isNewVisit) {
+                            AlertOverlayService.showCertificateAlert(applicationContext, host, status)
+                        }
+                    }
+
+                    GatewayCertificateChecker.Status.UNKNOWN -> stopOverlayVerificationBadgeService()
+                }
+            }
+        }
+    }
 
     private fun startOverlayVerificationBadgeService(url: String) {
         val intent = Intent(this, VerifiedBadgeOverlayService::class.java).apply {
@@ -317,6 +375,11 @@ class UrlGuardService : AccessibilityService() {
 
     override fun onInterrupt() {
         Log.d(tag, "Service interrupted")
+    }
+
+    override fun onDestroy() {
+        certificateScope.cancel()
+        super.onDestroy()
     }
 
     private class BrowserConfig(val packageName: String, val addressBarId: String)

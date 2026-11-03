@@ -5,13 +5,16 @@ import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nu.milad.motmaenbash.services.UrlGuardService.UrlAnalysisResult
 import nu.milad.motmaenbash.utils.AudioHelper
 import nu.milad.motmaenbash.utils.DatabaseHelper
+import nu.milad.motmaenbash.utils.GatewayCertificateChecker
 import nu.milad.motmaenbash.utils.TextUtils
 import nu.milad.motmaenbash.utils.UrlUtils
 
@@ -33,9 +36,32 @@ class UrlScanViewModel(private val context: Application) : AndroidViewModel(cont
 
 
             val (resultText, isSafe) = when (result) {
-                is UrlAnalysisResult.VerifiedPaymentGatewayUrl -> Pair(
-                    "این آدرس متعلق به یک درگاه پرداخت امن و مطمئن است.", true
-                )
+                is UrlAnalysisResult.VerifiedPaymentGatewayUrl -> {
+                    val certificateStatus = withContext(Dispatchers.IO) {
+                        GatewayCertificateChecker.check(UrlUtils.extractHost(urlToScan))
+                    }
+
+                    when (certificateStatus) {
+                        GatewayCertificateChecker.Status.TRUSTED -> Pair(
+                            "این آدرس متعلق به یک درگاه پرداخت امن و مطمئن است.", true
+                        )
+
+                        GatewayCertificateChecker.Status.USER_INSTALLED_ROOT -> Pair(
+                            "هشدار: گواهی امنیتی این درگاه را مرجعی صادر کرده که روی دستگاه شما نصب شده است و ممکن است ارتباط شما شنود شود. اطلاعات کارت خود را در آن وارد نکنید.",
+                            false
+                        )
+
+                        GatewayCertificateChecker.Status.UNTRUSTED -> Pair(
+                            "هشدار: گواهی امنیتی این درگاه پرداخت معتبر نیست. اطلاعات کارت خود را در آن وارد نکنید.",
+                            false
+                        )
+
+                        GatewayCertificateChecker.Status.UNKNOWN -> Pair(
+                            "این آدرس متعلق به درگاه‌های پرداخت شاپرک است، اما گواهی امنیتی آن بررسی نشد. اتصال اینترنت خود را بررسی کنید.",
+                            null
+                        )
+                    }
+                }
 
                 is UrlAnalysisResult.SuspiciousUrl -> Pair(
                     "هشدار: این آدرس به عنوان یک آدرس مشکوک شناسایی شده است.", false

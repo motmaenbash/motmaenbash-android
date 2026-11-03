@@ -636,6 +636,8 @@ fun createAlertFromType(
         Alert.AlertType.URL_FLAGGED -> "https://malicious-site.com" to "این آدرس مشکوک است."
         Alert.AlertType.APP_RISKY_INSTALL -> "com.malicious.app" to "نام برنامه مخرب"
         Alert.AlertType.APP_HIDDEN -> "com.hidden.app" to "برنامه مخفی"
+        Alert.AlertType.GATEWAY_USER_INSTALLED_ROOT,
+        Alert.AlertType.GATEWAY_UNTRUSTED_CERTIFICATE -> "pay.shaparak.ir" to "درگاه پرداخت"
 
     }
 
@@ -650,6 +652,8 @@ fun createAlertFromType(
         Alert.AlertType.URL_FLAGGED -> Alert.AlertLevel.ALERT
         Alert.AlertType.APP_RISKY_INSTALL -> Alert.AlertLevel.WARNING
         Alert.AlertType.APP_HIDDEN -> Alert.AlertLevel.WARNING
+        Alert.AlertType.GATEWAY_USER_INSTALLED_ROOT,
+        Alert.AlertType.GATEWAY_UNTRUSTED_CERTIFICATE -> Alert.AlertLevel.ALERT
 
     }
 

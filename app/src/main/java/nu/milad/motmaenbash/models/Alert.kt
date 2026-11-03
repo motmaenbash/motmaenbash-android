@@ -38,7 +38,9 @@ data class Alert(
         APP_FLAGGED(6),
         URL_FLAGGED(7),
         APP_RISKY_INSTALL(8),
-        APP_HIDDEN(9);
+        APP_HIDDEN(9),
+        GATEWAY_USER_INSTALLED_ROOT(10),
+        GATEWAY_UNTRUSTED_CERTIFICATE(11);
 
 
         companion object {

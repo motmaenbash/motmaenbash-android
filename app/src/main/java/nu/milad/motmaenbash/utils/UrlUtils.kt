@@ -65,6 +65,22 @@ object UrlUtils {
     }
 
 
+    /**
+     * Extracts the host name, without port, from the given URL.
+     *
+     * @param url The URL to extract the host from.
+     * @return The host name of the URL.
+     */
+    fun extractHost(url: String): String {
+        return url.trim().lowercase()
+            .replaceFirst("^(http://|https://)".toRegex(), "")
+            .substringBefore('/')
+            .substringBefore('?')
+            .substringBefore('#')
+            .substringBefore(':')
+    }
+
+
     fun extractAndCacheDomain(cache: LruCache<String, String>, url: String): String {
         return cache.get(url) ?: extractDomain(url).also { cache.put(url, it) }
     }

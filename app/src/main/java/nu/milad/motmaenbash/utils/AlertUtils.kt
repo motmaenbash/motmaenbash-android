@@ -196,6 +196,18 @@ object AlertUtils {
                 "این برنامه <b>آیکونی ندارد</b> تا پیدا یا حذف نشود، ولی می‌تواند تبلیغ نشان دهد؛ رفتاری رایج در <b>تبلیغ‌افزارها</b>. اگر آن را نصب نکرده‌اید، حذفش کنید."
             )
 
+            Alert.AlertType.GATEWAY_USER_INSTALLED_ROOT -> Triple(
+                "احتمال شنود درگاه پرداخت",
+                "گواهی این درگاه را مرجعی صادر کرده که روی دستگاه شما نصب شده است.",
+                "گواهی امنیتی این درگاه پرداخت را مرجعی صادر کرده که جزو مراجع معتبر اندروید نیست و بعدا روی دستگاه شما نصب شده است؛ پس دارنده‌ی آن می‌تواند اطلاعاتی را که در این صفحه وارد می‌کنید ببیند. اگر این گواهی را خودتان آگاهانه نصب نکرده‌اید، آن را از تنظیمات امنیتی دستگاه حذف کنید."
+            )
+
+            Alert.AlertType.GATEWAY_UNTRUSTED_CERTIFICATE -> Triple(
+                "گواهی امنیتی نامعتبر",
+                "گواهی امنیتی این درگاه پرداخت معتبر نیست.",
+                "گواهی امنیتی این درگاه پرداخت معتبر نیست؛ ممکن است این صفحه جعلی باشد یا کسی ارتباط شما را شنود کند. اگر مرورگر درباره‌ی گواهی امنیتی هشدار داد، از آن عبور نکنید."
+            )
+
             Alert.AlertType.URL_FLAGGED -> {
                 val domainOrUrlText =
                     if (isSpecificUrl) "آدرس اینترنتی" else "دامنه اینترنتی"
@@ -245,6 +257,8 @@ object AlertUtils {
             Alert.AlertType.SMS_SENDER_FLAGGED -> "پیامک‌های این شماره را با دقت بررسی کنید."
             Alert.AlertType.APP_FLAGGED -> "بدون اجرای برنامه، سریع آن را حذف کنید."
             Alert.AlertType.APP_HIDDEN -> "اگر این برنامه را نمی‌شناسید، آن را حذف کنید."
+            Alert.AlertType.GATEWAY_USER_INSTALLED_ROOT,
+            Alert.AlertType.GATEWAY_UNTRUSTED_CERTIFICATE -> "اطلاعات کارت خود را در این صفحه وارد نکنید."
 
             Alert.AlertType.URL_FLAGGED -> when (threatType) {
                 Alert.UrlThreatType.PHISHING -> "از باز کردن این لینک خودداری کنید."
