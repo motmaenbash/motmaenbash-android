@@ -14,5 +14,6 @@ data class App(
     val firstInstallTime: Long,
     val lastUpdateTime: Long,
     val permissions: List<String>,
-    val threatType: AppThreatType? = null
+    val threatType: AppThreatType? = null,
+    val signHashes: List<String> = listOf(sighHash)
 )

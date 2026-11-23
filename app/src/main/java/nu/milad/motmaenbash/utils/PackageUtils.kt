@@ -55,7 +55,8 @@ object PackageUtils {
             val permissions = packageInfo.requestedPermissions ?: arrayOf()
 
             // Get signing information
-            val signSha256 = getSignatureSha256(packageInfo)
+            val signHashes = getSignatureSha256List(packageInfo)
+            val signSha256 = signHashes.firstOrNull() ?: "No SHA256 found"
 
             val applicationInfo: ApplicationInfo =
                 packageInfo.applicationInfo ?: pm.getApplicationInfo(
@@ -71,17 +72,18 @@ object PackageUtils {
             val installSource = getInstallationSource(context, packageName)
 
             return App(
-                appName,
-                packageName,
-                appIcon,
-                versionCode,
-                apkSha256,
-                signSha256,
-                versionName,
-                installSource,
-                firstInstallTime,
-                lastUpdateTime,
-                permissions.toList()
+                appName = appName,
+                packageName = packageName,
+                appIcon = appIcon,
+                versionCode = versionCode,
+                apkHash = apkSha256,
+                sighHash = signSha256,
+                versionName = versionName,
+                installSource = installSource,
+                firstInstallTime = firstInstallTime,
+                lastUpdateTime = lastUpdateTime,
+                permissions = permissions.toList(),
+                signHashes = signHashes
             )
 
         } catch (e: PackageManager.NameNotFoundException) {
@@ -150,24 +152,31 @@ object PackageUtils {
     }
 
     /**
-     * Gets SHA256 signature hash based on API level
+     * Gets all SHA256 signature hashes based on API level, including multiple signers
+     * and signing certificate rotation history.
      */
-    private fun getSignatureSha256(packageInfo: PackageInfo): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // On API level 28 and above, use signingInfo
+    private fun getSignatureSha256List(packageInfo: PackageInfo): List<String> {
+        val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo.signingInfo?.let { signingInfo ->
-                (signingInfo.apkContentsSigners
-                    ?: signingInfo.signingCertificateHistory).firstOrNull()
-                    ?.let { calculateSHA256HexFromBytes(it.toByteArray()) } ?: "No SHA256 found"
-            } ?: "No SHA256 found"
+                if (signingInfo.hasMultipleSigners()) {
+                    signingInfo.apkContentsSigners?.toList()
+                } else {
+                    val currentSigners = signingInfo.apkContentsSigners?.toList().orEmpty()
+                    val historySigners = signingInfo.signingCertificateHistory?.toList().orEmpty()
+                    (currentSigners + historySigners)
+                }
+            }
         } else {
-            // On devices below API level 28, use the legacy signatures
             @Suppress("DEPRECATION")
-            packageInfo.signatures?.firstOrNull()?.let { signature ->
-                calculateSHA256HexFromBytes(signature.toByteArray())
-            } ?: "No SHA256 found"
-
+            packageInfo.signatures?.toList()
         }
+
+        val hashes = signatures
+            ?.map { calculateSHA256HexFromBytes(it.toByteArray()) }
+            ?.distinct()
+            .orEmpty()
+
+        return hashes.ifEmpty { listOf("No SHA256 found") }
     }
 
     /**

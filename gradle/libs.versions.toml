@@ -18,6 +18,7 @@ materialIconsExtended = "1.7.8"
 # Third-party libraries
 accompanistPermissions = "0.37.3"
 coilCompose = "2.7.0"
+junit = "4.13.2"
 # Firebase
 firebaseBom = "33.16.0"
 google-services = "4.4.4"
@@ -47,6 +48,7 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 # Third-party Libraries
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics-ktx" }

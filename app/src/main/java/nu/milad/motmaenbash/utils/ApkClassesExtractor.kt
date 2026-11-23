@@ -103,7 +103,7 @@ object ApkClassesExtractor {
             FileInputStream(apkFile).use { fileInput ->
                 ZipInputStream(fileInput).use { zipInput ->
                     var entry: ZipEntry?
-                    val dexDataList = mutableListOf<ByteArray>()
+                    val dexHashes = mutableListOf<String>()
 
                     while (zipInput.nextEntry.also { entry = it } != null) {
                         val entryName = entry!!.name
@@ -112,33 +112,33 @@ object ApkClassesExtractor {
                             Log.d(TAG, "Found DEX file: $entryName (${entry!!.size} bytes)")
 
                             try {
-                                val dexBytes = readEntryBytes(zipInput)
-                                dexDataList.add(dexBytes)
+                                val dexHash = streamEntrySha256(zipInput)
+                                dexHashes.add(dexHash)
                                 Log.d(
                                     TAG,
-                                    "Successfully read DEX file: $entryName (${dexBytes.size} bytes)"
+                                    "Successfully hashed DEX file: $entryName ($dexHash)"
                                 )
                             } catch (e: Exception) {
-                                Log.w(TAG, "Failed to read DEX: $entryName", e)
+                                Log.w(TAG, "Failed to hash DEX: $entryName", e)
                             }
                         }
                         zipInput.closeEntry()
                     }
 
-                    if (dexDataList.isNotEmpty()) {
-                        // Create combined SHA256 from all DEX files
-                        val combinedHash = calculateCombinedDexHash(dexDataList)
+                    if (dexHashes.isNotEmpty()) {
+                        // Create combined SHA256 from all DEX file hashes
+                        val combinedHash = calculateCombinedDexHashFromHashes(dexHashes)
 
                         Log.d(
                             TAG,
-                            "Direct extraction successful: found ${dexDataList.size} DEX files"
+                            "Direct extraction successful: found ${dexHashes.size} DEX files"
                         )
                         Log.d(TAG, "Combined DEX SHA256: $combinedHash")
 
                         return ApkExtractionResult.Success(
                             primaryHash = combinedHash,
                             allDexHashes = mapOf("direct_dex" to combinedHash),
-                            method = "Direct APK (${dexDataList.size} DEX files)"
+                            method = "Direct APK (${dexHashes.size} DEX files)"
                         )
                     }
                 }
@@ -170,7 +170,7 @@ object ApkClassesExtractor {
 
             Log.d(TAG, "Found ${splitApkPaths.size} split APKs")
 
-            val allDexData = mutableListOf<ByteArray>()
+            val allDexHashes = mutableListOf<String>()
 
             splitApkPaths.forEach { splitPath ->
                 val splitFile = File(splitPath)
@@ -185,11 +185,11 @@ object ApkClassesExtractor {
                                 val entryName = entry!!.name
 
                                 if (entryName.matches(Regex("classes\\d*\\.dex"))) {
-                                    val dexBytes = readEntryBytes(zipInput)
-                                    allDexData.add(dexBytes)
+                                    val dexHash = streamEntrySha256(zipInput)
+                                    allDexHashes.add(dexHash)
                                     Log.d(
                                         TAG,
-                                        "Split DEX found: ${splitFile.name}:$entryName (${dexBytes.size} bytes)"
+                                        "Split DEX found: ${splitFile.name}:$entryName ($dexHash)"
                                     )
                                 }
                                 zipInput.closeEntry()
@@ -201,16 +201,16 @@ object ApkClassesExtractor {
                 }
             }
 
-            if (allDexData.isNotEmpty()) {
-                val combinedHash = calculateCombinedDexHash(allDexData)
+            if (allDexHashes.isNotEmpty()) {
+                val combinedHash = calculateCombinedDexHashFromHashes(allDexHashes)
 
-                Log.d(TAG, "Split extraction successful: found ${allDexData.size} DEX files")
+                Log.d(TAG, "Split extraction successful: found ${allDexHashes.size} DEX files")
                 Log.d(TAG, "Combined DEX SHA256: $combinedHash")
 
                 return ApkExtractionResult.Success(
                     primaryHash = combinedHash,
                     allDexHashes = mapOf("split_dex" to combinedHash),
-                    method = "Split APKs (${allDexData.size} DEX files)"
+                    method = "Split APKs (${allDexHashes.size} DEX files)"
                 )
             }
 
@@ -309,32 +309,22 @@ object ApkClassesExtractor {
     }
 
     /**
-     * Calculates combined SHA256 from multiple DEX files
-     * For single DEX file: returns direct SHA256 of the file
-     * For multiple DEX files: combines individual hashes consistently
+     * Calculates combined SHA256 from individual DEX file hashes.
+     * For single DEX file: returns direct SHA256 of the file.
+     * For multiple DEX files: combines individual sorted hashes consistently.
      */
-    private fun calculateCombinedDexHash(dexDataList: List<ByteArray>): String {
+    private fun calculateCombinedDexHashFromHashes(dexHashes: List<String>): String {
         return try {
-
-            if (dexDataList.isEmpty()) {
+            if (dexHashes.isEmpty()) {
                 return "NO_DEX_FILES"
-
             }
 
-            // For single file, return direct hash
-            if (dexDataList.size == 1) {
-                return HashUtils.generateHashFromBytes(dexDataList[0], HashAlgorithms.SHA256)
+            if (dexHashes.size == 1) {
+                return dexHashes[0]
             }
 
-
-            // For multiple files, return combined hash
-            val individualHashes = dexDataList.map { dexData ->
-                HashUtils.generateHashFromBytes(dexData, HashAlgorithms.SHA256)
-            }.sorted()
-
-            val combinedString = individualHashes.joinToString("")
-            return HashUtils.generateSHA256(combinedString)
-
+            val combinedString = dexHashes.sorted().joinToString("")
+            HashUtils.generateSHA256(combinedString)
         } catch (e: Exception) {
             Log.e(TAG, "Error calculating combined DEX hash", e)
             "HASH_ERROR"
@@ -342,18 +332,19 @@ object ApkClassesExtractor {
     }
 
     /**
-     * Reads zip entry bytes using buffered approach
+     * Streams a zip entry directly through SHA-256 MessageDigest without allocating
+     * the entire uncompressed DEX file in memory.
      */
-    private fun readEntryBytes(zipInput: ZipInputStream): ByteArray {
-        val output = java.io.ByteArrayOutputStream()
+    private fun streamEntrySha256(zipInput: ZipInputStream): String {
+        val digest = java.security.MessageDigest.getInstance(HashAlgorithms.SHA256)
         val buffer = ByteArray(BUFFER_SIZE)
         var bytesRead: Int
 
         while (zipInput.read(buffer).also { bytesRead = it } != -1) {
-            output.write(buffer, 0, bytesRead)
+            digest.update(buffer, 0, bytesRead)
         }
 
-        return output.toByteArray()
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }
 
