@@ -397,16 +397,28 @@ class DatabaseHelper(appContext: Context) :
         packageName: String,
         apkHash: String,
         signHash: String
+    ): Boolean = isAppFlagged(packageName, apkHash, listOf(signHash))
+
+    fun isAppFlagged(
+        packageName: String,
+        apkHash: String,
+        signHashes: List<String>
     ): Boolean {
-
         val packageHash = HashUtils.generateSHA256(packageName.lowercase())
+        val validSignHashes = signHashes.filter { it.isNotBlank() }
+
+        val signClause = if (validSignHashes.isNotEmpty()) {
+            val placeholders = validSignHashes.joinToString(",") { "?" }
+            " OR ($COLUMN_HASH IN ($placeholders) AND type = $SIGN)"
+        } else {
+            ""
+        }
+
         val selection =
-            "($COLUMN_HASH = ? AND type = $PACKAGE) OR ($COLUMN_HASH = ? AND type = $APK) OR ($COLUMN_HASH = ? AND type = $SIGN)"
+            "($COLUMN_HASH = ? AND type = $PACKAGE) OR ($COLUMN_HASH = ? AND type = $APK)$signClause"
 
-        val selectionArgs = arrayOf(packageHash, apkHash, signHash)
-        val isFlagged = countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
-
-        return isFlagged
+        val selectionArgs = (listOf(packageHash, apkHash) + validSignHashes).toTypedArray()
+        return countData(TABLE_FLAGGED_APPS, selection, selectionArgs) > 0
     }
 
     // DEX-only check (use only when basic check fails)
@@ -418,16 +430,21 @@ class DatabaseHelper(appContext: Context) :
     }
 
 
-    fun isTrustedSideloadApp(packageName: String, signatureHash: String): Boolean {
+    fun isTrustedSideloadApp(packageName: String, signatureHash: String): Boolean =
+        isTrustedSideloadApp(packageName, listOf(signatureHash))
+
+    fun isTrustedSideloadApp(packageName: String, signatureHashes: List<String>): Boolean {
+        val validSignHashes = signatureHashes.filter { it.isNotBlank() }
+        if (validSignHashes.isEmpty()) return false
+
         val packageHash = HashUtils.generateSHA256(packageName.trim().lowercase())
-        val combinedHash = HashUtils.generateSHA256("$packageHash:$signatureHash")
-
-        val selection = "$COLUMN_HASH = ? AND type = $SIDELOAD_COMBINED"
-        val selectionArgs = arrayOf(combinedHash)
-        val isTrusted = countData(TABLE_TRUSTED_ENTITIES, selection, selectionArgs) > 0
-
-
-        return isTrusted
+        // Every active signer must match a trusted sideload entry so an attacker cannot
+        // co-sign or append an untrusted certificate to bypass verification.
+        return validSignHashes.all { sigHash ->
+            val combinedHash = HashUtils.generateSHA256("$packageHash:$sigHash")
+            val selection = "$COLUMN_HASH = ? AND type = $SIDELOAD_COMBINED"
+            countData(TABLE_TRUSTED_ENTITIES, selection, arrayOf(combinedHash)) > 0
+        }
     }
 
     fun isTrustedMarketPackage(packageName: String): Boolean {

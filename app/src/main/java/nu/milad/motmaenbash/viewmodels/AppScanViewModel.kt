@@ -64,7 +64,8 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
     private val _currentlyScannedApps = MutableStateFlow<List<App>>(emptyList())
     open val currentlyScannedApps: StateFlow<List<App>> = _currentlyScannedApps.asStateFlow()
 
-    private val scanScope = CoroutineScope(Job() + Dispatchers.Default)
+    private val scanDispatcher = Dispatchers.IO.limitedParallelism(4)
+    private val scanScope = CoroutineScope(Job() + scanDispatcher)
 
     // Use lazy initialization to prevent preview issues
     private val audioHelper by lazy {
@@ -140,7 +141,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                     databaseHelper.isAppFlagged(
                                         app.packageName,
                                         app.apkHash,
-                                        app.sighHash
+                                        app.signHashes
                                     ) -> AppThreatType.MALWARE
 
                                     HiddenAppDetector.analyze(
@@ -157,7 +158,7 @@ open class AppScanViewModel(private val context: Application) : AndroidViewModel
                                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
                                             !databaseHelper.isTrustedSideloadApp(
                                                 app.packageName,
-                                                app.sighHash
+                                                app.signHashes
                                             ) -> {
                                         // Calculate DEX hash
                                         val dexHash =

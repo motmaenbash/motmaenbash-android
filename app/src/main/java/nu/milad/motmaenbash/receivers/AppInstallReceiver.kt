@@ -69,13 +69,13 @@ class AppInstallReceiver : BroadcastReceiver() {
                 val hiddenAppResult = HiddenAppDetector.analyze(context, packageName)
 
                 val threatType = when {
-                    dbHelper.isAppFlagged(packageName, app.apkHash, app.sighHash) ->
+                    dbHelper.isAppFlagged(packageName, app.apkHash, app.signHashes) ->
                         AppThreatType.MALWARE
 
                     hiddenAppResult.isHidden -> AppThreatType.HIDDEN_APP
 
                     !PackageUtils.isFromTrustedSource(context, app.installSource) &&
-                            !dbHelper.isTrustedSideloadApp(packageName, app.sighHash) -> {
+                            !dbHelper.isTrustedSideloadApp(packageName, app.signHashes) -> {
                         // Calculate DEX hash
                         val dexHash = PackageUtils.calculateDexHash(context, packageName)
                         if (dexHash != null && dbHelper.isAppFlaggedByDex(dexHash)) {
